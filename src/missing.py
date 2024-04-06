@@ -1,6 +1,7 @@
 """Module for detecting, counting and removing missing values"""
 
 import numpy as np
+import pandas as pd
 
 
 def detect_missing_values(data):
@@ -18,7 +19,7 @@ def detect_missing_values(data):
     return is_missing
 
 
-def count_missing_values(data_frame, axis):
+def count_missing_values(data_frame, axis=0):
     """
     Count number of missing values in each row or column of dataframe
     depending on the specified axis
@@ -30,7 +31,8 @@ def count_missing_values(data_frame, axis):
     Returns:
     - pandas Series with the row/column index and the number of missing values
     """
-
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
     missing_values = data_frame.apply(detect_missing_values, axis=axis)
     n_missing_values = missing_values.sum(axis=axis)
     return n_missing_values
@@ -47,6 +49,8 @@ def drop_columns_with_missing_over_threshold(data_frame, threshold=0.25):
     - pandas DataFrame without columns with missingness higher than the threshold
 
     """
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
     missing = count_missing_values(data_frame, axis=0)
     to_drop = missing[missing / len(data_frame) > threshold]
     data_frame = data_frame.drop(columns=to_drop.index)
@@ -64,6 +68,8 @@ def drop_rows_with_missing_over_threshold(data_frame, threshold=0.25):
     - pandas DataFrame without columns with missingness higher than the threshold
 
     """
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
     missing = count_missing_values(data_frame, axis=1)
     to_drop = missing[missing / len(data_frame.columns) > threshold]
     data_frame = data_frame.drop(index=to_drop.index)

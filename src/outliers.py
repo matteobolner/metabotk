@@ -1,4 +1,5 @@
 """Module for detecting, counting and removing outlier values"""
+
 import numpy as np
 import pandas as pd
 
@@ -14,11 +15,14 @@ def detect_outliers(data, threshold):
     Returns:
     - Boolean array indicating outliers (True) and non-outliers (False)
     """
+    if len(data) == 0:
+        raise ValueError("Input is empty.")
     if isinstance(data, pd.DataFrame):
         raise TypeError(
             "DataFrame input is not supported. Please provide a list, array, or Series. \
                         To apply the function on a whole dataframe, use get_outliers_matrix"
         )
+
     median = np.nanmedian(data)
     q1 = np.nanquantile(data, 0.25)
     q3 = np.nanquantile(data, 0.75)
@@ -40,11 +44,13 @@ def get_outliers_matrix(data_frame, threshold):
     - pandas DataFrame indicating outliers (True) and non-outliers (False)
 
     """
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
     matrix = data_frame.apply(lambda x: detect_outliers(x, threshold=threshold), axis=0)
     return matrix
 
 
-def count_outliers(data_frame, axis, threshold=5):
+def count_outliers(data_frame, axis=0, threshold=5):
     """
     Count number of outlier values in each row or column of dataframe
     depending on the specified axis
@@ -59,6 +65,8 @@ def count_outliers(data_frame, axis, threshold=5):
     Returns:
     - pandas Series with the row/column index and the number of outliers
     """
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
 
     outliers_matrix = get_outliers_matrix(data_frame, threshold)
     outlier_counts = outliers_matrix.sum(axis=axis)
@@ -75,6 +83,9 @@ def remove_outliers(data_frame, threshold=5):
     Returns:
     - pandas DataFrame where the outlier values are replaced by NAs
     """
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
+
     outliers = get_outliers_matrix(data_frame, threshold=threshold)
     data_frame_without_outliers = data_frame.where(~outliers, np.nan)
     return data_frame_without_outliers
