@@ -2,6 +2,10 @@
 
 import numpy as np
 import pandas as pd
+from src.utils import validate_dataframe
+
+OUTLIER_THRESHOLD = 5
+
 
 
 def detect_outliers(data, threshold):
@@ -44,13 +48,12 @@ def get_outliers_matrix(data_frame, threshold):
     - pandas DataFrame indicating outliers (True) and non-outliers (False)
 
     """
-    if not isinstance(data_frame, pd.DataFrame):
-        raise TypeError("Data must be a pandas DataFrame")
+    validate_dataframe(data_frame)
     matrix = data_frame.apply(lambda x: detect_outliers(x, threshold=threshold), axis=0)
     return matrix
 
 
-def count_outliers(data_frame, axis=0, threshold=5):
+def count_outliers(data_frame, axis=0, threshold=OUTLIER_THRESHOLD):
     """
     Count number of outlier values in each row or column of dataframe
     depending on the specified axis
@@ -65,15 +68,13 @@ def count_outliers(data_frame, axis=0, threshold=5):
     Returns:
     - pandas Series with the row/column index and the number of outliers
     """
-    if not isinstance(data_frame, pd.DataFrame):
-        raise TypeError("Data must be a pandas DataFrame")
-
+    validate_dataframe(data_frame)
     outliers_matrix = get_outliers_matrix(data_frame, threshold)
     outlier_counts = outliers_matrix.sum(axis=axis)
     return outlier_counts
 
 
-def remove_outliers(data_frame, threshold=5):
+def remove_outliers(data_frame, threshold=OUTLIER_THRESHOLD):
     """
     Replace outlier values with NAs in the whole dataset
     Parameters:
@@ -83,9 +84,7 @@ def remove_outliers(data_frame, threshold=5):
     Returns:
     - pandas DataFrame where the outlier values are replaced by NAs
     """
-    if not isinstance(data_frame, pd.DataFrame):
-        raise TypeError("Data must be a pandas DataFrame")
-
+    validate_dataframe(data_frame)
     outliers = get_outliers_matrix(data_frame, threshold=threshold)
     data_frame_without_outliers = data_frame.where(~outliers, np.nan)
     return data_frame_without_outliers

@@ -1,4 +1,35 @@
 import pandas as pd
+import numpy as np
+
+def validate_dataframe(data_frame):
+    """
+    Ensure that the input data is a pandas dataframe.
+
+    Parameters:
+    - data_frame: input to validate
+    Returns:
+    - TypeError if input is not a pandas dataframe
+    """
+
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame")
+
+def ensure_numeric_data(data):
+    """
+    Ensure that the input data is numeric.
+
+    Parameters:
+    - data: list, array, or Series containing numerical data
+
+    Returns:
+    - np.array: Input data converted to NumPy array
+    """
+    if len(data) == 0:
+        raise ValueError("Empty data")
+    data = np.array(data)  # convert to np array
+    if not np.issubdtype(data.dtype, np.number):
+        raise TypeError("Data must contain only numeric values")
+    return data
 
 
 def parse_input(input_data):

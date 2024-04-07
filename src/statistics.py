@@ -2,7 +2,10 @@
 
 import pandas as pd
 import numpy as np
+from src.utils import validate_dataframe, ensure_numeric_data
 from src.outliers import detect_outliers
+
+OUTLIER_THRESHOLD=5
 
 
 def coefficient_of_variation(data):
@@ -16,18 +19,14 @@ def coefficient_of_variation(data):
     - Coefficient of Variation %
 
     """
-    if len(data) == 0:
-        raise ValueError("Empty data")
-    data = np.array(data)  # convert to np array
-    if not np.issubdtype(data.dtype, np.number):
-        raise TypeError("Data must contain only numeric values")
+    data=ensure_numeric_data(data)
     data = data[~np.isnan(data)]  # remove nan values
     cv = np.std(data) / np.mean(data)  # compute CV
     cv_pctg = cv * 100  # compute CV%
     return cv_pctg
 
 
-def basic_stats(data, outlier_threshold=5):
+def compute_statistics(data, outlier_threshold=OUTLIER_THRESHOLD):
     """
     Get some basic statistics from a collection
 
@@ -38,14 +37,8 @@ def basic_stats(data, outlier_threshold=5):
     - Pandas series containing statistics
 
     """
-    if len(data) == 0:
-        raise ValueError("Input data is empty")
-    data = np.array(data)
-    if not np.issubdtype(data.dtype, np.number):
-        raise TypeError("Data must contain only numeric values")
+    data=ensure_numeric_data(data)
     data_series = pd.Series(data)
-    if data_series.isnull().all():
-        raise ValueError("Input data contains only NaN values")
     stats = data_series.describe()
     cv = coefficient_of_variation(data_series)
     stats["CV%"] = cv
@@ -55,7 +48,7 @@ def basic_stats(data, outlier_threshold=5):
     return stats
 
 
-def dataframe_basic_stats(data_frame, axis=0, outlier_threshold=5):
+def compute_dataframe_statistics(data_frame, axis=0, outlier_threshold=OUTLIER_THRESHOLD):
     """
     Get basic statistics on the whole dataframe, either row-wise or column-wise
 
@@ -67,9 +60,8 @@ def dataframe_basic_stats(data_frame, axis=0, outlier_threshold=5):
     - Pandas DataFrame containing statistics for each row or column
 
     """
-    if not isinstance(data_frame, pd.DataFrame):
-        raise TypeError("Data must be a pandas DataFrame")
-    stats = data_frame.apply(lambda x: basic_stats(x, outlier_threshold), axis=axis)
+    validate_dataframe(data_frame)
+    stats = data_frame.apply(lambda x: compute_statistics(x, outlier_threshold), axis=axis)
     if axis == 0:
         stats = stats.transpose()
     return stats

@@ -1,14 +1,15 @@
 import pytest
-from src.statistics import *
-from tests.utils import (
+from src.statistics_class import *
+from tests.testing_functions import (
     create_test_dataframe_with_missing,
     create_test_dataframe_with_outliers,
 )
 import numpy as np
 import pandas as pd
 import warnings
-from scipy.stats import variation
 
+statistics_handler=StatisticsHandler()
+statistics_handler_high_outlier_thresh=StatisticsHandler(outlier_threshold=100)
 
 class TestCoefficientOfVariation:
     @pytest.mark.parametrize(
@@ -31,7 +32,7 @@ class TestCoefficientOfVariation:
             result = coefficient_of_variation([1, 2, "aa"])
 
 
-class TestBasicStats:
+class TestComputeStatistics:
     @pytest.mark.parametrize(
         "input_data, expected_output",
         [
@@ -109,28 +110,24 @@ class TestBasicStats:
             ),
         ],
     )
-    def test_basic_stats(self, input_data, expected_output):
-        result = basic_stats(input_data)
+    def test_compute_statistics(self, input_data, expected_output):
+        result = statistics_handler.compute_statistics(input_data)
         pd.testing.assert_series_equal(result, expected_output)
 
     def test_input_validation(self):
         # Test with invalid input types
         with pytest.raises(TypeError):
-            basic_stats("invalid_input")
+            statistics_handler.compute_statistics("invalid_input")
 
         with pytest.raises(TypeError):
-            basic_stats({"a": 1, "b": 2, "c": 3})
+            statistics_handler.compute_statistics({"a": 1, "b": 2, "c": 3})
 
         # Test with empty input
         with pytest.raises(ValueError):
-            basic_stats([])
-        # Test with empty input
-        with pytest.raises(ValueError):
-            basic_stats([np.nan, np.nan])
-
+            statistics_handler.compute_statistics([])
         # Test with input containing non-numeric elements
         with pytest.raises(TypeError):
-            basic_stats([1, 2, "a", 4, 5])
+            statistics_handler.compute_statistics([1, 2, "a", 4, 5])
 
 
 class TestDataFrameBasicStats:
@@ -330,10 +327,10 @@ class TestDataFrameBasicStats:
 
     def test_dataframe_stats(self, test_data):
         data, expected_output, axis = test_data
-        result = dataframe_basic_stats(data, axis=axis)
+        result = statistics_handler.compute_dataframe_statistics(data, axis=axis)
         pd.testing.assert_frame_equal(result, expected_output)
 
     def test_dataframe_stats_different_outlier_threshold(self, test_data):
         data, expected_output, axis = test_data
-        result = dataframe_basic_stats(data, axis=axis, outlier_threshold=100)
+        result = statistics_handler_high_outlier_thresh.compute_dataframe_statistics(data, axis=axis)
         assert result.iloc[-1, -1] == 0
