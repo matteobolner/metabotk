@@ -3,7 +3,7 @@ from tests.testing_functions import create_test_dataframe_with_missing
 import pytest
 import numpy as np
 import pandas as pd
-from src.missing_class import MissingDataHandler
+from src.missing import MissingDataHandler
 
 missing_handler = MissingDataHandler(threshold=0.25)
 

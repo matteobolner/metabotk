@@ -16,14 +16,14 @@ def test_read_metabolon_excel_missing_sheets(metabolon_instance):
 
     # Test that ValueError is raised if required sheets are missing
     with pytest.raises(ValueError):
-        metabolon_instance.read_metabolon_excel(mock_excel_path)
+        metabolon_instance.import_excel(mock_excel_path)
     os.remove(mock_excel_path)
 
 # Test case to check if sheets are correctly assigned
 def test_read_metabolon_excel(metabolon_instance):
     test_excel_path = 'data/cdt_demo.xlsx'
     # Test that sheets are correctly assigned to attributes
-    metabolon_instance.read_metabolon_excel(test_excel_path)
+    metabolon_instance.import_excel(test_excel_path)
     assert metabolon_instance.sample_metadata is not None
     assert metabolon_instance.chemical_annotation is not None
     assert metabolon_instance.peak_area_data is not None
@@ -35,6 +35,6 @@ def test_read_metabolon_flat_tables(metabolon_instance):
     chemical_annotation_df = pd.DataFrame({'Compound': ['X', 'Y', 'Z'], 'Mass': [100, 200, 300]})
 
     # Test reading flat tables
-    metabolon_instance.read_metabolon_flat_tables(sample_metadata_df, chemical_annotation_df)
+    metabolon_instance.import_tables(sample_metadata_df, chemical_annotation_df)
     assert metabolon_instance.sample_metadata.shape == (3, 2)
     assert metabolon_instance.chemical_annotation.shape == (3, 2)

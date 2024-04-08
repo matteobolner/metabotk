@@ -1,5 +1,5 @@
 import pytest
-from src.outliers_class import OutlierHandler
+from src.outliers import OutlierHandler
 import numpy as np
 import pandas as pd
 import warnings

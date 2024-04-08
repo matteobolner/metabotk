@@ -15,10 +15,10 @@ class MetabolonCDT:
     - data_key_and_explanation: DataFrame containing data key and explanation.
     - sample_metadata: DataFrame containing sample metadata (required).
     - chemical_annotation: DataFrame containing chemical annotation (required).
-    - peak_area_data: DataFrame containing peak area data (required).
-    - batch_normalized_data: DataFrame containing batch-normalized data (optional).
-    - batch_normalized_imputed_data: DataFrame containing batch-norm imputed data (optional).
-    - log_transformed_data: DataFrame containing log-transformed data (optional).
+    - peak_area_data: DataFrame containing peak area data and a column with the sample names. (required)
+    - batch_normalized_data: DataFrame containing batch-normalized data and a column with the sample names. (optional)
+    - batch_normalized_imputed_data: DataFrame containing batch-norm imputed data and a column with the sample names. (optional)
+    - log_transformed_data: DataFrame containing log-transformed data and a column with the sample names.(optional)
     """
 
     def __init__(self) -> None:
@@ -34,7 +34,8 @@ class MetabolonCDT:
         self.log_transformed_data = None
         self.additional_data = {}
 
-    def read_metabolon_excel(self, file_path) -> None:
+
+    def import_excel(self, file_path) -> None:
         """
         Read the Metabolon Client Data Table Excel file and assign its sheets to class attributes.
 
@@ -72,7 +73,7 @@ class MetabolonCDT:
         self.log_transformed_data = sheets.pop("Log Transformed Data", None)
         self.additional_data = sheets
 
-    def read_metabolon_flat_tables(
+    def import_tables(
         self,
         sample_metadata: Union[pd.DataFrame, str],
         chemical_annotation: Union[pd.DataFrame, str],
@@ -80,6 +81,7 @@ class MetabolonCDT:
         batch_normalized_data: Union[pd.DataFrame, str] = None,
         batch_normalized_imputed_data: Union[pd.DataFrame, str] = None,
         log_transformed_data: Union[pd.DataFrame, str] = None,
+        generic_data: Union[pd.DataFrame, str] = None,
     ) -> None:
         """
         Read flat tables for sample metadata, chemical annotation, and metabolite data.
@@ -114,3 +116,7 @@ class MetabolonCDT:
             self.log_transformed_data = parse_input(log_transformed_data)
         except TypeError:
             self.log_transformed_data = None
+        try:
+            self.generic_data = parse_input(generic_data)
+        except TypeError:
+            self.generic_data = None

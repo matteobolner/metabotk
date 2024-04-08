@@ -1,5 +1,5 @@
 import pytest
-from src.statistics_class import *
+from src.statistics import *
 from tests.testing_functions import (
     create_test_dataframe_with_missing,
     create_test_dataframe_with_outliers,
