@@ -45,7 +45,7 @@ def parse_input(input_data):
         elif input_data.endswith(".csv"):
             data = pd.read_csv(input_data).reset_index(drop=True)
         return data
-    raise ValueError(
+    raise TypeError(
         "Input should be a Pandas DataFrame or a file path to a TSV or CSV file."
     )
 
