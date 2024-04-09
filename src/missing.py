@@ -7,34 +7,25 @@ class MissingDataHandler:
     Class for detecting and counting missing values in data,
     as well as removing columns/rows based on their missing data content.
 
-    Attributes:
-        threshold (float): Maximum ratio of missingness for dropping columns or rows.
-
     Methods:
-        __init__(threshold=0.25): Initializes the MissingDataHandler with the specified threshold.
         detect_missing(data): Detects missing values in a collection.
         count_missing(data_frame, axis=0): Counts missing values in each row or column of a DataFrame.
         drop_columns_with_missing(data_frame): Removes columns with missing values above the threshold.
         drop_rows_with_missing(data_frame): Removes rows with missing values above the threshold.
     """
 
-    def __init__(self, threshold=0.25):
+    def __init__(self):
         """
-        Initializes the MissingDataHandler with the specified threshold.
-
-        Parameters:
-            threshold (float): Maximum ratio of missingness for dropping columns or rows.
+        Initializes the MissingDataHandler.
         """
-        self.threshold = threshold
-        self.validate_threshold()
 
-    def validate_threshold(self):
+    def validate_threshold(self, threshold):
         """
         Validates the threshold attribute.
         """
-        if not isinstance(self.threshold, (int, float)):
+        if not isinstance(threshold, (int, float)):
             raise TypeError("Threshold must be a numeric value")
-        if not 0 <= self.threshold <= 1:
+        if not 0 <= threshold <= 1:
             raise ValueError("Threshold must be between 0 and 1")
 
     def detect_missing(self, data):
@@ -83,7 +74,7 @@ class MissingDataHandler:
         n_missing_values = missing_values.sum(axis=axis)
         return n_missing_values
 
-    def drop_columns_with_missing(self, data_frame):
+    def drop_columns_with_missing(self, data_frame, threshold=0.25):
         """
         Removes columns with missing values above the threshold.
 
@@ -93,13 +84,14 @@ class MissingDataHandler:
         Returns:
             DataFrame: DataFrame without columns with missingness higher than the threshold.
         """
+        self.validate_threshold(threshold)
         validate_dataframe(data_frame)
         missing = self.count_missing_in_dataframe(data_frame, axis=0)
-        to_drop = missing[missing / len(data_frame) > self.threshold]
+        to_drop = missing[missing / len(data_frame) > threshold]
         data_frame = data_frame.drop(columns=to_drop.index)
         return data_frame
 
-    def drop_rows_with_missing(self, data_frame):
+    def drop_rows_with_missing(self, data_frame, threshold=0.25):
         """
         Removes rows with missing values above the threshold.
 
@@ -109,8 +101,9 @@ class MissingDataHandler:
         Returns:
             DataFrame: DataFrame without rows with missingness higher than the threshold.
         """
+        self.validate_threshold(threshold)
         validate_dataframe(data_frame)
         missing = self.count_missing_in_dataframe(data_frame, axis=1)
-        to_drop = missing[missing / len(data_frame.columns) > self.threshold]
+        to_drop = missing[missing / len(data_frame.columns) > threshold]
         data_frame = data_frame.drop(index=to_drop.index)
         return data_frame

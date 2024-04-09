@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from src.outliers_class import OutlierHandler
-from src.missing_class import MissingDataHandler
+from src.outliers import OutlierHandler
+from src.missing import MissingDataHandler
 
 from src.utils import ensure_numeric_data, validate_dataframe
 
@@ -26,36 +26,29 @@ class StatisticsHandler:
     """
     Class for obtaining basic statistics about the data.
 
-    Attributes:
-        outlier_threshold (float): Threshold for outlier detection.
-
     Methods:
-        __init__(outlier_threshold=5):
-            Initializes the StatisticsHandler with the specified outlier threshold.
+        __init__():
+            Initializes the StatisticsHandler.
         compute_statistics(data, outlier_threshold=None):
             Computes basic statistics for a collection of numerical data.
         compute_dataframe_statistics(data_frame, outlier_threshold=None):
             Computes basic statistics for a pandas DataFrame.
     """
 
-    def __init__(self, outlier_threshold=5, missing_threshold=0.25):
+    def __init__(self):
         """
-        Initializes the StatisticsHandler with the specified outlier threshold.
-
-        Parameters:
-            outlier_threshold (float): Threshold for outlier detection. Default is 5.
+        Initializes the StatisticsHandler.
         """
-        self.outlier_threshold = outlier_threshold
-        self.outlier_handler = OutlierHandler(threshold=outlier_threshold)
-        self.missing_handler = MissingDataHandler(threshold=missing_threshold)
+        self.outlier_handler = OutlierHandler()
+        self.missing_handler = MissingDataHandler()
 
-    def compute_statistics(self, data):
+    def compute_statistics(self, data, outlier_threshold):
         """
         Computes basic statistics for a collection of numerical data.
 
         Parameters:
             data (list, array, or Series): Collection containing numerical data.
-            outlier_threshold (float): Threshold for outlier detection. Default is None.
+            outlier_threshold (float): Threshold for outlier detection.
         Returns:
             Series: Pandas Series containing basic statistics.
         """
@@ -68,10 +61,10 @@ class StatisticsHandler:
         stats["CV%"] = cv
         stats = stats.rename(index={"50%": "median"})
         stats["missing"] = self.missing_handler.count_missing(data_series)
-        stats["outliers"] = sum(self.outlier_handler.detect_outliers(data_series))
+        stats["outliers"] = sum(self.outlier_handler.detect_outliers(data_series, threshold=outlier_threshold))
         return stats
 
-    def compute_dataframe_statistics(self, data_frame, axis=0):
+    def compute_dataframe_statistics(self, data_frame, outlier_threshold=5, axis=0):
         """
         Computes basic statistics for a pandas DataFrame.
 
@@ -84,7 +77,7 @@ class StatisticsHandler:
             DataFrame: Pandas DataFrame containing statistics for each column.
         """
         validate_dataframe(data_frame)
-        stats = data_frame.apply(lambda x: self.compute_statistics(x), axis=axis)
+        stats = data_frame.apply(lambda x: self.compute_statistics(x, outlier_threshold=outlier_threshold), axis=axis)
         if axis==0:
             stats=stats.transpose()
         return stats

@@ -5,16 +5,16 @@ import numpy as np
 import pandas as pd
 from src.missing import MissingDataHandler
 
-missing_handler = MissingDataHandler(threshold=0.25)
+missing_handler = MissingDataHandler()
 
 # missing_handler.detect_missing
 
 class TestValidateThreshold:
     def test_string_threshold(self):
         with pytest.raises(TypeError):
-            test=MissingDataHandler(threshold='A')
+            MissingDataHandler().validate_threshold('A')
         with pytest.raises(ValueError):
-            test=MissingDataHandler(threshold=12)
+            MissingDataHandler().validate_threshold(12)
 
 class TestDetectMissingValues:
     def test_input_list(self):
@@ -66,35 +66,32 @@ class TestCountMissingValues:
         missing_counts_to_assert.index = self.data.index
         assert missing_counts_to_assert.equals(missing_counts)
 
-missing_handler_threshold_0 = MissingDataHandler(threshold=0)
-missing_handler_threshold_1 = MissingDataHandler(threshold=1)
-missing_handler_threshold_half = MissingDataHandler(threshold=0.5)
 
 # drop_columns_with_missing_over_threshold
 class TestDropOverThreshold:
     data = create_test_dataframe_with_missing()
 
     def test_drop_columns_with_missing_over_threshold_0(self):
-        dropped = missing_handler_threshold_0.drop_columns_with_missing(self.data)
+        dropped = missing_handler.drop_columns_with_missing(self.data, threshold=0)
         assert np.array_equal(list(dropped.columns), ["C"])
 
     def test_drop_rows_with_missing_over_threshold_0(self):
-        dropped = missing_handler_threshold_0.drop_rows_with_missing(self.data)
+        dropped = missing_handler.drop_rows_with_missing(self.data, threshold=0)
         print(dropped)
         assert np.array_equal(list(dropped.index), [3, 4])
 
     def test_drop_columns_with_missing_over_threshold_1(self):
-        dropped = missing_handler_threshold_1.drop_columns_with_missing(self.data)
+        dropped = missing_handler.drop_columns_with_missing(self.data, threshold=1)
         assert dropped.equals(self.data)
 
     def test_drop_rows_with_missing_over_threshold_1(self):
-        dropped = missing_handler_threshold_1.drop_rows_with_missing(self.data)
+        dropped = missing_handler.drop_rows_with_missing(self.data, threshold=1)
         assert dropped.equals(self.data)
 
     def test_drop_columns_with_missing_over_threshold_half(self):
-        dropped = missing_handler_threshold_half.drop_columns_with_missing(self.data)
+        dropped = missing_handler.drop_columns_with_missing(self.data, threshold=0.5)
         assert np.array_equal(list(dropped.columns), ["A", "C", "D"])
 
     def test_drop_rows_with_missing_over_threshold_half(self):
-        dropped = missing_handler_threshold_half.drop_rows_with_missing(self.data)
+        dropped = missing_handler.drop_rows_with_missing(self.data, threshold=0.5)
         assert np.array_equal(list(dropped.index), [0, 2, 3, 4])
