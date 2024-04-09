@@ -43,14 +43,17 @@ class MetaboTK:
         parsed_data=parse_input(data)
         if (self.sample_id_column in parsed_data.columns) and (self.sample_id_column in parsed_sample_metadata.columns):
             self.sample_metadata=self.parser.sample_metadata
+            self.sample_metadata[self.sample_id_column]=self.sample_metadata[self.sample_id_column].astype(str)
             self.sample_metadata.set_index(self.sample_id_column, inplace=True)
             self.data=parsed_data
+            self.data.columns=[str(i) for i in self.data.columns]
             self.data.set_index(self.sample_id_column, inplace=True)
             self.samples=list(self.sample_metadata.index)
         else:
             raise ValueError("No sample ID column found in data")
         if self.metabolite_id_column in parsed_chemical_annotation.columns:
             self.chemical_annotation=self.parser.chemical_annotation
+            self.chemical_annotation[self.metabolite_id_column]=self.chemical_annotation[self.metabolite_id_column].astype(str)
             self.chemical_annotation.set_index(self.metabolite_id_column, inplace=True)
             self.metabolites=list(self.chemical_annotation.index)
         else:
@@ -193,9 +196,50 @@ class MetaboTK:
             tempclass.update_chemical_annotation()
             split_data[name]=tempclass
         return split_data
+
+    def drop_samples(self, samples_to_drop):
+        self.data=self.data.drop(index=[str(i) for i in samples_to_drop])
+        self.update_sample_metadata()
+
+    def drop_metabolites(self, metabolites_to_drop):
+        self.data=self.data.drop(columns=[str(i) for i in metabolites_to_drop])
+        self.update_chemical_annotation()
+
+    def drop_xenobiotic_metabolites(self):
+        self.drop_metabolites(self.chemical_annotation[self.chemical_annotation["SUPER_PATHWAY"].str.lower()=='xenobiotics'])
+
+    def extract_metabolites(self, metabolites_to_extract):
+        if not isinstance(metabolites_to_extract, list):
+            metabolites_to_extract=[metabolites_to_extract]
+        return self.sample_metadata.merge(self.data[[str(i) for i in metabolites_to_extract]], left_index=True, right_index=True)
+
+    def extract_samples(self, samples_to_extract):
+        if not isinstance(samples_to_extract, list):
+            samples_to_extract=[samples_to_extract]
+        return self.sample_metadata.loc[samples_to_extract].merge(self.data, left_index=True, right_index=True, how='left')
+
+    def extract_chemical_annotations(self, metabolites_to_extract):
+        if not isinstance(metabolites_to_extract, list):
+            metabolites_to_extract=[metabolites_to_extract]
+        return self.chemical_annotation.loc[[str(i) for i in metabolites_to_extract]]
+
+
     ###
     #Statistics
     ###
+    def TSA(self, exclude_xenobiotics=True, exclude_incomplete_metabolites=False):
+        """
+        Compute the Total Sum Abundance (TSA) values for each sample,
+        either on all metabolites or only on the complete ones without missing data.
+        Xenobiotics should be excluded as they usually are not considered for this calculation.
+        """
+        if exclude_xenobiotics:
+            temp_data=self.chemical_annotation[self.chemical_annotation['SUPER_PATHWAY'].str.lower()!='xenobiotics']
+        if exclude_incomplete_metabolites:
+            temp_data=temp_data.dropna(axis=1)
+        TSA=temp_data.apply(sum, axis=1)
+        ERI QUI
+        return TSA
 
     def compute_stats(self, outlier_threshold=5):
         """
@@ -216,12 +260,12 @@ class MetaboTK:
         self.sample_stats=sample_stats
 
 
+
 a=MetaboTK(sample_id_column='PARENT_SAMPLE_NAME')
 a.import_excel("data/cdt_demo.xlsx", data_sheet='batch_normalized_data')
-a.chemical_annotation
 
 test=a.split_by_metabolite_column("PLATFORM")
-
+a.sample_metadata.drop(["INTR-03233 [COPY 2]",'INTR-03212 [COPY 2]'])
 a.data
 
 a.sample_metadata
