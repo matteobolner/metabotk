@@ -326,10 +326,10 @@ class TestDataFrameBasicStats:
 
     def test_dataframe_stats(self, test_data):
         data, expected_output, axis = test_data
-        result = statistics_handler.compute_dataframe_statistics(data, axis=axis,outlier_threshold=5)
+        result = statistics_handler.compute_dataframe_statistics(data_frame=data, axis=axis, outlier_threshold=5)
         pd.testing.assert_frame_equal(result, expected_output)
 
     def test_dataframe_stats_different_outlier_threshold(self, test_data):
         data, expected_output, axis = test_data
-        result = statistics_handler.compute_dataframe_statistics(data, axis=axis, outlier_threshold=100)
+        result = statistics_handler.compute_dataframe_statistics(data_frame=data, axis=axis, outlier_threshold=100)
         assert result.iloc[-1, -1] == 0

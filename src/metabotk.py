@@ -1,6 +1,6 @@
 from src.reader import MetabolonCDT
 from src.statistics import StatisticsHandler
-from src.utils import parse_input, split_data_from_metadata
+from src.utils import parse_input
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -19,16 +19,16 @@ class MetaboTK:
         """
         Initialize the class.
         """
+        self._data_provider=data_provider
         self.stats_handler=StatisticsHandler()
-        self.data_provider=data_provider
-        if self.data_provider.lower()=='metabolon':
+        if self._data_provider.lower()=='metabolon':
             self.parser=MetabolonCDT()
         else:
             raise NotImplementedError('This data provider is not supported yet')
-        self.sample_id_column=sample_id_column
+        self._sample_id_column=sample_id_column
         self.sample_metadata=pd.DataFrame()
         self.samples=[]
-        self.metabolite_id_column=metabolite_id_column
+        self._metabolite_id_column=metabolite_id_column
         self.chemical_annotation=pd.DataFrame()
         self.metabolites=[]
         self.data=pd.DataFrame()
@@ -40,7 +40,7 @@ class MetaboTK:
     #Functions to import, setup and write data and metadata
     ###
 
-    def setup_data(self, chemical_annotation, sample_metadata, data) -> None:
+    def _setup_data(self, chemical_annotation, sample_metadata, data) -> None:
         """
         Setup the class with chemical annotation, sample metadata, and data.
 
@@ -52,28 +52,35 @@ class MetaboTK:
         Raises:
         ValueError: If the sample ID column is not found in the data or the metabolite ID column is not found in chemical annotation.
         """
-        parsed_chemical_annotation=parse_input(chemical_annotation)
-        parsed_sample_metadata=parse_input(sample_metadata)
-        parsed_data=parse_input(data)
-        if (self.sample_id_column in parsed_data.columns) and (self.sample_id_column in parsed_sample_metadata.columns):
-            self.sample_metadata=self.parser.sample_metadata
-            self.sample_metadata[self.sample_id_column]=self.sample_metadata[self.sample_id_column].astype(str)
-            self.sample_metadata.set_index(self.sample_id_column, inplace=True)
-            self.data=parsed_data
-            self.data.columns=[str(i) for i in self.data.columns]
-            self.data.set_index(self.sample_id_column, inplace=True)
-            self.samples=list(self.sample_metadata.index)
-        else:
-            raise ValueError("No sample ID column found in data")
-        if self.metabolite_id_column in parsed_chemical_annotation.columns:
-            self.chemical_annotation=self.parser.chemical_annotation
-            self.chemical_annotation[self.metabolite_id_column]=self.chemical_annotation[self.metabolite_id_column].astype(str)
-            self.chemical_annotation.set_index(self.metabolite_id_column, inplace=True)
-            self.metabolites=list(self.chemical_annotation.index)
-        else:
-            raise ValueError("No metabolite ID column found in chemical annotation")
+        try:
 
-    def import_excel(self, file_path, data_sheet) -> None:):
+            parsed_chemical_annotation=parse_input(chemical_annotation)
+            parsed_sample_metadata=parse_input(sample_metadata)
+            parsed_data=parse_input(data)
+            if (self._sample_id_column in parsed_data.columns) and (self._sample_id_column in parsed_sample_metadata.columns):
+                self.sample_metadata=parsed_sample_metadata
+                if self.sample_metadata is None:
+                    raise ValueError("Sample metadata is not properly initialized.")
+                self.sample_metadata[self._sample_id_column]=self.sample_metadata[self._sample_id_column].astype(str)
+                self.sample_metadata.set_index(self._sample_id_column, inplace=True)
+
+                self.data=parsed_data
+                self.data.columns=[str(i) for i in self.data.columns]
+                self.data.set_index(self._sample_id_column, inplace=True)
+                self.samples=list(self.sample_metadata.index)
+            else:
+                raise ValueError("No sample ID column found in data")
+            if self._metabolite_id_column in parsed_chemical_annotation.columns:
+                self.chemical_annotation=parsed_chemical_annotation
+                self.chemical_annotation[self._metabolite_id_column]=self.chemical_annotation[self._metabolite_id_column].astype(str)
+                self.chemical_annotation.set_index(self._metabolite_id_column, inplace=True)
+                self.metabolites=list(self.chemical_annotation.index)
+            else:
+                raise ValueError("No metabolite ID column found in chemical annotation")
+        except ValueError as ve:
+            raise ValueError(f"Error setting up data: {ve}")
+
+    def import_excel(self, file_path, data_sheet) -> None:
         """
         Import data from an Excel file and set up the class.
 
@@ -82,10 +89,17 @@ class MetaboTK:
         data_sheet (str): Name of the sheet containing the main data.
 
         """
-        self.parser.import_excel(file_path)
-        data=getattr(self.parser, data_sheet)
-        self.setup_data(self.parser.chemical_annotation, self.parser.sample_metadata, data)
-        self.remove_metadata_from_data()
+        try:
+            self.parser.import_excel(file_path)
+            data=getattr(self.parser, data_sheet)
+            self._setup_data(self.parser.chemical_annotation, self.parser.sample_metadata, data)
+            self._remove_metadata_from_data()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File '{file_path}' not found.")
+        except AttributeError:
+            raise AttributeError(f"Data sheet '{data_sheet}' not found in the Excel file.")
+        except ValueError as ve:
+            raise ValueError(f"Error importing data: {ve}")
 
     def import_tables(self, data, chemical_annotation='config/metabolites.tsv', sample_metadata='config/samples.tsv') -> None:
         """
@@ -97,10 +111,12 @@ class MetaboTK:
         sample_metadata (str): DataFrame or path to the file containing sample metadata.
 
         """
-        self.parser.import_tables(sample_metadata=sample_metadata, chemical_annotation=chemical_annotation, generic_data=data)
-        self.setup_data(self.parser.chemical_annotation, self.parser.sample_metadata, self.parser.generic_data)
-        self.remove_metadata_from_data()
-
+        try:
+            self.parser.import_tables(sample_metadata=sample_metadata, chemical_annotation=chemical_annotation, generic_data=data)
+            self._setup_data(self.parser.chemical_annotation, self.parser.sample_metadata, self.parser.generic_data)
+            self._remove_metadata_from_data()
+        except ValueError as ve:
+            raise ValueError(f"Error importing data: {ve}")
     def merge_sample_metadata_data(self)-> pd.DataFrame:
         """
         Merge sample metadata and data into a single DataFrame.
@@ -167,21 +183,21 @@ class MetaboTK:
         """
         if new_column not in self.chemical_annotation.columns:
             raise ValueError(f"No column named {new_column} in the metabolite metadata")
-        not_annotated=list(set(self.data.columns).difference(set(self.chemical_annotation[self.metabolite_id_column])))
+        not_annotated=list(set(self.data.columns).difference(set(self.chemical_annotation[self._metabolite_id_column])))
         if len(not_annotated)>0:
             raise ValueError(f"Missing chemical annotation for {not_annotated}")
-        renaming_dict={old:new for old,new in zip(self.chemical_annotation[self.metabolite_id_column],self.chemical_annotation[new_column])}
+        renaming_dict={old:new for old,new in zip(self.chemical_annotation[self._metabolite_id_column],self.chemical_annotation[new_column])}
         self.data.columns=[renaming_dict[old] for old in self.data.columns]
-        self.metabolite_id_column=new_column
+        self._metabolite_id_column=new_column
 
-    def update_chemical_annotation(self):
+    def _update_chemical_annotation(self):
         """
         Update chemical annotation based on the current data columns.
         """
         self.chemical_annotation=self.chemical_annotation.loc[list(self.data.columns)]
         self.metabolites=list(self.chemical_annotation.index)
 
-    def update_sample_metadata(self):
+    def _update_sample_metadata(self):
         """
         Update sample metadata based on the current data index.
         """
@@ -214,7 +230,7 @@ class MetaboTK:
             all=self.data.copy()
             self.data=self.stats_handler.missing_handler.drop_columns_with_missing(data_frame=self.data, threshold=threshold)
             remaining=set(self.data.columns)
-            self.update_chemical_annotation()
+            self._update_chemical_annotation()
             dropped=list(set(all.columns).difference(remaining))
             print(f"Removed {len(dropped)} features")
             dropped=all[dropped]
@@ -222,18 +238,21 @@ class MetaboTK:
         elif axis==1:
             all=self.data.copy()
             self.data=self.stats_handler.missing_handler.drop_rows_with_missing(data_frame=self.data, threshold=threshold)
-            self.update_sample_metadata()
+            self._update_sample_metadata()
             remaining=set(self.data.index)
             dropped=list(set(all.index).difference(remaining))
             print(f"Removed {len(dropped)} samples")
             dropped=all.loc[dropped]
             return dropped
 
-    def remove_metadata_from_data(self):
+    def _remove_metadata_from_data(self):
         """
         Remove metadata columns from the data.
         """
-        self.data=self.data[list(self.chemical_annotation.index)]
+        try:
+            self.data=self.data[list(self.chemical_annotation.index)]
+        except ValueError as ve:
+            raise ValueError(f"Error removing metadata from data: {ve}")
 
     def split_by_sample_column(self, column):
         """
@@ -243,11 +262,11 @@ class MetaboTK:
         split_data = {}
         for name, group in self.sample_metadata.groupby(by=column):
             tempdata=self.data.loc[group.index]
-            tempclass=MetaboTK(data_provider=self.data_provider, sample_id_column=self.sample_id_column, metabolite_id_column=self.metabolite_id_column)
+            tempclass=MetaboTK(data_provider=self._data_provider, sample_id_column=self._sample_id_column, metabolite_id_column=self._metabolite_id_column)
             tempclass.import_tables(data=tempdata.reset_index(), chemical_annotation=self.chemical_annotation.reset_index(), sample_metadata=group.reset_index())
-            tempclass.update_chemical_annotation()
-            tempclass.update_sample_metadata()
-            tempclass.remove_metadata_from_data()
+            tempclass._update_chemical_annotation()
+            tempclass._update_sample_metadata()
+            tempclass._remove_metadata_from_data()
             split_data[name]=tempclass
         return split_data
 
@@ -259,9 +278,9 @@ class MetaboTK:
         split_data = {}
         for name, group in self.chemical_annotation.groupby(by=column):
             tempdata=self.data[list(group.index)]
-            tempclass=MetaboTK(data_provider=self.data_provider, sample_id_column=self.sample_id_column, metabolite_id_column=self.metabolite_id_column)
+            tempclass=MetaboTK(data_provider=self._data_provider, sample_id_column=self._sample_id_column, metabolite_id_column=self._metabolite_id_column)
             tempclass.import_tables(data=tempdata.reset_index(), chemical_annotation=group.reset_index(), sample_metadata=self.sample_metadata.reset_index())
-            tempclass.update_chemical_annotation()
+            tempclass._update_chemical_annotation()
             split_data[name]=tempclass
         return split_data
 
@@ -272,8 +291,10 @@ class MetaboTK:
         Parameters:
         samples_to_drop (list): List of sample IDs to drop.
         """
+        if not isinstance(samples_to_drop, list):
+            samples_to_drop=[samples_to_drop]
         self.data=self.data.drop(index=[str(i) for i in samples_to_drop])
-        self.update_sample_metadata()
+        self._update_sample_metadata()
 
     def drop_metabolites(self, metabolites_to_drop):
         """
@@ -282,8 +303,10 @@ class MetaboTK:
         Parameters:
         metabolites_to_drop (list): List of metabolite IDs to drop.
         """
+        if not isinstance(metabolites_to_drop, list):
+            metabolites_to_drop=[metabolites_to_drop]
         self.data=self.data.drop(columns=[str(i) for i in metabolites_to_drop])
-        self.update_chemical_annotation()
+        self._update_chemical_annotation()
 
     def drop_xenobiotic_metabolites(self):
         """
@@ -337,7 +360,7 @@ class MetaboTK:
     ###
     #Statistics
     ###
-    def TSA(self, exclude_xenobiotics=True, exclude_incomplete_metabolites=False):
+    def total_sum_abundance(self, exclude_xenobiotics=True, exclude_incomplete_metabolites=False):
         """
         Compute the Total Sum Abundance (TSA) values for each sample,
         either on all metabolites or only on the complete ones without missing data.
@@ -349,9 +372,9 @@ class MetaboTK:
             temp_data=self.data
         if exclude_incomplete_metabolites:
             temp_data=temp_data.dropna(axis=1)
-        TSA=temp_data.sum(axis=1, skipna=True)
-        TSA.name="TSA"
-        return TSA
+        total_sum_abundance=temp_data.sum(axis=1, skipna=True)
+        total_sum_abundance.name="TSA"
+        return total_sum_abundance
 
     def compute_stats(self, outlier_threshold=5):
         """
@@ -365,11 +388,11 @@ class MetaboTK:
             raise ValueError("No data available. Please import data before computing statistics.")
 
         # Compute statistics using StatisticsHandler
-        feature_stats = self.stats_handler.compute_dataframe_statistics(self.data,outlier_threshold, axis=0)
-        sample_stats = self.stats_handler.compute_dataframe_statistics(self.data,outlier_threshold, axis=1)
-        tsa_complete_only=self.TSA(exclude_xenobiotics=True, exclude_incomplete_metabolites=True)
+        feature_stats = self.stats_handler.compute_dataframe_statistics(self.data, outlier_threshold, axis=0)
+        sample_stats = self.stats_handler.compute_dataframe_statistics(self.data, outlier_threshold, axis=1)
+        tsa_complete_only=self.total_sum_abundance(exclude_xenobiotics=True, exclude_incomplete_metabolites=True)
         tsa_complete_only.name='TSA_complete_only'
-        tsa_all=self.TSA(exclude_xenobiotics=True, exclude_incomplete_metabolites=False)
+        tsa_all=self.total_sum_abundance(exclude_xenobiotics=True, exclude_incomplete_metabolites=False)
         tsa_all.name='TSA_including_incomplete'
         tsa=pd.concat([tsa_complete_only, tsa_all], axis=1)
         sample_stats=sample_stats.merge(tsa, left_index=True, right_index=True)
@@ -447,21 +470,9 @@ class MetaboTK:
         plot: Seaborn scatterplot object.
         """
         if not x:
-            x=self.sample_id_column
+            x=self._sample_id_column
         data=self.extract_metabolites(metabolite)
         plot = sns.scatterplot(data=data, x=x, y=str(metabolite), hue=hue)
         if savepath:
             plot.figure.savefig(savepath)
         return plot
-
-
-a=MetaboTK(sample_id_column='sample')
-
-a.import_tables(chemical_annotation="/home/pelmo/work/workspace/pigphenomics_metabolomics/config/metabolites.tsv",
-                                sample_metadata="/home/pelmo/work/workspace/pigphenomics_metabolomics/config/samples.tsv",
-                                data="/home/pelmo/work/workspace/pigphenomics_metabolomics/data/raw_data/data.tsv"
-                                )
-
-
-b=MetaboTK()
-b.import_excel("data/cdt_demo.xlsx", data_sheet='batch_normalized_data')

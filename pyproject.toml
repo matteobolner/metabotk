@@ -11,6 +11,8 @@ requests = "^2.31.0"
 pandas = "^2.2.1"
 pytest = "^8.1.1"
 coverage = "^7.4.4"
+scikit-learn = "^1.4.2"
+seaborn = "^0.13.2"
 
 
 [build-system]

@@ -48,22 +48,3 @@ def parse_input(input_data):
     raise TypeError(
         "Input should be a Pandas DataFrame or a file path to a TSV or CSV file."
     )
-
-
-def split_data_from_metadata(input_data, metabolites):
-    """
-    Split metabolite abundance data from sample metadata
-    """
-    # get all columns not corresponding to a metabolite name i.e. metadata columns
-    metadata_columns = [col for col in input_data.columns if col not in metabolites]
-    # get all columns corresponding to a metabolite name
-    metabolite_names = [i for i in metabolites if i in input_data.columns]
-    # get metadata
-    if len(metadata_columns) > 0:
-        metadata = input_data[metadata_columns]
-    else:
-        metadata = None
-    # get metabolite abundance data and convert to float
-    data = input_data[metabolite_names]
-    data = data.astype(float)
-    return data, metadata

@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from src.outliers import OutlierHandler
 from src.missing import MissingDataHandler
-
 from src.utils import ensure_numeric_data, validate_dataframe
 
 
@@ -64,7 +63,7 @@ class StatisticsHandler:
         stats["outliers"] = sum(self.outlier_handler.detect_outliers(data_series, threshold=outlier_threshold))
         return stats
 
-    def compute_dataframe_statistics(self, data_frame, outlier_threshold=5, axis=0):
+    def compute_dataframe_statistics(self, data_frame, outlier_threshold, axis=0):
         """
         Computes basic statistics for a pandas DataFrame.
 
