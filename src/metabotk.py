@@ -2,6 +2,10 @@ from src.reader import MetabolonCDT
 from src.statistics import StatisticsHandler
 from src.utils import parse_input, split_data_from_metadata
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+import seaborn as sns
+
 import warnings
 
 import pandas as pd
@@ -30,13 +34,23 @@ class MetaboTK:
         self.data=pd.DataFrame()
         self.feature_stats=pd.DataFrame()
         self.sample_stats=pd.DataFrame()
+        self.PCA=pd.DataFrame()
+        self.PCA_object=None
     ###
     #Functions to import, setup and write data and metadata
     ###
 
     def setup_data(self, chemical_annotation, sample_metadata, data) -> None:
         """
-        Setup data
+        Setup the class with chemical annotation, sample metadata, and data.
+
+        Parameters:
+        chemical_annotation (DataFrame): DataFrame or path of file containing chemical annotation.
+        sample_metadata (DataFrame): DataFrame or path of file containing sample metadata.
+        data (DataFrame): DataFrame containing or path of file the main data.
+
+        Raises:
+        ValueError: If the sample ID column is not found in the data or the metabolite ID column is not found in chemical annotation.
         """
         parsed_chemical_annotation=parse_input(chemical_annotation)
         parsed_sample_metadata=parse_input(sample_metadata)
@@ -59,25 +73,55 @@ class MetaboTK:
         else:
             raise ValueError("No metabolite ID column found in chemical annotation")
 
-    def import_excel(self, file_path, data_sheet) -> None:#='batch_normalized_data'):
+    def import_excel(self, file_path, data_sheet) -> None:):
+        """
+        Import data from an Excel file and set up the class.
+
+        Parameters:
+        file_path (str): Path to the Excel file.
+        data_sheet (str): Name of the sheet containing the main data.
+
+        """
         self.parser.import_excel(file_path)
         data=getattr(self.parser, data_sheet)
         self.setup_data(self.parser.chemical_annotation, self.parser.sample_metadata, data)
+        self.remove_metadata_from_data()
 
     def import_tables(self, data, chemical_annotation='config/metabolites.tsv', sample_metadata='config/samples.tsv') -> None:
+        """
+        Import data from tables and set up the class.
+
+        Parameters:
+        data (DataFrame): DataFrame or path of file containing the main data.
+        chemical_annotation (str): DataFrame or path to the file containing chemical annotation.
+        sample_metadata (str): DataFrame or path to the file containing sample metadata.
+
+        """
         self.parser.import_tables(sample_metadata=sample_metadata, chemical_annotation=chemical_annotation, generic_data=data)
         self.setup_data(self.parser.chemical_annotation, self.parser.sample_metadata, self.parser.generic_data)
+        self.remove_metadata_from_data()
 
     def merge_sample_metadata_data(self)-> pd.DataFrame:
+        """
+        Merge sample metadata and data into a single DataFrame.
+
+        Returns:
+        DataFrame: Merged DataFrame containing sample metadata and data.
+        """
         merged=self.sample_metadata.merge(self.data, left_index=True, right_index=True)
         return merged
 
-    def split_sample_metadata_data(self)-> pd.DataFrame:
-        self.data=self.data[self.chemical_annotation[self.metabolite_id_column]]
-
     def save_merged(self, data_path, chemical_annotation_path=None):
         """
-        Save the merged sample data and metabolite abundance data to a TSV file
+        Save the merged sample data and metabolite abundance data to TSV files.
+        Chemical annotation is saved optionally.
+
+        Parameters:
+        data_path (str): Path to save the merged sample data.
+        chemical_annotation_path (str, optional): Path to save the chemical annotation data. Default is None.
+
+        Raises:
+        ValueError: If attempting to save an empty DataFrame.
         """
         merged = self.merge_sample_metadata_data()
         if len(merged)==0:
@@ -88,7 +132,15 @@ class MetaboTK:
 
     def save(self, data_path=None, chemical_annotation_path=None, sample_metadata_path=None):
         """
-        Save the individual parts
+        Save individual parts of the dataset to TSV files.
+
+        Parameters:
+        data_path (str, optional): Path to save the data. Default is None.
+        chemical_annotation_path (str, optional): Path to save the chemical annotation data. Default is None.
+        sample_metadata_path (str, optional): Path to save the sample metadata. Default is None.
+
+        Raises:
+        ValueError: If attempting to save an empty DataFrame.
         """
         if len(self.data)==0:
             raise ValueError("Trying to save an empty dataframe")
@@ -105,7 +157,13 @@ class MetaboTK:
 
     def replace_column_names(self, new_column) -> None:
         """
-        Replace the data column names with names from a columno of the metabolite metadata
+        Replace data column names with names from a column of the metabolite metadata.
+
+        Parameters:
+        new_column (str): Name of the column from metabolite metadata to use for renaming.
+
+        Raises:
+        ValueError: If the specified column does not exist in the metabolite metadata or if chemical annotation is missing for some features.
         """
         if new_column not in self.chemical_annotation.columns:
             raise ValueError(f"No column named {new_column} in the metabolite metadata")
@@ -117,10 +175,16 @@ class MetaboTK:
         self.metabolite_id_column=new_column
 
     def update_chemical_annotation(self):
+        """
+        Update chemical annotation based on the current data columns.
+        """
         self.chemical_annotation=self.chemical_annotation.loc[list(self.data.columns)]
         self.metabolites=list(self.chemical_annotation.index)
 
     def update_sample_metadata(self):
+        """
+        Update sample metadata based on the current data index.
+        """
         self.sample_metadata=self.sample_metadata.loc[self.data.index]
         self.samples=list(self.sample_metadata.index)
 
@@ -166,6 +230,9 @@ class MetaboTK:
             return dropped
 
     def remove_metadata_from_data(self):
+        """
+        Remove metadata columns from the data.
+        """
         self.data=self.data[list(self.chemical_annotation.index)]
 
     def split_by_sample_column(self, column):
@@ -180,6 +247,7 @@ class MetaboTK:
             tempclass.import_tables(data=tempdata.reset_index(), chemical_annotation=self.chemical_annotation.reset_index(), sample_metadata=group.reset_index())
             tempclass.update_chemical_annotation()
             tempclass.update_sample_metadata()
+            tempclass.remove_metadata_from_data()
             split_data[name]=tempclass
         return split_data
 
@@ -198,27 +266,69 @@ class MetaboTK:
         return split_data
 
     def drop_samples(self, samples_to_drop):
+        """
+        Drop specified samples from the dataset.
+
+        Parameters:
+        samples_to_drop (list): List of sample IDs to drop.
+        """
         self.data=self.data.drop(index=[str(i) for i in samples_to_drop])
         self.update_sample_metadata()
 
     def drop_metabolites(self, metabolites_to_drop):
+        """
+        Drop specified metabolites from the dataset.
+
+        Parameters:
+        metabolites_to_drop (list): List of metabolite IDs to drop.
+        """
         self.data=self.data.drop(columns=[str(i) for i in metabolites_to_drop])
         self.update_chemical_annotation()
 
     def drop_xenobiotic_metabolites(self):
+        """
+        Drop xenobiotic metabolites from the dataset.
+        """
         self.drop_metabolites(self.chemical_annotation[self.chemical_annotation["SUPER_PATHWAY"].str.lower()=='xenobiotics'])
 
     def extract_metabolites(self, metabolites_to_extract):
+        """
+        Extract data for specified metabolites.
+
+        Parameters:
+        metabolites_to_extract (str or list): Name(s) of metabolite(s) to extract.
+
+        Returns:
+        DataFrame: Extracted data for the specified metabolites merged with sample metadata
+        """
         if not isinstance(metabolites_to_extract, list):
             metabolites_to_extract=[metabolites_to_extract]
         return self.sample_metadata.merge(self.data[[str(i) for i in metabolites_to_extract]], left_index=True, right_index=True)
 
     def extract_samples(self, samples_to_extract):
+        """
+        Extract data for specified samples.
+
+        Parameters:
+        samples_to_extract (str or list): ID(s) of sample(s) to extract.
+
+        Returns:
+        DataFrame: Extracted data and sample metadata for the specified samples.
+        """
         if not isinstance(samples_to_extract, list):
             samples_to_extract=[samples_to_extract]
         return self.sample_metadata.loc[samples_to_extract].merge(self.data, left_index=True, right_index=True, how='left')
 
     def extract_chemical_annotations(self, metabolites_to_extract):
+        """
+        Extract chemical annotations for the specified metabolites.
+
+        Parameters:
+        metabolites_to_extract (str or list): Name(s) of metabolite(s) to extract annotations for.
+
+        Returns:
+        DataFrame: Extracted chemical annotations for the specified metabolites.
+        """
         if not isinstance(metabolites_to_extract, list):
             metabolites_to_extract=[metabolites_to_extract]
         return self.chemical_annotation.loc[[str(i) for i in metabolites_to_extract]]
@@ -234,11 +344,13 @@ class MetaboTK:
         Xenobiotics should be excluded as they usually are not considered for this calculation.
         """
         if exclude_xenobiotics:
-            temp_data=self.chemical_annotation[self.chemical_annotation['SUPER_PATHWAY'].str.lower()!='xenobiotics']
+            temp_data=self.data[(self.chemical_annotation[self.chemical_annotation['SUPER_PATHWAY'].str.lower()!='xenobiotics'].index)]
+        else:
+            temp_data=self.data
         if exclude_incomplete_metabolites:
             temp_data=temp_data.dropna(axis=1)
-        TSA=temp_data.apply(sum, axis=1)
-        ERI QUI
+        TSA=temp_data.sum(axis=1, skipna=True)
+        TSA.name="TSA"
         return TSA
 
     def compute_stats(self, outlier_threshold=5):
@@ -255,19 +367,101 @@ class MetaboTK:
         # Compute statistics using StatisticsHandler
         feature_stats = self.stats_handler.compute_dataframe_statistics(self.data,outlier_threshold, axis=0)
         sample_stats = self.stats_handler.compute_dataframe_statistics(self.data,outlier_threshold, axis=1)
-
-        self.feature_stats=feature_stats
+        tsa_complete_only=self.TSA(exclude_xenobiotics=True, exclude_incomplete_metabolites=True)
+        tsa_complete_only.name='TSA_complete_only'
+        tsa_all=self.TSA(exclude_xenobiotics=True, exclude_incomplete_metabolites=False)
+        tsa_all.name='TSA_including_incomplete'
+        tsa=pd.concat([tsa_complete_only, tsa_all], axis=1)
+        sample_stats=sample_stats.merge(tsa, left_index=True, right_index=True)
         self.sample_stats=sample_stats
+        self.feature_stats=feature_stats
+
+    def get_pca(self, n_components=3):
+        """
+        Perform Principal Component Analysis (PCA) on the data.
+
+        Parameters:
+            n_components (int, optional): Number of components for the PCA. Default is 3.
+
+        Raises:
+            ValueError: If the data contains NaN values or not all columns contain numeric data.
+
+        Returns:
+            self.PCA :DataFrame containing the PCA-transformed data.
+            self.PCA_object :sklearn PCA object.
+        """
+        input_data = self.data
+        # Check if all columns have numeric data types
+        if input_data.isnull().any().any():
+            print("Data contains NaN values; columns with empty values were ignored")
+            input_data = input_data.dropna(axis=1)
+        if not input_data.select_dtypes(include=["number"]).equals(input_data):
+            raise ValueError("Not all columns contain numeric data.")
+
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(input_data)
+
+        pca = PCA(n_components=n_components).fit(scaled_data)
+        pca_transformed = pd.DataFrame(
+            pca.transform(scaled_data),
+            columns=[f"PC{i}" for i in range(1, n_components + 1)], index=self.samples
+        )
+        pca_transformed = pd.concat([self.sample_metadata, pca_transformed], axis=1)
+        self.PCA = pca_transformed
+        self.PCA_object=pca
+
+    def plot_pca(self, hue, x="PC1", y="PC2", savepath=None):
+        """
+        Plot PCA results.
+
+        Parameters:
+        hue (str): Column name in sample metadata DataFrame to color the points by.
+        x (str): Name of the X-axis. Default is 'PC1'.
+        y (str): Name of the Y-axis. Default is 'PC2'.
+        savepath (str, optional): Path to save the plot as an image file. Default is None.
+
+        Returns:
+        plot: Seaborn scatterplot object.
+        """
+        if self.PCA_object:
+            plot = sns.scatterplot(data=self.pca, x=x, y=y, hue=hue)
+        else:
+            print("PCA not found, computing now with 3 components...")
+            self.get_pca(n_components=3)
+            plot = sns.scatterplot(data=self.PCA, x=x, y=y, hue=hue)
+        if savepath:
+            plot.figure.savefig(savepath)
+        return plot
+
+    def plot_metabolite(self, metabolite, x=None, hue=None, savepath=None):
+        """
+        Plot metabolite abundance data.
+
+        Parameters:
+        metabolite (str): Name of the metabolite.
+        x (str, optional): Name of the X-axis. Default is the class sample ID column.
+        hue (str, optional): Column name in sample metadata DataFrame to color the points by. Default is None.
+        savepath (str, optional): Path to save the plot as an image file. Default is None.
+
+        Returns:
+        plot: Seaborn scatterplot object.
+        """
+        if not x:
+            x=self.sample_id_column
+        data=self.extract_metabolites(metabolite)
+        plot = sns.scatterplot(data=data, x=x, y=str(metabolite), hue=hue)
+        if savepath:
+            plot.figure.savefig(savepath)
+        return plot
 
 
+a=MetaboTK(sample_id_column='sample')
 
-a=MetaboTK(sample_id_column='PARENT_SAMPLE_NAME')
-a.import_excel("data/cdt_demo.xlsx", data_sheet='batch_normalized_data')
+a.import_tables(chemical_annotation="/home/pelmo/work/workspace/pigphenomics_metabolomics/config/metabolites.tsv",
+                                sample_metadata="/home/pelmo/work/workspace/pigphenomics_metabolomics/config/samples.tsv",
+                                data="/home/pelmo/work/workspace/pigphenomics_metabolomics/data/raw_data/data.tsv"
+                                )
 
-test=a.split_by_metabolite_column("PLATFORM")
-a.sample_metadata.drop(["INTR-03233 [COPY 2]",'INTR-03212 [COPY 2]'])
-a.data
 
-a.sample_metadata
-
-a.merge_sample_metadata_data().to_csv("test.tsv", sep='\t')
+b=MetaboTK()
+b.import_excel("data/cdt_demo.xlsx", data_sheet='batch_normalized_data')
