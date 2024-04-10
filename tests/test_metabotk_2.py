@@ -3,7 +3,7 @@ import pandas as pd
 from src.reader import MetabolonCDT
 from src.statistics import StatisticsHandler
 from src.utils import parse_input
-from src.metabotk import MetaboTK
+from metabolomics_toolkit import MetaboTK
 
 
 @pytest.fixture

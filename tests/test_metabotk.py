@@ -1,5 +1,5 @@
 import pytest
-from src.metabotk import MetaboTK
+from metabolomics_toolkit import MetaboTK
 
 def test_merge_data_sample_metadata():
     test_instance=MetaboTK(sample_id_column='PARENT_SAMPLE_NAME')
