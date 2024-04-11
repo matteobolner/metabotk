@@ -7,11 +7,14 @@ Welcome to metabolomics_toolkit's documentation!
 ================================================
 .. automodule:: metabolomics_toolkit
     :members:
+.. automodule:: cli
+    :members:
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
+   metabolomics_toolkit
+   cli
 
 Indices and tables
 ==================
