@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
+
 
 def validate_dataframe(data_frame):
     """
@@ -48,3 +50,6 @@ def parse_input(input_data):
     raise TypeError(
         "Input should be a Pandas DataFrame or a file path to a TSV or CSV file."
     )
+
+def create_directory(directory_path):
+    Path(directory_path).mkdir(parents=True, exist_ok=True)

@@ -107,3 +107,33 @@ class MissingDataHandler:
         to_drop = missing[missing / len(data_frame.columns) > threshold]
         data_frame = data_frame.drop(index=to_drop.index)
         return data_frame
+
+    def drop_missing_from_dataframe(self, data_frame, axis=0, threshold=0.25):
+        """
+        Remove columns or rows with missing values above the threshold.
+
+        Parameters:
+            - threshold: missingness over which to remove the row/column
+            - axis: {0 or ‘index’, remove columns, 1 or ‘columns’, remove rows}, default 0
+
+        Returns:
+            DataFrame: DataFrame containing the rows/columns dropped.
+        """
+        if axis==0:
+            all=data_frame.copy()
+            data_frame=self.drop_columns_with_missing(data_frame=data_frame, threshold=threshold)
+            remaining=set(data_frame.columns)
+            #self._update_chemical_annotation()
+            dropped=list(set(all.columns).difference(remaining))
+            print(f"Removed {len(dropped)} elements")
+            dropped=all[dropped]
+            return dropped
+        elif axis==1:
+            all=data_frame.copy()
+            data_frame=self.drop_rows_with_missing(data_frame=data_frame, threshold=threshold)
+            #self._update_sample_metadata()
+            remaining=set(data_frame.index)
+            dropped=list(set(all.index).difference(remaining))
+            print(f"Removed {len(dropped)} elements")
+            dropped=all.loc[dropped]
+            return dropped

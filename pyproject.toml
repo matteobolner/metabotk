@@ -13,6 +13,8 @@ pytest = "^8.1.1"
 coverage = "^7.4.4"
 scikit-learn = "^1.4.2"
 seaborn = "^0.13.2"
+statsmodels = "^0.14.1"
+dill = "^0.3.8"
 
 [tool.poetry.group.docs]
 optional = true

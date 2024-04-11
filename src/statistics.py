@@ -41,6 +41,21 @@ class StatisticsHandler:
         self.outlier_handler = OutlierHandler()
         self.missing_handler = MissingDataHandler()
 
+    def total_sum_abundance(self, data_frame, exclude_incomplete):
+        """
+        Computes total sum abundance (TSA) row-wise
+        Parameters:
+            data_frame (DataFrame): pandas DataFrame containing numerical data.
+            exclude_incomplete: option to exclude columns containing incomplete values from the computation
+        Returns:
+            Series: Pandas Series containing TSA values for each row.
+        """
+        if exclude_incomplete:
+            data_frame=data_frame.dropna(axis=1)
+        tsa=data_frame.sum(axis=1, skipna=True)
+        tsa.name="TSA"
+        return tsa
+
     def compute_statistics(self, data, outlier_threshold):
         """
         Computes basic statistics for a collection of numerical data.
