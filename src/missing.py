@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from src.utils import validate_dataframe
 
+
 class MissingDataHandler:
     """
     Class for detecting and counting missing values in data,
@@ -53,8 +54,8 @@ class MissingDataHandler:
             Number of missing values in collection
         """
 
-        missing=self.detect_missing(data)
-        n_missing=missing.sum()
+        missing = self.detect_missing(data)
+        n_missing = missing.sum()
         return n_missing
 
     def count_missing_in_dataframe(self, data_frame, axis=0):
@@ -119,21 +120,25 @@ class MissingDataHandler:
         Returns:
             DataFrame: DataFrame containing the rows/columns dropped.
         """
-        if axis==0:
-            all=data_frame.copy()
-            data_frame=self.drop_columns_with_missing(data_frame=data_frame, threshold=threshold)
-            remaining=set(data_frame.columns)
-            #self._update_chemical_annotation()
-            dropped=list(set(all.columns).difference(remaining))
+        if axis == 0:
+            all = data_frame.copy()
+            data_frame = self.drop_columns_with_missing(
+                data_frame=data_frame, threshold=threshold
+            )
+            remaining = set(data_frame.columns)
+            # self._update_chemical_annotation()
+            dropped = list(set(all.columns).difference(remaining))
             print(f"Removed {len(dropped)} elements")
-            dropped=all[dropped]
+            dropped = all[dropped]
             return dropped
-        elif axis==1:
-            all=data_frame.copy()
-            data_frame=self.drop_rows_with_missing(data_frame=data_frame, threshold=threshold)
-            #self._update_sample_metadata()
-            remaining=set(data_frame.index)
-            dropped=list(set(all.index).difference(remaining))
+        elif axis == 1:
+            all = data_frame.copy()
+            data_frame = self.drop_rows_with_missing(
+                data_frame=data_frame, threshold=threshold
+            )
+            # self._update_sample_metadata()
+            remaining = set(data_frame.index)
+            dropped = list(set(all.index).difference(remaining))
             print(f"Removed {len(dropped)} elements")
-            dropped=all.loc[dropped]
+            dropped = all.loc[dropped]
             return dropped

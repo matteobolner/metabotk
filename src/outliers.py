@@ -2,13 +2,19 @@ import numpy as np
 import pandas as pd
 from src.utils import validate_dataframe
 
+
 class OutlierHandler:
+    """
+    Class for detecting outliers using the Interquartile Range (IQR) method.
+    """
+
     def detect_outliers(self, data, threshold):
         """
-        Get outlier values using the Interquartile Range (IQR) method.
+        Detect outlier values in a single-column numerical array.
 
         Parameters:
-        - data: list, array, or Series containing numerical data
+        - data: single-column numerical array
+        - threshold: a factor that determines the range from the IQR
 
         Returns:
         - Boolean array indicating outliers (True) and non-outliers (False)
@@ -29,24 +35,29 @@ class OutlierHandler:
 
     def get_outliers_matrix(self, data_frame, threshold, axis=0):
         """
-        Get a matrix of value outliers over the whole dataset column-wise.
+        Get a matrix indicating outliers in each row or column of a dataframe.
 
         Parameters:
         - data_frame: pandas DataFrame containing only numeric values
+        - threshold: a factor that determines the range from the IQR
+        - axis: {0 or ‘index’, apply to each column, 1 or ‘columns’, apply to each row}, default 0
 
         Returns:
         - pandas DataFrame indicating outliers (True) and non-outliers (False)
         """
         validate_dataframe(data_frame)
-        matrix = data_frame.apply(lambda x: self.detect_outliers(x,threshold), axis=axis)
+        matrix = data_frame.apply(
+            lambda x: self.detect_outliers(x, threshold), axis=axis
+        )
         return matrix
 
     def count_outliers(self, data_frame, threshold, axis=0):
         """
-        Count number of outlier values in each row or column of dataframe.
+        Count number of outlier values in each row or column of a dataframe.
 
         Parameters:
         - data_frame: pandas DataFrame containing only numeric values
+        - threshold: a factor that determines the range from the IQR
         - axis: {0 or ‘index’, apply to each column, 1 or ‘columns’, apply to each row}, default 0
 
         Returns:
@@ -59,16 +70,17 @@ class OutlierHandler:
 
     def remove_outliers(self, data_frame, threshold, axis=0):
         """
-        Replace outlier values with NAs in the whole dataset, column-wise or row-wise.
+        Replace outlier values with NAs in a dataframe, column-wise or row-wise.
 
         Parameters:
         - data_frame: pandas DataFrame containing only numeric values
+        - threshold: a factor that determines the range from the IQR
         - axis: {0 or ‘index’, apply to each column, 1 or ‘columns’, apply to each row}, default 0
 
         Returns:
         - pandas DataFrame where the outlier values are replaced by NAs
         """
         validate_dataframe(data_frame)
-        outliers = self.get_outliers_matrix(data_frame,threshold, axis=axis)
+        outliers = self.get_outliers_matrix(data_frame, threshold, axis=axis)
         data_frame_without_outliers = data_frame.where(~outliers, np.nan)
         return data_frame_without_outliers
