@@ -216,12 +216,6 @@ class DatasetManager:
             raise ValueError("Trying to save an empty dataframe")
         merged.to_csv(data_path, sep="\t")
         if chemical_annotation_path:
-            """Save the chemical annotation data to a TSV file.
-
-            This function saves the chemical annotation data to a TSV file.
-            The file is saved to the path specified by the
-            `chemical_annotation_path` parameter.
-            """
             self.chemical_annotation.to_csv(chemical_annotation_path, sep="\t")
 
     def save(

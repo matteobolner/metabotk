@@ -26,6 +26,26 @@ files = [
 dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
 [[package]]
+name = "Boruta"
+version = "0.3"
+description = "Python Implementation of Boruta Feature Selection"
+optional = false
+python-versions = "*"
+files = []
+develop = false
+
+[package.dependencies]
+numpy = ">=1.10.4"
+scikit-learn = ">=0.17.1"
+scipy = ">=0.17.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/matteobolner/boruta_py.git"
+reference = "HEAD"
+resolved_reference = "31dc893c9721f78e088b770659e1627a8fa8b87f"
+
+[[package]]
 name = "certifi"
 version = "2024.2.2"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -1390,4 +1410,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "b6ab71067d6b047ef785466f5e726f993f6dc66645c050d1a4b6d7c2d1e922d7"
+content-hash = "7cd4b76f28c7273ffcc34f5588222b1c4411e9eb1b1e8f5bfeb62f5914386a29"
