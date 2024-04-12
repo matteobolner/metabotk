@@ -1,14 +1,12 @@
-import pandas as pd
 import numpy as np
 import statsmodels.formula.api as smf
 import dill
-import os
 from src.utils import create_directory
 
 
-class EffectsHandler:
+class ModelsHandler:
     """
-    Class for fitting linear models to the data and obtaining residuals
+    Class for fitting models to the data and obtaining residuals
 
     The class takes a data manager as input, and fits a linear model using the
     formula specified in the constructor for each metabolite. The residuals
@@ -41,7 +39,7 @@ class EffectsHandler:
         self.residuals = self.data_manager.data.copy()
         self.residuals.loc[:] = np.nan
 
-    def fit_model(self, metabolite):
+    def fit_linear_model(self, metabolite):
         """
         Fit a linear model using the formula specified in the constructor.
 
@@ -57,7 +55,7 @@ class EffectsHandler:
         residuals = fitted_model.resid
         return residuals, model
 
-    def get_all_residuals(self, models_path=None):
+    def get_linear_model_residuals(self, models_path=None):
         """
         Fit a linear model for each metabolite and extract residuals.
 
@@ -70,7 +68,7 @@ class EffectsHandler:
         if models_path:
             create_directory(models_path)
         for metabolite in self.data_manager.metabolites:
-            residuals, model = self.fit_model(metabolite)
+            residuals, model = self.fit_linear_model(metabolite)
             self.residuals[metabolite] = residuals
             if models_path:
                 with open(f"{models_path}/{metabolite}.pickle", "wb") as handle:

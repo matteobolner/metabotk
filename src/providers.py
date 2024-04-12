@@ -9,7 +9,7 @@ from src.utils import parse_input
 
 class MetabolonCDT:
     """
-    A class for reading and working with with Metabolon Client Data Table files.
+    A class for reading Metabolon Client Data Table files.
 
     Attributes:
     - data_key_and_explanation: DataFrame containing data key and explanation.
@@ -65,24 +65,13 @@ class MetabolonCDT:
 
         # Assign sheets to attributes
         self.data_key_and_explanation = sheets.pop("Data Key & Explanation", None)
-        """DataFrame containing data key and explanation, if present in the Excel file."""
         self.sample_metadata = sheets.pop("Sample Meta Data")
-        """DataFrame containing sample metadata."""
         self.chemical_annotation = sheets.pop("Chemical Annotation")
-        """DataFrame containing chemical annotation."""
         self.peak_area_data = sheets.pop("Peak Area Data")
-        """DataFrame containing peak area data and a column with the sample names."""
         self.batch_normalized_data = sheets.pop("Batch-normalized Data", None)
-        """DataFrame containing batch-normalized data and a column with the sample names,
-        if present in the Excel file."""
         self.batch_normalized_imputed_data = sheets.pop("Batch-norm Imputed Data", None)
-        """DataFrame containing batch-norm imputed data and a column with the sample names,
-        if present in the Excel file."""
         self.log_transformed_data = sheets.pop("Log Transformed Data", None)
-        """DataFrame containing log-transformed data and a column with the sample names,
-        if present in the Excel file."""
         self.additional_data = sheets
-        """Dictionary of additional sheets found in the Excel file, keyed by sheet name."""
 
     def import_tables(
         self,

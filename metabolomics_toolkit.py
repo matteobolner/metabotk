@@ -1,11 +1,10 @@
 from src.manager import DatasetManager
 from src.statistics import StatisticsHandler
-from src.effects_models import EffectsHandler
+from src.models import ModelsHandler
 from src.dimensionality_reduction import DimensionalityReduction
-from src.utils import parse_input
 from src.visualization import Visualization
+from src.feature_selection import FeatureSelection
 import pandas as pd
-from src.reader import MetabolonCDT
 
 
 class MetaboTK(DatasetManager):
@@ -16,7 +15,7 @@ class MetaboTK(DatasetManager):
     def __init__(
         self,
         data_provider="metabolon",
-        sample_id_column="PARENT_SAMPLE_NAME",
+        sample_id_column=None,
         metabolite_id_column="CHEM_ID",
     ) -> None:
         """
@@ -30,6 +29,8 @@ class MetaboTK(DatasetManager):
         self.stats = StatisticsHandler()
         self.dimensionality_reduction = DimensionalityReduction(self)
         self.visualization = Visualization(self)
+        self.models = ModelsHandler(self)
+        self.feature_selection = FeatureSelection(self)
 
     ###
     # Statistics
@@ -131,51 +132,7 @@ class MetaboTK(DatasetManager):
         Returns:
         - pandas DataFrame where the outlier values are replaced by NAs
         """
-        self.data = self.stats.outlier_handler.remove_outliers(
+        data_without_outliers = self.stats.outlier_handler.remove_outliers(
             self.data, threshold=threshold, axis=axis
         )
-
-    def get_pca(self, n_components=3, output_pca_object=False):
-        """
-        Perform Principal Component Analysis (PCA) on the data.
-
-        This function performs PCA on the data and returns the transformed data
-        as a DataFrame. The number of components can be specified using the
-        n_components parameter. By default, 3 components are used.
-
-        Parameters:
-            n_components (int, optional): Number of components for the PCA. Default is 3.
-            output_pca_object (bool, optional): Whether to return the PCA object from scikit-learn. Default is False.
-
-        Raises:
-            ValueError: If the data contains NaN values or not all columns contain numeric data.
-
-        Returns:
-            pca_transformed (DataFrame): DataFrame containing the PCA-transformed data.
-            pca (PCA): sklearn PCA object. Only returned if output_pca_object is True.
-        """
-        PCA, PCA_object = self.dimensionality_reduction.get_pca(
-            n_components=n_components
-        )
-        if output_pca_object == True:
-            return PCA, PCA_object
-        else:
-            return PCA
-
-    def effect_residuals(self, formula, models_path=None):
-        """
-        Fit linear models for each metabolite and extract residuals.
-
-        Fit a linear model for each metabolite using the formula specified,
-        and extract the residuals from the fitted models. The residuals are
-        returned as a DataFrame with the same index as the original data.
-
-        Parameters:
-        - formula: a formula used to fit the linear models
-        - models_path: path to directory where models will be saved
-
-        Returns:
-        - residuals (DataFrame): DataFrame of residuals with same index as data
-        """
-        effect_handler = EffectsHandler(data_manager=self, formula=formula)
-        self.residuals = effect_handler.get_all_residuals()
+        return data_without_outliers

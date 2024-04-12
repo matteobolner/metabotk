@@ -1,7 +1,7 @@
-import pandas as pd
-from src.reader import MetabolonCDT
-from src.utils import parse_input
 from typing import Union, Optional, Dict
+import pandas as pd
+from src.providers import MetabolonCDT
+from src.utils import parse_input
 
 
 class DatasetManager:
@@ -20,7 +20,7 @@ class DatasetManager:
     def __init__(
         self,
         data_provider: str = "metabolon",
-        sample_id_column: str = "PARENT_SAMPLE_NAME",
+        sample_id_column: str = None,
         metabolite_id_column: str = "CHEM_ID",
     ) -> None:
         """
@@ -73,7 +73,13 @@ class DatasetManager:
             parsed_chemical_annotation = parse_input(chemical_annotation)
             parsed_sample_metadata = parse_input(sample_metadata)
             parsed_data = parse_input(data)
-
+            if not self._sample_id_column:
+                if parsed_data.columns[0] in parsed_sample_metadata.columns:
+                    self._sample_id_column = parsed_data.columns[0]
+                else:
+                    raise ValueError(
+                        "No sample ID column found in data with correspondence in sample metadata"
+                    )
             # check that sample ID column is found in data
             if (self._sample_id_column in parsed_data.columns) and (
                 self._sample_id_column in parsed_sample_metadata.columns
@@ -109,7 +115,7 @@ class DatasetManager:
         except ValueError as ve:
             raise ValueError(f"Error setting up data: {ve}")
 
-    def import_excel(self, file_path, data_sheet) -> None:
+    def import_excel(self, file_path: str, data_sheet: str) -> None:
         """
         Import data from an Excel file and set up the class.
 
@@ -133,21 +139,23 @@ class DatasetManager:
             self.parser.import_excel(file_path)
             data = getattr(self.parser, data_sheet)
             self._setup_data(
-                self.parser.chemical_annotation, self.parser.sample_metadata, data
+                self.parser.chemical_annotation,
+                self.parser.sample_metadata,
+                data,
             )
             self._remove_metadata_from_data()
-        except FileNotFoundError:
-            raise FileNotFoundError(f"File '{file_path}' not found.")
-        except AttributeError:
+        except FileNotFoundError as fnfe:
+            raise FileNotFoundError(f"File '{file_path}' not found.") from fnfe
+        except AttributeError as ae:
             raise AttributeError(
                 f"Data sheet '{data_sheet}' not found in the Excel file."
-            )
+            ) from ae
         except ValueError as ve:
-            raise ValueError(f"Error importing data: {ve}")
+            raise ValueError(f"Error importing data: {ve}") from ve
 
     def import_tables(
         self,
-        data,
+        data: Union[pd.DataFrame, str],
         chemical_annotation: Union[pd.DataFrame, str] = "config/metabolites.tsv",
         sample_metadata: Union[pd.DataFrame, str] = "config/samples.tsv",
     ) -> None:
@@ -155,9 +163,9 @@ class DatasetManager:
         Import data from tables and set up the class.
 
         Parameters:
-        data (DataFrame or str): DataFrame or path of file containing the main data.
-        chemical_annotation (DataFrame or str): DataFrame or path to the file containing chemical annotation.
-        sample_metadata (DataFrame or str): DataFrame or path to the file containing sample metadata.
+            data: DataFrame or path of file containing the main data.
+            chemical_annotation: DataFrame or path to the file containing chemical annotation.
+            sample_metadata: DataFrame or path to the file containing sample metadata.
 
         """
         try:
@@ -173,7 +181,7 @@ class DatasetManager:
             )
             self._remove_metadata_from_data()
         except ValueError as ve:
-            raise ValueError("Error importing data: {}".format(ve))
+            raise ValueError("Error importing data: {}".format(ve)) from ve
 
     def merge_sample_metadata_data(self) -> pd.DataFrame:
         """
@@ -255,6 +263,46 @@ class DatasetManager:
             self.chemical_annotation.to_csv(chemical_annotation_path, sep="\t")
         if sample_metadata_path:
             self.sample_metadata.to_csv(sample_metadata_path, sep="\t")
+
+    def save_excel(self, file_path, data_sheet="data"):
+        """
+        Save the dataset to an Excel file.
+
+        This function saves the dataset to an Excel file. The data, chemical
+        annotation, and sample metadata are saved to separate sheets in the
+        Excel file. The name of the sheet containing the data is specified by
+        the `data_name` parameter.
+
+        Parameters:
+            file_path (str): Path to save the Excel file.
+            data_name (str): Name of the sheet containing the data. Default is
+                "data".
+
+        Returns:
+            None
+        """
+        with pd.ExcelWriter(file_path) as writer:
+            self.chemical_annotation.to_excel(writer, sheet_name="chemical_annotation")
+            self.sample_metadata.to_excel(writer, sheet_name="sample_metadata")
+            self.data.to_excel(writer, sheet_name=data_sheet)
+
+    def add_to_excel(self, file_path, new_sheet, new_sheet_name):
+        """
+        Add a new sheet to an Excel file.
+        This function adds a new sheet to an Excel file.
+        The new sheet is specified by the `new_sheet` parameter, and the name of
+        the new sheet is specified by the `new_sheet_name` parameter.
+
+        Parameters:
+            file_path (str): Path of the Excel file to add the new sheet to.
+            new_sheet (DataFrame): DataFrame to add as a new sheet.
+            new_sheet_name (str): Name of the new sheet.
+
+        Returns:
+            None
+        """
+        with pd.ExcelWriter(file_path, mode="a") as writer:
+            new_sheet.to_excel(writer, sheet_name=new_sheet_name)
 
     ###
     # Utility functions to manipulate the class attributes
