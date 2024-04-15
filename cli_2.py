@@ -3,6 +3,7 @@
 import os
 import argparse
 from metabolomics_toolkit import MetaboTK
+from typing import Union
 
 parser = argparse.ArgumentParser(description="Metabolomics data analysis tool")
 
@@ -78,23 +79,24 @@ output_options.add_argument(
 
 analysis_group = parser.add_argument_group("Analysis", "Analysis options")
 analysis_options = analysis_group.add_mutually_exclusive_group()
-analysis_options.add_argument(
+analysis_group.add_argument(
     "--exclude-xenobiotics",
     dest="exclude_xenobiotics",
-    action="store_false",
+    action="store_true",
     help="Exclude xenobiotic metabolites from the analysis",
 )
-analysis_options.add_argument(
+analysis_group.add_argument(
     "--outlier-threshold",
     dest="outlier_threshold",
     nargs="?",
-    const=5,
+    default=5,
     type=float,
     help="Numeric threshold for the outlier detection; default value is 5",
 )
 
 analysis_options.add_argument(
     "--sample-stats",
+    action="store_true",
     dest="sample_stats",
     help="Print to stdout the sample statistics for the entire dataset",
 )
@@ -102,20 +104,96 @@ analysis_options.add_argument(
 analysis_options.add_argument(
     "--metabolite-stats",
     dest="metabolite_stats",
-    nargs="?",
-    const=5,
-    type=float,
-    metavar="per_metabolite_or_sample",
+    action="store_true",
     help="Print to stdout each metabolite's statistics for the entire dataset",
 )
 analysis_options.add_argument(
     "--remove-outliers",
     dest="remove_outliers",
-    nargs="?",
-    metavar="per_metabolite_or_sample",
+    action="store_true",
     help="Remove metabolite outlier values from the dataset and replace them with NAs; \
-        outliers can be computed per metabolite (over all samples, default) or per sample (over all metabolites)\
-        the data without outliers will be printed to stdout",
+        outliers are computed column-wise;the data without outliers will be printed to stdout",
+)
+
+analysis_options.add_argument(
+    "--fit-model",
+    dest="fit_model",
+    nargs="+",
+    metavar=("formula", "model_dir"),
+    help="Fit a linear model to each metabolite and print the residuals to stdout; optionally, save the models as pickle files in a folder of choice",
+)
+
+analysis_options.add_argument(
+    "--PCA",
+    dest="PCA",
+    nargs="?",
+    default=None,
+    help="Perform a PCA on the dataset and print the results to stdout; number of componentsm must be specified",
+)
+###FEATURE SELECTION
+fs_group = parser.add_argument_group(
+    "Feature Selection", "Feature selection methods and options"
+)
+fs_group.add_argument(
+    "--fs-method",
+    dest="fs_method",
+    nargs="?",
+    default=None,
+    help="Which feature selection method to use, default is boruta",
+)
+
+fs_group.add_argument(
+    "-y", "--y_column", help="Column containing target values", default=None
+)
+fs_group.add_argument(
+    "-t", "--threads", help="Threads to use, default is 1", default=1, type=int
+)
+fs_group.add_argument(
+    "-a",
+    "--alpha",
+    help="Alpha (p-value threshold), default is 0.01",
+    default=0.01,
+    type=float,
+)
+
+fs_group.add_argument(
+    "-r",
+    "--random-state",
+    help="Random state seed, default is 42",
+    default=42,
+    type=int,
+)
+fs_group.add_argument(
+    "-d",
+    "--max-depth",
+    help="BORUTA:Max depth of the tree, default is None",
+    default=None,
+    type=Union[None, int],
+)
+fs_group.add_argument(
+    "-w",
+    "--class-weight",
+    help="BORUTA: Class weights, default is balanced",
+    default="balanced",
+)
+fs_group.add_argument(
+    "-n",
+    "--n-estimators",
+    help="BORUTA: Number of estimators, default is 100",
+    default="auto",
+)
+fs_group.add_argument(
+    "-i",
+    "--max-iterations",
+    help="BORUTA: Max iterations. default is 1000",
+    default=1000,
+    type=int,
+)
+fs_group.add_argument(
+    "-o",
+    "--output-dir",
+    help="BORUTA: Output directory for saving rankings, model and importance history, default is None (print ranking only to stdout)",
+    default=None,
 )
 
 
@@ -166,10 +244,46 @@ if args.metabolite_stats:
     print(metabolite_stats.to_csv(sep="\t"))
 
 if args.remove_outliers:
-    outliers_removed = metabotk_instance.remove_outliers(
-        outlier_threshold=args.outlier_threshold,
+    outliers_removed = metabotk_instance.stats.outlier_handler.remove_outliers(
+        data_frame=metabotk_instance.data,
+        axis=0,
+        threshold=args.outlier_threshold,
     )
-    print(metabolite_stats.to_csv(sep="\t"))
+    print(outliers_removed.to_csv(sep="\t"))
+
+### FIT MODELS
+if args.fit_model:
+    if len(args.fit_model) == 2:
+        residuals = metabotk_instance.models.get_linear_model_residuals(
+            formula=args.fit_model[0], models_path=args.fit_model[1]
+        )
+    else:
+        residuals = metabotk_instance.models.get_linear_model_residuals(
+            formula=args.fit_model[0], models_path=None
+        )
+    print(residuals.to_csv(sep="\t"))
+
+### PCA
+
+if args.PCA:
+    pca = metabotk_instance.dimensionality_reduction.get_pca(n_components=int(args.PCA))
+    print(pca.to_csv(sep="\t"))
+
+
+### FEATURE SELECTION:
+if args.fs_method:
+    if args.fs_method == "boruta":
+        ranking = metabotk_instance.feature_selection.boruta(
+            y_column=args.y_column,
+            threads=args.threads,
+            random_state=args.random_state,
+            max_depth=args.max_depth,
+            class_weight=args.class_weight,
+            n_estimators=args.n_estimators,
+            alpha=args.alpha,
+            max_iterations=args.max_iterations,
+            output_dir=args.output_dir,
+        )
 
 
 ###SAVE DATA

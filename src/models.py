@@ -22,9 +22,7 @@ class ModelsHandler:
         residuals (DataFrame): dataframe of residuals, initially full of NaNs
     """
 
-    def __init__(
-        self, data_manager, formula="C(slaughter) + C(batch) + weight", models_path=None
-    ) -> None:
+    def __init__(self, data_manager) -> None:
         """
         Initialize the class.
 
@@ -34,12 +32,11 @@ class ModelsHandler:
             models_path (str): path to directory where models will be saved
         """
         self.data_manager = data_manager
-        self.formula = formula
         self.merged = self.data_manager.merge_sample_metadata_data()
         self.residuals = self.data_manager.data.copy()
         self.residuals.loc[:] = np.nan
 
-    def fit_linear_model(self, metabolite):
+    def fit_linear_model(self, metabolite, formula):
         """
         Fit a linear model using the formula specified in the constructor.
 
@@ -50,12 +47,12 @@ class ModelsHandler:
             residuals (Series): residuals from the fitted model
             model (RegressionResults): fitted model
         """
-        model = smf.ols(f"Q('{metabolite}') ~ {self.formula}", self.merged)
+        model = smf.ols(f"Q('{metabolite}') ~ {formula}", self.merged)
         fitted_model = model.fit()
         residuals = fitted_model.resid
         return residuals, model
 
-    def get_linear_model_residuals(self, models_path=None):
+    def get_linear_model_residuals(self, formula, models_path=None):
         """
         Fit a linear model for each metabolite and extract residuals.
 
@@ -68,7 +65,7 @@ class ModelsHandler:
         if models_path:
             create_directory(models_path)
         for metabolite in self.data_manager.metabolites:
-            residuals, model = self.fit_linear_model(metabolite)
+            residuals, model = self.fit_linear_model(metabolite, formula)
             self.residuals[metabolite] = residuals
             if models_path:
                 with open(f"{models_path}/{metabolite}.pickle", "wb") as handle:

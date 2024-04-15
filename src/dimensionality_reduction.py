@@ -66,4 +66,4 @@ class DimensionalityReduction:
             pca_transformed, left_index=True, right_index=True
         )
 
-        return pca_transformed, pca
+        return pca_transformed  # , pca

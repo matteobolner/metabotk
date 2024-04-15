@@ -27,10 +27,6 @@ class MetaboTK(DatasetManager):
             metabolite_id_column=metabolite_id_column,
         )
         self.stats = StatisticsHandler()
-        self.dimensionality_reduction = DimensionalityReduction(self)
-        self.visualization = Visualization(self)
-        self.models = ModelsHandler(self)
-        self.feature_selection = FeatureSelection(self)
 
     ###
     # Statistics
@@ -116,23 +112,30 @@ class MetaboTK(DatasetManager):
         # self.metabolite_stats=metabolite_stats
         return metabolite_stats
 
-    def remove_outliers(self, axis=0, threshold=5):
-        """
-        Replace outlier values with NAs in the whole dataset, column-wise or row-wise.
+    @property
+    def models(self):
+        """Lazy initialization of ModelsHandler instance."""
+        if not hasattr(self, "_models_"):
+            self._models_ = ModelsHandler(self)
+        return self._models_
 
-        This function replaces outlier values with NAs in the whole dataset,
-        column-wise or row-wise. Outliers are determined using the interquartile
-        range method, which is considered more robust than the standard
-        deviation method.
+    @property
+    def dimensionality_reduction(self):
+        """Lazy initialization of DimensionalityReduction instance."""
+        if not hasattr(self, "_dimensionality_reduction_"):
+            self._dimensionality_reduction_ = DimensionalityReduction(self)
+        return self._dimensionality_reduction_
 
-        Parameters:
-        - axis: {0 or ‘index’, apply to each column, 1 or ‘columns’, apply to each row}, default 0
-        - threshold: a factor that determines the range from the IQR (default=5)
+    @property
+    def visualization(self):
+        """Lazy initialization of Visualization instance."""
+        if not hasattr(self, "_visualization_"):
+            self._visualization_ = Visualization(self)
+        return self._visualization_
 
-        Returns:
-        - pandas DataFrame where the outlier values are replaced by NAs
-        """
-        data_without_outliers = self.stats.outlier_handler.remove_outliers(
-            self.data, threshold=threshold, axis=axis
-        )
-        return data_without_outliers
+    @property
+    def feature_selection(self):
+        """Lazy initialization of FeatureSelection instance."""
+        if not hasattr(self, "_feature_selection_"):
+            self._feature_selection_ = FeatureSelection(self)
+        return self._feature_selection_

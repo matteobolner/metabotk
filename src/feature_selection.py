@@ -7,6 +7,7 @@ Currently implemented methods:
 
 """
 
+import dill
 from sklearn.ensemble import RandomForestClassifier
 from boruta import BorutaPy
 import pandas as pd
@@ -23,24 +24,16 @@ class FeatureSelection:
         group (str): Column name containing sample class information
     """
 
-    def __init__(self, data_manager, threads=1, random_state=42, group="GROUP"):
+    def __init__(self, data_manager):
         """
         Initiate the class
 
         Args:
             data_manager (DatasetManager): DatasetManager object with data to be selected
-            threads (int): Number of threads to use for parallel processing
-            random_state (int): Random state for reproducibility
-            group (str): Column name containing sample class information
         """
         self.data_manager = data_manager
-        self.threads = threads
-        self.random_state = random_state
-        self.group = group
 
-    def setup_random_forest(
-        self, random_state=42, max_depth=None, class_weight=None, **kwargs
-    ):
+    def setup_random_forest(self, random_state, threads, max_depth, class_weight):
         """
         Setup random forest
 
@@ -53,7 +46,7 @@ class FeatureSelection:
             RandomForestClassifier: Random Forest classifier
         """
         rf = RandomForestClassifier(
-            n_jobs=self.threads,
+            n_jobs=threads,
             class_weight=class_weight,
             max_depth=max_depth,
             random_state=random_state,
@@ -62,13 +55,15 @@ class FeatureSelection:
 
     def boruta(
         self,
+        y_column,
+        threads=1,
+        random_state=42,
         max_depth=None,
         class_weight="balanced",
         n_estimators="auto",
         alpha=0.01,
         max_iterations=1000,
-        random_state=42,
-        get_model=False,
+        output_dir=None,
     ):
         """
         Boruta feature selection
@@ -94,12 +89,17 @@ class FeatureSelection:
                 number as rows and the metabolite as columns. If get_model
                 is True, then the Boruta model is returned as well.
         """
+        if not y_column:
+            raise ValueError("y value must be specified")
         X = self.data_manager.data.values
 
-        y = self.data_manager.sample_metadata[self.group].values
+        y = self.data_manager.sample_metadata[y_column].values
 
         rf = self.setup_random_forest(
-            random_state=random_state, max_depth=max_depth, class_weight=class_weight
+            random_state=random_state,
+            threads=threads,
+            max_depth=max_depth,
+            class_weight=class_weight,
         )
         feat_selector = BorutaPy(
             rf,
@@ -110,11 +110,14 @@ class FeatureSelection:
             max_iter=max_iterations,
         )
         feat_selector.fit(X, y)
-
+        print(feat_selector.importance_history_)
         importance_history = pd.DataFrame(
-            feat_selector.importance_history_, index=range(max_iterations)
+            feat_selector.importance_history_,
+            index=range(len(feat_selector.importance_history_)),
         )
         importance_history.columns = self.data_manager.metabolites
+        importance_history.index.name = "iteration"
+        importance_history = importance_history.reset_index()
 
         ranking = pd.DataFrame(
             feat_selector.ranking_,
@@ -123,7 +126,15 @@ class FeatureSelection:
         )
         ranking.index.name = "metabolite"
         ranking = ranking.reset_index()
-        if get_model:
-            return (ranking, importance_history, feat_selector)
+
+        if output_dir:
+            with open(f"{output_dir}/boruta_model.pickle", "wb") as f:
+                dill.dump(feat_selector, f)
+            importance_history.to_csv(
+                f"{output_dir}/boruta_importance_history.tsv", sep="\t", index=False
+            )
+
+            ranking.to_csv(f"{output_dir}/boruta_ranking.tsv", sep="\t", index=False)
+            return ranking
         else:
-            return (ranking, importance_history)
+            return ranking
