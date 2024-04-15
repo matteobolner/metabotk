@@ -398,7 +398,7 @@ class DatasetManager:
         except ValueError as ve:
             raise ValueError("Error removing metadata from data: {}".format(ve))
 
-    def split_by_sample_column(self, column: str) -> Dict[str, "MetaboTK"]:
+    def split_by_sample_column(self, column: str) -> Dict[str, "DatasetManager"]:
         """
         Split the dataset (data and sample metadata) in multiple independent DataClass instances
         based on the values of a sample metadata column.
@@ -417,10 +417,10 @@ class DatasetManager:
             values of the sample metadata column and the values are the DataClass instances
             containing the split data.
         """
-        split_data: Dict[str, MetaboTK] = {}
+        split_data: Dict[str, DatasetManager] = {}
         for name, group in self.sample_metadata.groupby(by=column):
             tempdata = self.data.loc[group.index]
-            tempclass = MetaboTK(
+            tempclass = DatasetManager(
                 data_provider=self._data_provider,
                 sample_id_column=self._sample_id_column,
                 metabolite_id_column=self._metabolite_id_column,
@@ -436,7 +436,7 @@ class DatasetManager:
             split_data[name] = tempclass
         return split_data
 
-    def split_by_metabolite_column(self, column: str) -> Dict[str, "MetaboTK"]:
+    def split_by_metabolite_column(self, column: str) -> Dict[str, "DatasetManager"]:
         """
         Split the data in multiple independent DataClass instances
         based on the values of a metabolite metadata column
@@ -445,12 +445,12 @@ class DatasetManager:
         column (str): Name of the column in the metabolite metadata table to use for splitting
 
         Returns:
-        Dict[str, MetaboTK]: dictionary where keys are the unique values present in the column and values are the corresponding DataClass instances
+        Dict[str, DatasetManager]: dictionary where keys are the unique values present in the column and values are the corresponding DataClass instances
         """
-        split_data: Dict[str, "MetaboTK"] = {}
+        split_data: Dict[str, "DatasetManager"] = {}
         for name, group in self.chemical_annotation.groupby(by=column):
             tempdata = self.data[list(group.index)]
-            tempclass = MetaboTK(
+            tempclass = DatasetManager(
                 data_provider=self._data_provider,
                 sample_id_column=self._sample_id_column,
                 metabolite_id_column=self._metabolite_id_column,

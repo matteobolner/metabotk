@@ -21,7 +21,7 @@ class DimensionalityReduction:
         """
         self.data_manager = data_manager
 
-    def get_pca(self, n_components=3):
+    def get_pca(self, n_components=3, get_pca_object=False):
         """
         Perform Principal Component Analysis (PCA) on the data.
 
@@ -65,5 +65,7 @@ class DimensionalityReduction:
         pca_transformed = self.data_manager.sample_metadata.merge(
             pca_transformed, left_index=True, right_index=True
         )
-
-        return pca_transformed  # , pca
+        if get_pca_object == True:
+            return pca_transformed, pca
+        else:
+            return pca_transformed

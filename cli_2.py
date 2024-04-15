@@ -128,7 +128,7 @@ analysis_options.add_argument(
     dest="PCA",
     nargs="?",
     default=None,
-    help="Perform a PCA on the dataset and print the results to stdout; number of componentsm must be specified",
+    help="Perform a PCA on the dataset and print the results to stdout; number of components must be specified",
 )
 ###FEATURE SELECTION
 fs_group = parser.add_argument_group(
@@ -266,7 +266,9 @@ if args.fit_model:
 ### PCA
 
 if args.PCA:
-    pca = metabotk_instance.dimensionality_reduction.get_pca(n_components=int(args.PCA))
+    pca = metabotk_instance.dimensionality_reduction.get_pca(
+        n_components=int(args.PCA), get_pca_object=False
+    )
     print(pca.to_csv(sep="\t"))
 
 
