@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Welcome to metabolomics_toolkit’s documentation! &#8212; metabolomics_toolkit 0.1.0 documentation</title>
+    <title>metabotk Documentation &#8212; metabotk 0.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
     <script src="_static/documentation_options.js?v=01f34227"></script>
@@ -30,242 +30,122 @@
 
           <div class="body" role="main">
             
-  <section id="module-metabolomics_toolkit">
-<span id="welcome-to-metabolomics-toolkit-s-documentation"></span><h1>Welcome to metabolomics_toolkit’s documentation!<a class="headerlink" href="#module-metabolomics_toolkit" title="Link to this heading">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metabolomics_toolkit.</span></span><span class="sig-name descname"><span class="pre">MetaboTK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'metabolon'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PARENT_SAMPLE_NAME'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metabolite_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CHEM_ID'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK" title="Link to this definition">¶</a></dt>
-<dd><p>Class for working with metabolomics data</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.compute_stats">
-<span class="sig-name descname"><span class="pre">compute_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outlier_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.compute_stats" title="Link to this definition">¶</a></dt>
-<dd><p>Computes basic statistics for the metabolomics data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame containing statistics for each column of the data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.drop_metabolites">
-<span class="sig-name descname"><span class="pre">drop_metabolites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metabolites_to_drop</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.drop_metabolites" title="Link to this definition">¶</a></dt>
-<dd><p>Drop specified metabolites from the dataset.</p>
-<p>Parameters:
-metabolites_to_drop (list): List of metabolite IDs to drop.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.drop_missing">
-<span class="sig-name descname"><span class="pre">drop_missing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.drop_missing" title="Link to this definition">¶</a></dt>
-<dd><p>Remove columns or rows with missing values above the threshold.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>threshold</strong> (<em>-</em>) – missingness over which to remove the row/column</p></li>
-<li><p><strong>axis</strong> (<em>-</em>) – {0 or ‘index’, remove columns, 1 or ‘columns’, remove rows}, default 0</p></li>
+  <section id="metabotk-documentation">
+<h1>metabotk Documentation<a class="headerlink" href="#metabotk-documentation" title="Link to this heading">¶</a></h1>
+<p>This documentation provides an overview of the <strong>metabotk</strong> library, including its command-line interface (CLI) and core functionalities for working with metabolomics data.</p>
+<section id="cli-documentation">
+<h2>CLI Documentation<a class="headerlink" href="#cli-documentation" title="Link to this heading">¶</a></h2>
+<p>The metabotk CLI offers various functionalities for data import, analysis, manipulation, and more. For details on CLI usage and available options, refer to the <a class="reference external" href="cli-docs">CLI Documentation</a>.</p>
+</section>
+<section id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Link to this heading">¶</a></h2>
+<section id="metabotk">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">metabotk</span></code><a class="headerlink" href="#metabotk" title="Link to this heading">¶</a></h3>
+<p>For more detailed documentation on specific methods and functionalities, please refer to the individual function docstrings and the metabotk documentation.</p>
+</section>
+</section>
+</section>
+<section id="metabotk-command-line-interface-documentation">
+<h1>metabotk Command Line Interface Documentation<a class="headerlink" href="#metabotk-command-line-interface-documentation" title="Link to this heading">¶</a></h1>
+<p>This documentation provides an overview of the metabotk Command Line Interface (CLI), offering various functionalities for metabolomics data analysis.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>Before using the metabotk CLI, ensure that metabotk is installed. You can install it via pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>metabotk
+</pre></div>
+</div>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>To use the metabotk CLI, execute the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>metabotk<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Link to this heading">¶</a></h2>
+<p>The metabotk CLI supports the following options:</p>
+<ul class="simple">
+<li><p><cite>-h, –help</cite>: Display help message and exit.</p></li>
+<li><p><cite>–version</cite>: Show the version number and exit.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataFrame containing the rows/columns dropped.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.drop_samples">
-<span class="sig-name descname"><span class="pre">drop_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_to_drop</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.drop_samples" title="Link to this definition">¶</a></dt>
-<dd><p>Drop specified samples from the dataset.</p>
-<p>Parameters:
-samples_to_drop (list): List of sample IDs to drop.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.drop_xenobiotic_metabolites">
-<span class="sig-name descname"><span class="pre">drop_xenobiotic_metabolites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.drop_xenobiotic_metabolites" title="Link to this definition">¶</a></dt>
-<dd><p>Drop xenobiotic metabolites from the dataset.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.extract_chemical_annotations">
-<span class="sig-name descname"><span class="pre">extract_chemical_annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metabolites_to_extract</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.extract_chemical_annotations" title="Link to this definition">¶</a></dt>
-<dd><p>Extract chemical annotations for the specified metabolites.</p>
-<p>Parameters:
-metabolites_to_extract (str or list): Name(s) of metabolite(s) to extract annotations for.</p>
-<p>Returns:
-DataFrame: Extracted chemical annotations for the specified metabolites.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.extract_metabolites">
-<span class="sig-name descname"><span class="pre">extract_metabolites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metabolites_to_extract</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.extract_metabolites" title="Link to this definition">¶</a></dt>
-<dd><p>Extract data for specified metabolites.</p>
-<p>Parameters:
-metabolites_to_extract (str or list): Name(s) of metabolite(s) to extract.</p>
-<p>Returns:
-DataFrame: Extracted data for the specified metabolites merged with sample metadata</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.extract_samples">
-<span class="sig-name descname"><span class="pre">extract_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_to_extract</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.extract_samples" title="Link to this definition">¶</a></dt>
-<dd><p>Extract data for specified samples.</p>
-<p>Parameters:
-samples_to_extract (str or list): ID(s) of sample(s) to extract.</p>
-<p>Returns:
-DataFrame: Extracted data and sample metadata for the specified samples.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.get_pca">
-<span class="sig-name descname"><span class="pre">get_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.get_pca" title="Link to this definition">¶</a></dt>
-<dd><p>Perform Principal Component Analysis (PCA) on the data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n_components</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of components for the PCA. Default is 3.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the data contains NaN values or not all columns contain numeric data.</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame containing the PCA-transformed data.
-self.PCA_object :sklearn PCA object.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>self.PCA</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.import_excel">
-<span class="sig-name descname"><span class="pre">import_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_sheet</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.import_excel" title="Link to this definition">¶</a></dt>
-<dd><p>Import data from an Excel file and set up the class.</p>
-<p>Parameters:
-file_path (str): Path to the Excel file.
-data_sheet (str): Name of the sheet containing the main data.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.import_tables">
-<span class="sig-name descname"><span class="pre">import_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemical_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'config/metabolites.tsv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'config/samples.tsv'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.import_tables" title="Link to this definition">¶</a></dt>
-<dd><p>Import data from tables and set up the class.</p>
-<p>Parameters:
-data (DataFrame): DataFrame or path of file containing the main data.
-chemical_annotation (str): DataFrame or path to the file containing chemical annotation.
-sample_metadata (str): DataFrame or path to the file containing sample metadata.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.merge_sample_metadata_data">
-<span class="sig-name descname"><span class="pre">merge_sample_metadata_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.merge_sample_metadata_data" title="Link to this definition">¶</a></dt>
-<dd><p>Merge sample metadata and data into a single DataFrame.</p>
-<p>Returns:
-DataFrame: Merged DataFrame containing sample metadata and data.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.plot_metabolite">
-<span class="sig-name descname"><span class="pre">plot_metabolite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metabolite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.plot_metabolite" title="Link to this definition">¶</a></dt>
-<dd><p>Plot metabolite abundance data.</p>
-<p>Parameters:
-metabolite (str): Name of the metabolite.
-x (str, optional): Name of the X-axis. Default is the class sample ID column.
-hue (str, optional): Column name in sample metadata DataFrame to color the points by. Default is None.
-savepath (str, optional): Path to save the plot as an image file. Default is None.</p>
-<p>Returns:
-plot: Seaborn scatterplot object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.plot_pca">
-<span class="sig-name descname"><span class="pre">plot_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PC1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PC2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.plot_pca" title="Link to this definition">¶</a></dt>
-<dd><p>Plot PCA results.</p>
-<p>Parameters:
-hue (str): Column name in sample metadata DataFrame to color the points by.
-x (str): Name of the X-axis. Default is ‘PC1’.
-y (str): Name of the Y-axis. Default is ‘PC2’.
-savepath (str, optional): Path to save the plot as an image file. Default is None.</p>
-<p>Returns:
-plot: Seaborn scatterplot object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.remove_outliers">
-<span class="sig-name descname"><span class="pre">remove_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.remove_outliers" title="Link to this definition">¶</a></dt>
-<dd><p>Replace outlier values with NAs in the whole dataset, column-wise or row-wise.</p>
-<p>Parameters:
-- axis: {0 or ‘index’, apply to each column, 1 or ‘columns’, apply to each row}, default 0
-Returns:
-- pandas DataFrame where the outlier values are replaced by NAs</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.replace_column_names">
-<span class="sig-name descname"><span class="pre">replace_column_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_column</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.replace_column_names" title="Link to this definition">¶</a></dt>
-<dd><p>Replace data column names with names from a column of the metabolite metadata.</p>
-<p>Parameters:
-new_column (str): Name of the column from metabolite metadata to use for renaming.</p>
-<p>Raises:
-ValueError: If the specified column does not exist in the metabolite metadata or if chemical annotation is missing for some features.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemical_annotation_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_metadata_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.save" title="Link to this definition">¶</a></dt>
-<dd><p>Save individual parts of the dataset to TSV files.</p>
-<p>Parameters:
-data_path (str, optional): Path to save the data. Default is None.
-chemical_annotation_path (str, optional): Path to save the chemical annotation data. Default is None.
-sample_metadata_path (str, optional): Path to save the sample metadata. Default is None.</p>
-<p>Raises:
-ValueError: If attempting to save an empty DataFrame.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.save_merged">
-<span class="sig-name descname"><span class="pre">save_merged</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemical_annotation_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.save_merged" title="Link to this definition">¶</a></dt>
-<dd><p>Save the merged sample data and metabolite abundance data to TSV files.
-Chemical annotation is saved optionally.</p>
-<p>Parameters:
-data_path (str): Path to save the merged sample data.
-chemical_annotation_path (str, optional): Path to save the chemical annotation data. Default is None.</p>
-<p>Raises:
-ValueError: If attempting to save an empty DataFrame.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.split_by_metabolite_column">
-<span class="sig-name descname"><span class="pre">split_by_metabolite_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.split_by_metabolite_column" title="Link to this definition">¶</a></dt>
-<dd><p>Split the data in multiple independent DataClass instances
-based on the values of a metabolite metadata column</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.split_by_sample_column">
-<span class="sig-name descname"><span class="pre">split_by_sample_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.split_by_sample_column" title="Link to this definition">¶</a></dt>
-<dd><p>Split the dataset (data and sample metadata) in multiple independent DataClass instances
-based on the values of a sample metadata column</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="metabolomics_toolkit.MetaboTK.total_sum_abundance">
-<span class="sig-name descname"><span class="pre">total_sum_abundance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_xenobiotics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_incomplete_metabolites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#metabolomics_toolkit.MetaboTK.total_sum_abundance" title="Link to this definition">¶</a></dt>
-<dd><p>Compute the Total Sum Abundance (TSA) values for each sample,
-either on all metabolites or only on the complete ones without missing data.
-Xenobiotics should be excluded as they usually are not considered for this calculation.</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="input-options">
+<h3>Input Options<a class="headerlink" href="#input-options" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><cite>-ie, –excel</cite>: Specify an Excel file and sheet from which to extract data.</p></li>
+<li><p><cite>-it, –tables</cite>: Specify three TSV files for data, samples, and metabolites.</p></li>
+<li><p><cite>-sid, –sample_id</cite>: Specify the column name for sample IDs.</p></li>
+<li><p><cite>-mid, –metabolite_id</cite>: Specify the column name for metabolite IDs.</p></li>
+</ul>
+</section>
+<section id="output-options">
+<h3>Output Options<a class="headerlink" href="#output-options" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><cite>-oe, –output-excel</cite>: Save the dataset to an Excel file.</p></li>
+<li><p><cite>-ot, –output-tables</cite>: Save the dataset to three TSV files.</p></li>
+<li><p><cite>-od, –output-data</cite>: Save only the data to a TSV file.</p></li>
+</ul>
+</section>
+<section id="dataset-manipulation-options">
+<h3>Dataset Manipulation Options<a class="headerlink" href="#dataset-manipulation-options" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><cite>-ss, –split-samples</cite>: Split the dataset based on sample metadata.</p></li>
+<li><p><cite>-sm, –split-metabolites</cite>: Split the dataset based on metabolite metadata.</p></li>
+</ul>
+</section>
+<section id="analysis-options">
+<h3>Analysis Options<a class="headerlink" href="#analysis-options" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><cite>–exclude-xenobiotics</cite>: Exclude xenobiotic metabolites from analysis.</p></li>
+<li><p><cite>–outlier-threshold</cite>: Set a threshold for outlier detection.</p></li>
+<li><p><cite>–sample-stats</cite>: Print sample statistics for the dataset.</p></li>
+<li><p><cite>–metabolite-stats</cite>: Print metabolite statistics for the dataset.</p></li>
+<li><p><cite>–remove-outliers</cite>: Remove outlier values from the dataset.</p></li>
+<li><p><cite>–fit-model</cite>: Fit a linear model to each metabolite.</p></li>
+<li><p><cite>–PCA</cite>: Perform Principal Component Analysis (PCA) on the dataset.</p></li>
+</ul>
+</section>
+<section id="feature-selection-options">
+<h3>Feature Selection Options<a class="headerlink" href="#feature-selection-options" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><cite>–fs-method</cite>: Specify the feature selection method.</p></li>
+<li><p><cite>-y, –y_column</cite>: Column containing target values.</p></li>
+<li><p><cite>-t, –threads</cite>: Number of threads to use.</p></li>
+<li><p><cite>-a, –alpha</cite>: Alpha (p-value threshold) for feature selection.</p></li>
+<li><p><cite>-r, –random-state</cite>: Random state seed for feature selection.</p></li>
+</ul>
+</section>
+<section id="feature-selection-boruta-options">
+<h3>Feature Selection - Boruta Options<a class="headerlink" href="#feature-selection-boruta-options" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><cite>-d, –max-depth</cite>: Max depth of the tree for Boruta feature selection.</p></li>
+<li><p><cite>-w, –class-weight</cite>: Class weights for Boruta feature selection.</p></li>
+<li><p><cite>-n, –n-estimators</cite>: Number of estimators for Boruta feature selection.</p></li>
+<li><p><cite>-i, –max-iterations</cite>: Max iterations for Boruta feature selection.</p></li>
+<li><p><cite>-o, –output-dir</cite>: Output directory for Boruta feature selection.</p></li>
+</ul>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Import data from an Excel file:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>metabotk<span class="w"> </span>--excel<span class="w"> </span>data.xlsx<span class="w"> </span>data_sheet
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Perform sample-wise statistics analysis:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>metabotk<span class="w"> </span>--excel<span class="w"> </span>data.xlsx<span class="w"> </span>data_sheet<span class="w"> </span>--sample-stats
+</pre></div>
+</div>
+</section>
+<section id="current-documentation">
+<h2>Current documentation<a class="headerlink" href="#current-documentation" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 </div>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
@@ -283,7 +163,7 @@ Xenobiotics should be excluded as they usually are not considered for this calcu
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">metabolomics_toolkit</a></h1>
+<h1 class="logo"><a href="#">metabotk</a></h1>
 
 
 
