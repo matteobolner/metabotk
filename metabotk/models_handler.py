@@ -1,7 +1,7 @@
 import numpy as np
 import statsmodels.formula.api as smf
 import dill
-from metabotk.utils import create_directory, is_int
+from metabotk.utils import create_directory
 
 
 class ModelsHandler:
@@ -47,11 +47,7 @@ class ModelsHandler:
             residuals (Series): residuals from the fitted model
             model (RegressionResults): fitted model
         """
-        if is_int(metabolite):
-            model = smf.ols(f"Q('{metabolite}') ~ {formula}", self.merged)
-        else:
-            model = smf.ols(f"{metabolite} ~ {formula}", self.merged)
-
+        model = smf.ols(f"Q('{metabolite}') ~ {formula}", self.merged)
         fitted_model = model.fit()
         residuals = fitted_model.resid
         return residuals, model
