@@ -111,3 +111,11 @@ def create_directory(directory_path):
         Path of the directory to be created.
     """
     Path(directory_path).mkdir(parents=True, exist_ok=True)
+
+
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
