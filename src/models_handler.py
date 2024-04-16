@@ -1,7 +1,7 @@
 import numpy as np
 import statsmodels.formula.api as smf
 import dill
-from src.utils import create_directory
+from utils import create_directory
 
 
 class ModelsHandler:

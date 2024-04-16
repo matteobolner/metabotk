@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+from typing import Union
 import os
 import argparse
 from metabolomics_toolkit import MetaboTK
-from typing import Union
+from utils import create_directory
 
 parser = argparse.ArgumentParser(description="Metabolomics data analysis tool")
 
@@ -63,9 +64,10 @@ output_options.add_argument(
     "--output-tables",
     dest="output_tables",
     nargs=3,
-    metavar=("data", "samples", "metabolites"),
-    help="Save the dataset to three tsv files: data, samples, and metabolites, in this order",
+    metavar=("data", "metabolites", "samples"),
+    help="Save the dataset to three tsv files: data, metabolites and samples, in this order",
 )
+
 output_options.add_argument(
     "-od",
     "--output-data",
@@ -74,6 +76,30 @@ output_options.add_argument(
     metavar=("data"),
     help="Save only the data to a TSV file",
 )
+
+###SPLIT DATASET
+
+manipulation_group = parser.add_argument_group("Manipulation", "Dataset manipulation")
+manipulation_options = manipulation_group.add_mutually_exclusive_group()
+manipulation_options.add_argument(
+    "-ss",
+    "--split-samples",
+    dest="split_samples",
+    nargs=3,
+    metavar=("sample_column", "output_dir", "output_format"),
+    default=None,
+    help="Split the dataset into multiple DataClass instances based on the values of a sample metadata column, and save each instance to a separate file in the output directory",
+)
+manipulation_options.add_argument(
+    "-sm",
+    "--split-metabolites",
+    dest="split_metabolites",
+    nargs=3,
+    metavar=("metabolite_column", "output_dir", "output_format"),
+    default=None,
+    help="Split the dataset into multiple DataClass instances based on the values of a metabolite metadata column, and save each instance to a separate file in the output directory",
+)
+
 
 ###ANALYSIS ARGUMENTS
 
@@ -288,6 +314,47 @@ if args.fs_method:
         )
 
 
+###SPLIT DATA
+if args.split_samples:
+    if not args.split_samples[0]:
+        raise ValueError("No column specified for splitting data")
+    else:
+        split_samples_dict = metabotk_instance.split_by_sample_column(
+            column=args.split_samples[0]
+        )
+    outdir = args.split_samples[1]
+    create_directory(outdir)
+    for k, v in split_samples_dict.items():
+        k = k.replace(" ", "_").replace("/", "_").replace("-", "_")
+        if args.split_samples[2] == "excel":
+            v.save_excel(f"{outdir}/{k}.xlsx")
+        else:
+            v.save_tables(
+                data_path=f"{outdir}/{k}_data.tsv",
+                chemical_annotation_path=f"{outdir}/{k}_metabolites.tsv",
+                sample_metadata_path=f"{outdir}/{k}_samples.tsv",
+            )
+
+if args.split_metabolites:
+    if not args.split_metabolites[0]:
+        raise ValueError("No column specified for splitting data")
+    else:
+        split_metabolites_dict = metabotk_instance.split_by_metabolite_column(
+            column=args.split_metabolites[0]
+        )
+    outdir = args.split_metabolites[1]
+    create_directory(outdir)
+    for k, v in split_metabolites_dict.items():
+        k = k.replace(" ", "_").replace("/", "_").replace("-", "_")
+        if args.split_metabolites[2] == "excel":
+            v.save_excel(f"{outdir}/{k}.xlsx")
+        else:
+            v.save_tables(
+                data_path=f"{outdir}/{k}_data.tsv",
+                chemical_annotation_path=f"{outdir}/{k}_metabolites.tsv",
+                sample_metadata_path=f"{outdir}/{k}_samples.tsv",
+            )
+
 ###SAVE DATA
 
 if args.output_excel:
@@ -301,3 +368,8 @@ if args.output_excel:
         metabotk_instance.save_excel(
             file_path=args.output_excel[0], data_sheet=args.output_excel[1]
         )
+
+if args.output_tables:
+    metabotk_instance.save_tables(
+        args.output_tables[0], args.output_tables[1], args.output_tables[2]
+    )

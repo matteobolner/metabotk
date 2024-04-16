@@ -1,7 +1,7 @@
 from typing import Union, Optional, Dict
 import pandas as pd
-from src.providers import MetabolonCDT
-from src.utils import parse_input
+from providers_handler import MetabolonCDT
+from utils import parse_input
 
 
 class DatasetManager:
@@ -226,7 +226,7 @@ class DatasetManager:
         if chemical_annotation_path:
             self.chemical_annotation.to_csv(chemical_annotation_path, sep="\t")
 
-    def save(
+    def save_tables(
         self,
         data_path: Optional[str] = None,
         chemical_annotation_path: Optional[str] = None,

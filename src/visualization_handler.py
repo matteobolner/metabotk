@@ -1,5 +1,5 @@
 import seaborn as sns
-from src.dimensionality_reduction import DimensionalityReduction
+from dimensionality_reduction import DimensionalityReduction
 
 
 class Visualization:

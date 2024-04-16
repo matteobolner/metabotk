@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from src.outliers import OutlierHandler
-from src.missing import MissingDataHandler
-from src.utils import ensure_numeric_data, validate_dataframe
+from outliers_handler import OutlierHandler
+from missing_handler import MissingDataHandler
+from utils import ensure_numeric_data, validate_dataframe
 
 
 def coefficient_of_variation(data):

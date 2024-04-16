@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from src.utils import validate_dataframe
+from utils import validate_dataframe
 
 
 class MissingDataHandler:

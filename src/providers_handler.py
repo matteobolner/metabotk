@@ -4,7 +4,7 @@ Module for parsing input data
 
 from typing import Union
 import pandas as pd
-from src.utils import parse_input
+from utils import parse_input
 
 
 class MetabolonCDT:

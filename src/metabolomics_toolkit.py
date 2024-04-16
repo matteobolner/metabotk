@@ -1,9 +1,9 @@
-from src.manager import DatasetManager
-from src.statistics import StatisticsHandler
-from src.models import ModelsHandler
-from src.dimensionality_reduction import DimensionalityReduction
-from src.visualization import Visualization
-from src.feature_selection import FeatureSelection
+from statistics_handler import StatisticsHandler
+from dataset_manager import DatasetManager
+from models_handler import ModelsHandler
+from visualization_handler import Visualization
+from dimensionality_reduction import DimensionalityReduction
+from feature_selection import FeatureSelection
 import pandas as pd
 
 
