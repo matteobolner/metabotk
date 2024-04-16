@@ -109,8 +109,11 @@ class DatasetManager:
                 self.chemical_annotation.set_index(
                     self._metabolite_id_column, inplace=True
                 )
+                # Cleanup data from metadata
+                self._remove_metadata_from_data()
                 # Update the chemical annotation data in the class
                 self._update_chemical_annotation()
+
             else:
                 raise ValueError("No metabolite ID column found in chemical annotation")
         except ValueError as ve:
