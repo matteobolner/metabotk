@@ -3,7 +3,7 @@ import pandas as pd
 from metabotk.providers_handler import MetabolonCDT
 from metabotk.statistics_handler import StatisticsHandler
 from metabotk.utils import parse_input
-from metabotk.main import MetaboTK
+from metabotk.interface import MetaboTK
 
 
 @pytest.fixture

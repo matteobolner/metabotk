@@ -393,8 +393,11 @@ class DatasetManager:
         Raises:
             ValueError: If there is an error removing the metadata from the data.
         """
+        metabolites_in_data = [
+            i for i in self.chemical_annotation.index if i in self.data.columns
+        ]
         try:
-            self.data = self.data[list(self.chemical_annotation.index)]
+            self.data = self.data[metabolites_in_data]
         except ValueError as ve:
             raise ValueError("Error removing metadata from data: {}".format(ve))
 

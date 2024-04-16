@@ -2,7 +2,7 @@
 from typing import Union
 import os
 import argparse
-from metabotk.main import MetaboTK
+from metabotk.interface import MetaboTK
 from metabotk.utils import create_directory
 
 
