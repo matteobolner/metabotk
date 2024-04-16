@@ -14,7 +14,7 @@ Class Documentation
 :class:`metabotk`
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: metabotk.MetaboTK
+.. autoclass:: main.MetaboTK
     :members:
     :undoc-members:
     :show-inheritance:
@@ -159,14 +159,9 @@ Current documentation
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
+   
+   api
 
-   main
-   cli
-   dataset_manager
-   missing
-   statistics_handler
-
-   dimensionality_reduction
 Indices and tables
 ==================
 
