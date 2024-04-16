@@ -1,9 +1,9 @@
-from statistics_handler import StatisticsHandler
-from dataset_manager import DatasetManager
-from models_handler import ModelsHandler
-from visualization_handler import Visualization
-from dimensionality_reduction import DimensionalityReduction
-from feature_selection import FeatureSelection
+from metabotk.statistics_handler import StatisticsHandler
+from metabotk.dataset_manager import DatasetManager
+from metabotk.models_handler import ModelsHandler
+from metabotk.visualization_handler import Visualization
+from metabotk.dimensionality_reduction import DimensionalityReduction
+from metabotk.feature_selection import FeatureSelection
 import pandas as pd
 
 

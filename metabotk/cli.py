@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-
 from typing import Union
 import os
 import argparse
-from metabolomics_toolkit import MetaboTK
-from utils import create_directory
+from metabotk.main import MetaboTK
+from metabotk.utils import create_directory
 
 parser = argparse.ArgumentParser(description="Metabolomics data analysis tool")
 

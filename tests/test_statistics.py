@@ -1,5 +1,5 @@
 import pytest
-from src.statistics import *
+from metabotk.statistics_handler import *
 from tests.testing_functions import (
     create_test_dataframe_with_missing,
     create_test_dataframe_with_outliers,
@@ -8,7 +8,8 @@ import numpy as np
 import pandas as pd
 import warnings
 
-statistics_handler=StatisticsHandler()
+statistics_handler = StatisticsHandler()
+
 
 class TestCoefficientOfVariation:
     @pytest.mark.parametrize(
@@ -110,23 +111,27 @@ class TestComputeStatistics:
         ],
     )
     def test_compute_statistics(self, input_data, expected_output):
-        result = statistics_handler.compute_statistics(input_data,outlier_threshold=5)
+        result = statistics_handler.compute_statistics(input_data, outlier_threshold=5)
         pd.testing.assert_series_equal(result, expected_output)
 
     def test_input_validation(self):
         # Test with invalid input types
         with pytest.raises(TypeError):
-            statistics_handler.compute_statistics("invalid_input",outlier_threshold=5)
+            statistics_handler.compute_statistics("invalid_input", outlier_threshold=5)
 
         with pytest.raises(TypeError):
-            statistics_handler.compute_statistics({"a": 1, "b": 2, "c": 3},outlier_threshold=5)
+            statistics_handler.compute_statistics(
+                {"a": 1, "b": 2, "c": 3}, outlier_threshold=5
+            )
 
         # Test with empty input
         with pytest.raises(ValueError):
-            statistics_handler.compute_statistics([],outlier_threshold=5)
+            statistics_handler.compute_statistics([], outlier_threshold=5)
         # Test with input containing non-numeric elements
         with pytest.raises(TypeError):
-            statistics_handler.compute_statistics([1, 2, "a", 4, 5],outlier_threshold=5)
+            statistics_handler.compute_statistics(
+                [1, 2, "a", 4, 5], outlier_threshold=5
+            )
 
 
 class TestDataFrameBasicStats:
@@ -326,10 +331,14 @@ class TestDataFrameBasicStats:
 
     def test_dataframe_stats(self, test_data):
         data, expected_output, axis = test_data
-        result = statistics_handler.compute_dataframe_statistics(data_frame=data, axis=axis, outlier_threshold=5)
+        result = statistics_handler.compute_dataframe_statistics(
+            data_frame=data, axis=axis, outlier_threshold=5
+        )
         pd.testing.assert_frame_equal(result, expected_output)
 
     def test_dataframe_stats_different_outlier_threshold(self, test_data):
         data, expected_output, axis = test_data
-        result = statistics_handler.compute_dataframe_statistics(data_frame=data, axis=axis, outlier_threshold=100)
+        result = statistics_handler.compute_dataframe_statistics(
+            data_frame=data, axis=axis, outlier_threshold=100
+        )
         assert result.iloc[-1, -1] == 0

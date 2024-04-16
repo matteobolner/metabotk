@@ -1,5 +1,5 @@
 import seaborn as sns
-from dimensionality_reduction import DimensionalityReduction
+from metabotk.dimensionality_reduction import DimensionalityReduction
 
 
 class Visualization:

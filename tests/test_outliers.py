@@ -1,5 +1,5 @@
 import pytest
-from src.outliers import OutlierHandler
+from metabotk.outliers_handler import OutlierHandler
 import numpy as np
 import pandas as pd
 import warnings
@@ -8,13 +8,16 @@ from tests.testing_functions import (
     create_outlier_presence_matrix_from_dataframe,
 )
 
-outlier_handler=OutlierHandler()
+outlier_handler = OutlierHandler()
 # detect_outliers
+
 
 class TestDetectOutliers:
     def test_input_df(self):
         with pytest.raises(TypeError):
-            outlier_handler.detect_outliers(create_test_dataframe_with_outliers(), threshold=1)
+            outlier_handler.detect_outliers(
+                create_test_dataframe_with_outliers(), threshold=1
+            )
 
     def test_input_list(self):
         data = [1, 2, 3, 4, 100]
@@ -31,19 +34,22 @@ class TestDetectOutliers:
     def test_single_outlier(self):
         data = np.array([1, 2, 3, 10, 5])
         assert np.array_equal(
-            outlier_handler.detect_outliers(data, threshold=1), [False, False, False, True, False]
+            outlier_handler.detect_outliers(data, threshold=1),
+            [False, False, False, True, False],
         )
 
     def test_single_outlier_higher_threshold(self):
         data = np.array([1, 2, 3, 10, 5])
         assert np.array_equal(
-            outlier_handler.detect_outliers(data, threshold=5), [False, False, False, False, False]
+            outlier_handler.detect_outliers(data, threshold=5),
+            [False, False, False, False, False],
         )
 
     def test_multiple_outliers(self):
         data = np.array([1, 100, 1, 50, 1, 2, 3])
         assert np.array_equal(
-            outlier_handler.detect_outliers(data, threshold=1), [False, True, False, True, False, False, False]
+            outlier_handler.detect_outliers(data, threshold=1),
+            [False, True, False, True, False, False, False],
         )
 
     def test_negative_values(self):
@@ -65,6 +71,7 @@ class TestDetectOutliers:
 
 # get_outliers_matrix
 
+
 class TestGetOutliersMatrix:
     data, outliers_df = (
         create_test_dataframe_with_outliers(),
@@ -72,7 +79,9 @@ class TestGetOutliersMatrix:
     )
 
     def test_outliers_matrix(self):
-        assert outlier_handler.get_outliers_matrix(self.data, threshold=5).equals(self.outliers_df)
+        assert outlier_handler.get_outliers_matrix(self.data, threshold=5).equals(
+            self.outliers_df
+        )
 
 
 # count_outliers
@@ -86,37 +95,41 @@ class TestCountOutliers:
     )
 
     def test_count_outliers_column_wise(self):
-        outlier_counts = outlier_handler.count_outliers(self.data, axis=0,threshold=1)
+        outlier_counts = outlier_handler.count_outliers(self.data, axis=0, threshold=1)
         outlier_counts_to_assert = pd.Series([1, 2, 1, 2])
         outlier_counts_to_assert.index = self.data.columns
         assert outlier_counts_to_assert.equals(outlier_counts)
 
     def test_count_outliers_row_wise(self):
-        outlier_counts = outlier_handler.count_outliers(self.data, axis=1,threshold=1)
+        outlier_counts = outlier_handler.count_outliers(self.data, axis=1, threshold=1)
         outlier_counts_to_assert = pd.Series([1, 1, 1, 3, 0])
         outlier_counts_to_assert.index = self.data.index
         assert outlier_counts_to_assert.equals(outlier_counts)
 
     def test_count_outliers_column_wise_high_threshold(self):
-        outlier_counts = outlier_handler.count_outliers(self.data, axis=0,threshold=5)
+        outlier_counts = outlier_handler.count_outliers(self.data, axis=0, threshold=5)
         outlier_counts_to_assert = pd.Series([0, 1, 0, 1])
         outlier_counts_to_assert.index = self.data.columns
         assert outlier_counts_to_assert.equals(outlier_counts)
 
     def test_count_outliers_row_wise_high_threshold(self):
-        outlier_counts = outlier_handler.count_outliers(self.data, axis=1,threshold=5)
+        outlier_counts = outlier_handler.count_outliers(self.data, axis=1, threshold=5)
         outlier_counts_to_assert = pd.Series([1, 1, 0, 0, 0])
         outlier_counts_to_assert.index = self.data.index
         assert outlier_counts_to_assert.equals(outlier_counts)
 
     def test_count_outliers_column_wise_medium_threshold(self):
-        outlier_counts = outlier_handler.count_outliers(self.data, axis=0,threshold=1.2)
+        outlier_counts = outlier_handler.count_outliers(
+            self.data, axis=0, threshold=1.2
+        )
         outlier_counts_to_assert = pd.Series([1, 1, 0, 2])
         outlier_counts_to_assert.index = self.data.columns
         assert outlier_counts_to_assert.equals(outlier_counts)
 
     def test_count_outliers_row_wise_medium_threshold(self):
-        outlier_counts = outlier_handler.count_outliers(self.data, axis=1,threshold=1.2)
+        outlier_counts = outlier_handler.count_outliers(
+            self.data, axis=1, threshold=1.2
+        )
         outlier_counts_to_assert = pd.Series([1, 1, 1, 1, 0])
         outlier_counts_to_assert.index = self.data.index
         assert outlier_counts_to_assert.equals(outlier_counts)
@@ -135,4 +148,6 @@ class TestRemoveOutliers:
         data_without_outliers = self.data.copy()
         data_without_outliers.loc[0, "B"] = np.nan  # Outlier in column B
         data_without_outliers.loc[1, "D"] = np.nan  # Outlier in column D
-        assert outlier_handler.remove_outliers(self.data, threshold=5).equals(data_without_outliers)
+        assert outlier_handler.remove_outliers(self.data, threshold=5).equals(
+            data_without_outliers
+        )

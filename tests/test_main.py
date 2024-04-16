@@ -1,9 +1,9 @@
 import pytest
 import pandas as pd
-from src.providers import MetabolonCDT
-from src.statistics import StatisticsHandler
-from src.utils import parse_input
-from metabolomics_toolkit import MetaboTK
+from metabotk.providers_handler import MetabolonCDT
+from metabotk.statistics_handler import StatisticsHandler
+from metabotk.utils import parse_input
+from metabotk.main import MetaboTK
 
 
 @pytest.fixture

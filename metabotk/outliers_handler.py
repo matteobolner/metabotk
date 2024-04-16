@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from utils import validate_dataframe
+from metabotk.utils import validate_dataframe
 
 
 class OutlierHandler:

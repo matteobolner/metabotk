@@ -1,7 +1,7 @@
 from typing import Union, Optional, Dict
 import pandas as pd
-from providers_handler import MetabolonCDT
-from utils import parse_input
+from metabotk.providers_handler import MetabolonCDT
+from metabotk.utils import parse_input
 
 
 class DatasetManager:

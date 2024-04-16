@@ -3,18 +3,20 @@ from tests.testing_functions import create_test_dataframe_with_missing
 import pytest
 import numpy as np
 import pandas as pd
-from src.missing import MissingDataHandler
+from metabotk.missing_handler import MissingDataHandler
 
 missing_handler = MissingDataHandler()
 
 # missing_handler.detect_missing
 
+
 class TestValidateThreshold:
     def test_string_threshold(self):
         with pytest.raises(TypeError):
-            MissingDataHandler().validate_threshold('A')
+            MissingDataHandler().validate_threshold("A")
         with pytest.raises(ValueError):
             MissingDataHandler().validate_threshold(12)
+
 
 class TestDetectMissingValues:
     def test_input_list(self):
@@ -38,7 +40,8 @@ class TestDetectMissingValues:
     def test_multiple_missing(self):
         data = np.array([1, np.nan, 1, np.nan, 1, 2, 3])
         assert np.array_equal(
-            missing_handler.detect_missing(data), [False, True, False, True, False, False, False]
+            missing_handler.detect_missing(data),
+            [False, True, False, True, False, False, False],
         )
 
     def test_empty_input(self):
@@ -48,6 +51,7 @@ class TestDetectMissingValues:
             data = np.array([])
             detected_missing = missing_handler.detect_missing(data)
         assert not any(detected_missing)
+
 
 # count_missing_values
 class TestCountMissingValues:

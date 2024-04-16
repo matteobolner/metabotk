@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 import numpy as np
-from src.utils import validate_dataframe, ensure_numeric_data, parse_input
+from metabotk.utils import validate_dataframe, ensure_numeric_data, parse_input
 
 
 class TestValidateDataFrame:

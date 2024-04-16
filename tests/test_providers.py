@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from src.providers import MetabolonCDT
+from metabotk.providers_handler import MetabolonCDT
 import os
 
 
