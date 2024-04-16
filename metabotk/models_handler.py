@@ -47,7 +47,7 @@ class ModelsHandler:
             residuals (Series): residuals from the fitted model
             model (RegressionResults): fitted model
         """
-        model = smf.ols(f"Q({metabolite}) ~ {formula}", self.merged)
+        model = smf.ols(f"Q(\"{metabolite}\") ~ {formula}", self.merged)
         fitted_model = model.fit()
         residuals = fitted_model.resid
         return residuals, model
