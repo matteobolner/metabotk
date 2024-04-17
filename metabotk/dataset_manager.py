@@ -88,6 +88,11 @@ class DatasetManager:
                 self.sample_metadata = parsed_sample_metadata
                 if self.sample_metadata is None:
                     raise ValueError("Sample metadata is not properly initialized.")
+                if self.sample_metadata[self._sample_id_column].duplicated().any():
+                    warnings.warn(
+                        "Warning: there are duplicate values in the chosen sample column.\
+                        Consider choosing another column or renaming the duplicated samples"
+                    )
                 self.sample_metadata[self._sample_id_column] = self.sample_metadata[
                     self._sample_id_column
                 ].astype(str)
