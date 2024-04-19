@@ -217,7 +217,7 @@ def cli():
     fs_group.add_argument(
         "-n",
         "--n-estimators",
-        help="BORUTA: Number of estimators, default is 100",
+        help="BORUTA: Number of estimators, default is 1000",
         default="auto",
     )
     fs_group.add_argument(
