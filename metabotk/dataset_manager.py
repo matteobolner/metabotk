@@ -2,6 +2,7 @@ from typing import Union, Optional, Dict
 import pandas as pd
 from metabotk.providers_handler import MetabolonCDT
 from metabotk.utils import parse_input
+import warnings
 
 
 class DatasetManager:
@@ -97,10 +98,11 @@ class DatasetManager:
                     self._sample_id_column
                 ].astype(str)
                 self.sample_metadata.set_index(self._sample_id_column, inplace=True)
-
                 self.data = parsed_data
                 self.data.columns = [str(i) for i in self.data.columns]
                 self.data.set_index(self._sample_id_column, inplace=True)
+                # Drop samples not in data
+                self.sample_metadata = self.sample_metadata.loc[self.data.index]
                 self.samples = list(self.sample_metadata.index)
             else:
                 raise ValueError("No sample ID column found in data")
