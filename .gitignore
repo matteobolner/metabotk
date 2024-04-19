@@ -4,3 +4,4 @@ tests/__pycache__/
 .ftpconfig
 .coverage
 data
+metabotk/local_test.py
