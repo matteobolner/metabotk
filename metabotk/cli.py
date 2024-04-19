@@ -181,14 +181,24 @@ def cli():
     )
 
     fs_group.add_argument(
-        "-y", "--y_column", help="Column containing target values", default=None
+        "-y",
+        "--y_column",
+        dest="y_column",
+        help="Column containing target values",
+        default=None,
     )
     fs_group.add_argument(
-        "-t", "--threads", help="Threads to use, default is 1", default=1, type=int
+        "-t",
+        "--threads",
+        dest="threads",
+        help="Threads to use, default is 1",
+        default=1,
+        type=int,
     )
     fs_group.add_argument(
         "-a",
         "--alpha",
+        dest="alpha",
         help="Alpha (p-value threshold), default is 0.01",
         default=0.01,
         type=float,
@@ -197,6 +207,7 @@ def cli():
     fs_group.add_argument(
         "-r",
         "--random-state",
+        dest="random_state",
         help="Random state seed, default is 42",
         default=42,
         type=int,
@@ -204,6 +215,7 @@ def cli():
     fs_group.add_argument(
         "-d",
         "--max-depth",
+        dest="max_depth",
         help="BORUTA:Max depth of the tree, default is None",
         default=None,
         type=Union[None, int],
@@ -211,18 +223,21 @@ def cli():
     fs_group.add_argument(
         "-w",
         "--class-weight",
+        dest="class_weight",
         help="BORUTA: Class weights, default is balanced",
         default="balanced",
     )
     fs_group.add_argument(
         "-n",
         "--n-estimators",
+        dest="n_estimators",
         help="BORUTA: Number of estimators, default is 1000",
         default="auto",
     )
     fs_group.add_argument(
         "-i",
         "--max-iterations",
+        dest="max_iterations",
         help="BORUTA: Max iterations. default is 1000",
         default=1000,
         type=int,
@@ -230,6 +245,7 @@ def cli():
     fs_group.add_argument(
         "-o",
         "--output-dir",
+        dest="output_dir",
         help="BORUTA: Output directory for saving rankings, model and importance history, default is None (print ranking only to stdout)",
         default=None,
     )
@@ -321,6 +337,7 @@ def cli():
                 max_iterations=args.max_iterations,
                 output_dir=args.output_dir,
             )
+            print(ranking.to_csv(sep="\t"))
 
     ###SPLIT DATA
     if args.split_samples:
