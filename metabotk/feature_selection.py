@@ -131,10 +131,10 @@ class FeatureSelection:
             with open(f"{output_dir}/boruta_model.pickle", "wb") as f:
                 dill.dump(feat_selector, f)
             importance_history.to_csv(
-                f"{output_dir}/boruta_importance_history.tsv", sep="\t", index=False
+                f"{output_dir}/importance_history.tsv", sep="\t", index=False
             )
 
-            ranking.to_csv(f"{output_dir}/boruta_ranking.tsv", sep="\t", index=False)
+            ranking.to_csv(f"{output_dir}/ranking.tsv", sep="\t", index=False)
             return ranking
         else:
             return ranking
