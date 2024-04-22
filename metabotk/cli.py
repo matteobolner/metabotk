@@ -112,6 +112,14 @@ def cli():
         default=None,
         help="Split the dataset into multiple DataClass instances based on the values of a metabolite metadata column, and save each instance to a separate file in the output directory",
     )
+    manipulation_options.add_argument(
+        "--stratified-kfold",
+        dest="stratified_kfold",
+        nargs=3,
+        metavar=("n_splits", "stratification_column", "output_dir"),
+        default=None,
+        help="Split the dataset into n_splits folds, and save each training and validation group to a separate file in the output directory. The samples in the folds will be stratified on the specified column",
+    )
 
     ###ANALYSIS ARGUMENTS
 
@@ -173,7 +181,7 @@ def cli():
         "Feature Selection", "Feature selection methods and options"
     )
     fs_group.add_argument(
-        "--fs-method",
+        "--feature-selection",
         dest="fs_method",
         nargs="?",
         default=None,
@@ -379,6 +387,12 @@ def cli():
                     chemical_annotation_path=f"{outdir}/{k}_metabolites.tsv",
                     sample_metadata_path=f"{outdir}/{k}_samples.tsv",
                 )
+    if args.split_samples_kfold:
+        metabotk_instance.feature_selection.stratified_kfold(
+            n_splits=args.split_samples_kfold[0],
+            stratification_column=args.split_samples_kfold[1],
+            output_dir=args.split_samples_kfold[2],
+        )
 
     ###SAVE DATA
 

@@ -1,4 +1,13 @@
+"""
+Visualization module for MetaboTK
+This module provides functions to visualize the results of principal component analysis (PCA) and plot metabolite
+abundance data.
+TODO: add more visualizations
+"""
+
 import seaborn as sns
+import pandas as pd
+from typing import Optional
 from metabotk.dimensionality_reduction import DimensionalityReduction
 
 
@@ -48,15 +57,52 @@ class Visualization:
         plot: seaborn.axisgrid.FacetGrid
             Seaborn scatterplot object.
         """
-        if pca:
-            plot = sns.scatterplot(data=pca, x=x, y=y, hue=hue)
-        else:
+        if not pca:
             print("PCA not found, computing now with 3 components...")
             pca = self.dimensionality_reduction.get_pca(n_components=3)
-            plot = sns.scatterplot(data=pca, x=x, y=y, hue=hue)
+        plot = sns.scatterplot(data=pca, x=x, y=y, hue=hue)
         if savepath:
             plot.figure.savefig(savepath)
         return plot
+
+    def plot_pca_grid(
+        self,
+        pca: pd.DataFrame = None,
+        hue: Optional[str] = None,
+        savepath: Optional[str] = None,
+    ) -> sns.axisgrid.PairGrid:
+        """
+        Plot PCA results in a grid using seaborn's pairplot.
+
+        Parameters
+        ----------
+        pca: pandas.DataFrame, optional
+            DataFrame with PCA results. If not provided, it will be computed
+            using the `get_pca` function from the `DimensionalityReduction` class.
+        hue: str, optional
+            Column name in sample metadata DataFrame to color the points by.
+        savepath: str, optional
+            Path to save the plot as an image file. If not provided, the plot
+            will not be saved.
+
+        Returns
+        -------
+        plot: seaborn.axisgrid.PairGrid
+            Seaborn pairplot object.
+        """
+        if pca is None:
+            print("PCA not found, computing now with 3 components...")
+            pca = self.dimensionality_reduction.get_pca(n_components=3)
+        plot = sns.pairplot(
+            data=pca,
+            vars=[col for col in pca.columns if col.startswith("PC")],
+            hue=hue,
+            diag_kind="kde",
+            diag_kws={"linewidth": 0, "shade": False},
+        )
+
+        if savepath:
+            plot.fig.savefig(savepath)
 
     def plot_metabolite(self, metabolite, x=None, hue=None, savepath=None):
         """

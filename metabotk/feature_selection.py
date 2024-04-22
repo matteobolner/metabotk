@@ -9,8 +9,10 @@ Currently implemented methods:
 
 import dill
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold, KFold
 from boruta import BorutaPy
 import pandas as pd
+from metabotk.utils import create_directory
 
 
 class FeatureSelection:
@@ -138,3 +140,44 @@ class FeatureSelection:
             return ranking
         else:
             return ranking
+
+    def stratified_kfold(
+        self,
+        n_splits: int,
+        stratification_column: str,
+        output_dir: str,
+    ) -> dict:
+        """Split the dataset using a stratified approach for cross-validation.
+
+        This function splits the dataset into n_splits folds using a stratified
+        approach where the samples are split based on the values in the
+        stratification_column in the sample metadata. The dataframes are saved
+        to output_dir with filenames in the format of <fold_number>_train.tsv.
+        The function returns a dictionary where the keys are the fold number
+        and the values are the train dataframes.
+
+        Args:
+            n_splits: Number of splits to perform.
+            output_dir: Directory to save dataframes to.
+            stratification_column: Column in sample metadata to use for
+                stratification.
+        Returns:
+            Dictionary with keys as fold numbers and values as the train
+            dataframes.
+        """
+        create_directory(output_dir)
+        X = self.data_manager.data
+        split_train = {}
+        split_val = {}
+        y = self.data_manager.sample_metadata[stratification_column]
+        skf = StratifiedKFold(n_splits=n_splits)
+        skf_splits = skf.split(X, y)
+        for fold, (train_idx, val_idx) in enumerate(skf_splits):
+            train = X.iloc[train_idx]
+            val = X.iloc[val_idx]
+            train.to_csv(f"{output_dir}/{fold}_train.tsv", sep="\t")
+            val.to_csv(f"{output_dir}/{fold}_val.tsv", sep="\t")
+            split_train[fold] = train
+            split_val[fold] = val
+
+        return split_train, split_val
