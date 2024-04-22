@@ -173,11 +173,12 @@ class FeatureSelection:
         skf = StratifiedKFold(n_splits=int(n_splits))
         skf_splits = skf.split(X, y)
         for fold, (train_idx, val_idx) in enumerate(skf_splits):
+            foldname = fold + 1
             train = X.iloc[train_idx]
             val = X.iloc[val_idx]
-            train.to_csv(f"{output_dir}/{fold}_train.tsv", sep="\t")
-            val.to_csv(f"{output_dir}/{fold}_val.tsv", sep="\t")
-            split_train[fold] = train
-            split_val[fold] = val
+            train.to_csv(f"{output_dir}/{foldname}_train.tsv", sep="\t")
+            val.to_csv(f"{output_dir}/{foldname}_val.tsv", sep="\t")
+            split_train[foldname] = train
+            split_val[foldname] = val
 
         return split_train, split_val
