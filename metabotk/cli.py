@@ -387,11 +387,11 @@ def cli():
                     chemical_annotation_path=f"{outdir}/{k}_metabolites.tsv",
                     sample_metadata_path=f"{outdir}/{k}_samples.tsv",
                 )
-    if args.split_samples_kfold:
+    if args.stratified_kfold:
         metabotk_instance.feature_selection.stratified_kfold(
-            n_splits=args.split_samples_kfold[0],
-            stratification_column=args.split_samples_kfold[1],
-            output_dir=args.split_samples_kfold[2],
+            n_splits=args.stratified_kfold[0],
+            stratification_column=args.stratified_kfold[1],
+            output_dir=args.stratified_kfold[2],
         )
 
     ###SAVE DATA
