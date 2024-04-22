@@ -170,7 +170,7 @@ class FeatureSelection:
         split_train = {}
         split_val = {}
         y = self.data_manager.sample_metadata[stratification_column]
-        skf = StratifiedKFold(n_splits=n_splits)
+        skf = StratifiedKFold(n_splits=int(n_splits))
         skf_splits = skf.split(X, y)
         for fold, (train_idx, val_idx) in enumerate(skf_splits):
             train = X.iloc[train_idx]
