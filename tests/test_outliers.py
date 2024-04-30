@@ -11,13 +11,22 @@ from tests.testing_functions import (
 outlier_handler = OutlierHandler()
 # detect_outliers
 
+test_data=pd.read_csv("data/data.csv")
+test_data = test_data[test_data.columns[5:10]].iloc[10:20]
+test_values_series = test_data["212"]
+
+
 
 class TestDetectOutliers:
+    data=test_data
     def test_input_df(self):
         with pytest.raises(TypeError):
             outlier_handler.detect_outliers(
-                create_test_dataframe_with_outliers(), threshold=1
+                self.data, threshold=1
             )
+
+    def test_input_series(self):
+        assert (outlier_handler.detect_outliers(test_values_series, threshold=1.5)).sum()==1
 
     def test_input_list(self):
         data = [1, 2, 3, 4, 100]
@@ -60,17 +69,8 @@ class TestDetectOutliers:
         with pytest.raises(ValueError):
             outlier_handler.detect_outliers([], threshold=1)
 
-    # def test_empty_input(self):
-    #    with warnings.catch_warnings():
-    #    # Filter out the specific warning related to nanmean on an empty slice
-    #        warnings.filterwarnings("ignore", message="Mean of empty slice")
-    #        data = np.array([])
-    #        detected_outliers=detect_outliers(data, 1)
-    #    assert not any(detected_outliers)
-
 
 # get_outliers_matrix
-
 
 class TestGetOutliersMatrix:
     data, outliers_df = (
