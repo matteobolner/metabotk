@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from metabotk.outliers_handler import OutlierHandler
 from metabotk.missing_handler import MissingDataHandler
-from metabotk.utils import ensure_numeric_data, validate_dataframe
+from metabotk.utils import ensure_numeric_data
 
 
 def coefficient_of_variation(data):
@@ -46,12 +46,13 @@ class StatisticsHandler:
     for a collection of numerical data or a pandas DataFrame.
     """
 
-    def __init__(self):
+    def __init__(self, data_manager):
         """
         Initializes the StatisticsHandler.
         """
         self.outlier_handler = OutlierHandler()
         self.missing_handler = MissingDataHandler()
+        self.data_manager = data_manager
 
     def total_sum_abundance(self, data_frame, exclude_incomplete=True):
         """
@@ -66,7 +67,9 @@ class StatisticsHandler:
             Series: Pandas Series containing TSA values for each row.
         """
         if exclude_incomplete:
-            data_frame = data_frame.dropna(axis=1)
+            data_frame = data_frame.dropna(axis=1).copy()
+        else:
+            data_frame = data_frame.copy()
         tsa = data_frame.sum(axis=1, skipna=True)
         tsa.name = "TSA"
         return tsa
@@ -94,7 +97,6 @@ class StatisticsHandler:
             - Number of missing values
             - Number of outliers
         """
-        data = np.array(data)
         data_series = pd.Series(data)
         if len(data) == 0:
             raise ValueError("Input data is empty")
@@ -110,7 +112,7 @@ class StatisticsHandler:
         )
         return stats
 
-    def compute_dataframe_statistics(self, data_frame, outlier_threshold, axis=0):
+    def compute_dataframe_statistics(self, outlier_threshold, axis):
         """
         Computes basic statistics for a pandas DataFrame.
 
@@ -134,8 +136,7 @@ class StatisticsHandler:
             - Number of missing values
             - Number of outliers
         """
-        validate_dataframe(data_frame)
-        stats = data_frame.apply(
+        stats = self.data_manager.data.apply(
             lambda x: self.compute_statistics(x, outlier_threshold=outlier_threshold),
             axis=axis,
         )
@@ -143,7 +144,7 @@ class StatisticsHandler:
             stats = stats.transpose()
         return stats
 
-    def compute_correlations(self, data_frame, method):
+    def compute_correlations(self, method):
         """
         Computes correlations between columns in a pandas DataFrame.
 
@@ -154,11 +155,10 @@ class StatisticsHandler:
         Returns:
             DataFrame: Pandas DataFrame containing correlations between columns.
         """
-        validate_dataframe(data_frame)
-        correlations = data_frame.corr(method=method)
+        correlations = self.data_manager.data.corr(method=method)
         return correlations
 
-    def get_top_n_correlations(self, data_frame, n=10, method="pearson"):
+    def get_top_n_correlations(self, n=10, method="pearson"):
         """
         Get the top n correlations for each column in a pandas DataFrame.
 
@@ -171,8 +171,7 @@ class StatisticsHandler:
             DataFrame: Pandas DataFrame containing top n correlations
             for each metabolite and their values.
         """
-        validate_dataframe(data_frame)
-        correlations = self.compute_correlations(data_frame, method)
+        correlations = self.compute_correlations(method)
         top_correlations = []
 
         for metabolite in correlations.columns:
@@ -196,7 +195,7 @@ class StatisticsHandler:
         ]
         return top_correlations
 
-    def metabolite_stats(self, data_frame, outlier_threshold=5):
+    def metabolite_stats(self, outlier_threshold=5):
         """
         Computes basic statistics for the metabolomics data metabolite-wise
 
@@ -221,20 +220,17 @@ class StatisticsHandler:
 
         """
         # Ensure that data is set up properly
-        validate_dataframe(data_frame)
-        if data_frame.empty:
+        if self.data_manager.data.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
 
         # Compute statistics using StatisticsHandler
-        metabolite_stats = self.compute_dataframe_statistics(
-            data_frame, outlier_threshold, axis=0
-        )
+        metabolite_stats = self.compute_dataframe_statistics(outlier_threshold, axis=0)
         # self.metabolite_stats=metabolite_stats
         return metabolite_stats
 
-    def sample_stats(self, data_frame, outlier_threshold=5):
+    def sample_stats(self, outlier_threshold=5):
         """
         Computes basic statistics for the metabolomics data sample-wise
 
@@ -247,21 +243,20 @@ class StatisticsHandler:
              DataFrame containing statistics for each sample across all metabolites.
         """
         # Ensure that data is set up properly
-        validate_dataframe(data_frame)
-        if data_frame.empty:
+        if self.data_manager.data.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
-        sample_stats = self.compute_dataframe_statistics(
-            data_frame, outlier_threshold, axis=1
-        )
+        sample_stats = self.compute_dataframe_statistics(outlier_threshold, axis=1)
 
         # Compute Total Sum of Abundance (TSA) for each sample across all metabolites
         tsa_complete_only = self.total_sum_abundance(
-            data_frame, exclude_incomplete=True
+            self.data_manager.data, exclude_incomplete=True
         )
         tsa_complete_only.name = "TSA_complete_only"
-        tsa_all = self.total_sum_abundance(data_frame, exclude_incomplete=False)
+        tsa_all = self.total_sum_abundance(
+            self.data_manager.data, exclude_incomplete=False
+        )
         tsa_all.name = "TSA_including_incomplete"
         tsa = pd.concat([tsa_complete_only, tsa_all], axis=1)
 
