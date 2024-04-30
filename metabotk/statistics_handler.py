@@ -1,3 +1,7 @@
+"""
+Statistics module
+"""
+
 import pandas as pd
 import numpy as np
 from metabotk.outliers_handler import OutlierHandler
@@ -55,7 +59,8 @@ class StatisticsHandler:
 
         Parameters:
             data_frame (DataFrame): pandas DataFrame containing numerical data.
-            exclude_incomplete (bool): option to exclude columns containing incomplete values from the computation
+            exclude_incomplete (bool): option to exclude columns containing incomplete values
+            from the computation
 
         Returns:
             Series: Pandas Series containing TSA values for each row.
@@ -152,3 +157,115 @@ class StatisticsHandler:
         validate_dataframe(data_frame)
         correlations = data_frame.corr(method=method)
         return correlations
+
+    def get_top_n_correlations(self, data_frame, n=10, method="pearson"):
+        """
+        Get the top n correlations for each column in a pandas DataFrame.
+
+        Parameters:
+            data_frame (DataFrame): Pandas DataFrame containing numerical values.
+            n (int): Number of top correlations to return. Default is 10.
+            method (str): Method for computing correlations. Default is 'pearson'.
+
+        Returns:
+            DataFrame: Pandas DataFrame containing top n correlations
+            for each metabolite and their values.
+        """
+        validate_dataframe(data_frame)
+        correlations = self.compute_correlations(data_frame, method)
+        top_correlations = []
+
+        for metabolite in correlations.columns:
+            top_n_abs = (
+                correlations[metabolite]
+                .abs()
+                .sort_values(ascending=False)
+                .drop(metabolite)
+                .iloc[0:n]
+                .index
+            )
+            top_n = correlations[metabolite].loc[top_n_abs]
+            top_n.index.name = "correlated_ids"
+            top_n.name = "correlation"
+            top_n = top_n.reset_index()
+            top_n["metabolite"] = metabolite
+            top_correlations.append(top_n)
+        top_correlations = pd.concat(top_correlations)
+        top_correlations = top_correlations[
+            ["metabolite", "correlated_ids", "correlation"]
+        ]
+        return top_correlations
+
+    def metabolite_stats(self, data_frame, outlier_threshold=5):
+        """
+        Computes basic statistics for the metabolomics data metabolite-wise
+
+        This function computes basic statistics for each metabolite in the data.
+        The statistics computed are:
+        - Mean
+        - Standard deviation
+        - Median
+        - Min
+        - Max
+        - Sum
+        - Coefficient of Variation (CV%)
+        - Number of missing values
+        - Number of outliers
+
+        Parameters:
+        - outlier_threshold: Threshold for outlier detection (default=5).
+
+        Returns:
+            pandas DataFrame: DataFrame containing statistics for each metabolite.
+            The index of the DataFrame is the metabolite names.
+
+        """
+        # Ensure that data is set up properly
+        validate_dataframe(data_frame)
+        if data_frame.empty:
+            raise ValueError(
+                "No data available. Please import data before computing statistics."
+            )
+
+        # Compute statistics using StatisticsHandler
+        metabolite_stats = self.compute_dataframe_statistics(
+            data_frame, outlier_threshold, axis=0
+        )
+        # self.metabolite_stats=metabolite_stats
+        return metabolite_stats
+
+    def sample_stats(self, data_frame, outlier_threshold=5):
+        """
+        Computes basic statistics for the metabolomics data sample-wise
+
+        This function computes statistics for each sample across all metabolites.
+
+        Parameters:
+            outlier_threshold (int): Threshold for identifying outliers.
+
+        Returns:
+             DataFrame containing statistics for each sample across all metabolites.
+        """
+        # Ensure that data is set up properly
+        validate_dataframe(data_frame)
+        if data_frame.empty:
+            raise ValueError(
+                "No data available. Please import data before computing statistics."
+            )
+        sample_stats = self.compute_dataframe_statistics(
+            data_frame, outlier_threshold, axis=1
+        )
+
+        # Compute Total Sum of Abundance (TSA) for each sample across all metabolites
+        tsa_complete_only = self.total_sum_abundance(
+            data_frame, exclude_incomplete=True
+        )
+        tsa_complete_only.name = "TSA_complete_only"
+        tsa_all = self.total_sum_abundance(data_frame, exclude_incomplete=False)
+        tsa_all.name = "TSA_including_incomplete"
+        tsa = pd.concat([tsa_complete_only, tsa_all], axis=1)
+
+        # Merge TSA with sample statistics
+        sample_stats = sample_stats.merge(tsa, left_index=True, right_index=True)
+        # self.sample_stats=sample_stats
+        return sample_stats
