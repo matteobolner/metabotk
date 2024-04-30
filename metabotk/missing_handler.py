@@ -1,4 +1,5 @@
 import numpy as np
+
 import pandas as pd
 from metabotk.utils import validate_dataframe
 
@@ -20,7 +21,7 @@ class MissingDataHandler:
         Initializes the MissingDataHandler.
         """
 
-    def validate_threshold(self, threshold):
+    def _validate_threshold(self, threshold):
         """
         Validates the threshold attribute.
         """
@@ -29,7 +30,7 @@ class MissingDataHandler:
         if not 0 <= threshold <= 1:
             raise ValueError("Threshold must be between 0 and 1")
 
-    def detect_missing(self, data):
+    def _detect_missing(self, data):
         """
         Detects missing values in a collection.
 
@@ -43,7 +44,7 @@ class MissingDataHandler:
         is_missing = np.isnan(data)
         return is_missing
 
-    def count_missing(self, data):
+    def _count_missing(self, data):
         """
         Counts missing values in a collection.
 
@@ -54,11 +55,11 @@ class MissingDataHandler:
             Number of missing values in collection
         """
 
-        missing = self.detect_missing(data)
+        missing = self._detect_missing(data)
         n_missing = missing.sum()
         return n_missing
 
-    def count_missing_in_dataframe(self, data_frame, axis=0):
+    def _count_missing_in_dataframe(self, data_frame, axis=0):
         """
         Counts missing values in each row or column of a DataFrame.
 
@@ -71,11 +72,11 @@ class MissingDataHandler:
             Series: Pandas Series with the row/column index and the number of missing values.
         """
         validate_dataframe(data_frame)
-        missing_values = data_frame.apply(self.detect_missing, axis=axis)
+        missing_values = data_frame.apply(self._detect_missing, axis=axis)
         n_missing_values = missing_values.sum(axis=axis)
         return n_missing_values
 
-    def drop_columns_with_missing(self, data_frame, threshold=0.25):
+    def _drop_columns_with_missing(self, data_frame, threshold=0.25):
         """
         Removes columns with missing values above the threshold.
 
@@ -85,14 +86,31 @@ class MissingDataHandler:
         Returns:
             DataFrame: DataFrame without columns with missingness higher than the threshold.
         """
-        self.validate_threshold(threshold)
+        self._validate_threshold(threshold)
         validate_dataframe(data_frame)
-        missing = self.count_missing_in_dataframe(data_frame, axis=0)
+        missing = self._count_missing_in_dataframe(data_frame, axis=0)
         to_drop = missing[missing / len(data_frame) > threshold]
         data_frame = data_frame.drop(columns=to_drop.index)
         return data_frame
 
-    def drop_rows_with_missing(self, data_frame, threshold=0.25):
+    def _drop_columns_with_missing(self, data_frame, threshold=0.25):
+        """
+        Removes columns with missing values above the threshold.
+
+        Parameters:
+            data_frame (DataFrame): Pandas DataFrame containing only numeric values.
+
+        Returns:
+            DataFrame: DataFrame without columns with missingness higher than the threshold.
+        """
+        self._validate_threshold(threshold)
+        validate_dataframe(data_frame)
+        missing = self._count_missing_in_dataframe(data_frame, axis=0)
+        to_drop = missing[missing / len(data_frame) > threshold]
+        data_frame = data_frame.drop(columns=to_drop.index)
+        return data_frame
+
+    def _drop_rows_with_missing(self, data_frame, threshold=0.25):
         """
         Removes rows with missing values above the threshold.
 
@@ -102,14 +120,16 @@ class MissingDataHandler:
         Returns:
             DataFrame: DataFrame without rows with missingness higher than the threshold.
         """
-        self.validate_threshold(threshold)
+        self._validate_threshold(threshold)
         validate_dataframe(data_frame)
-        missing = self.count_missing_in_dataframe(data_frame, axis=1)
+        missing = self._count_missing_in_dataframe(data_frame, axis=1)
         to_drop = missing[missing / len(data_frame.columns) > threshold]
         data_frame = data_frame.drop(index=to_drop.index)
         return data_frame
 
-    def drop_missing_from_dataframe(self, data_frame, axis=0, threshold=0.25):
+    def drop_missing_from_dataframe(
+        self, data_frame: pd.DataFrame, axis: int = 0, threshold: float = 0.25
+    ) -> pd.DataFrame:
         """
         Remove columns or rows with missing values above the threshold.
 
@@ -121,24 +141,23 @@ class MissingDataHandler:
             DataFrame: DataFrame containing the rows/columns dropped.
         """
         if axis == 0:
-            all = data_frame.copy()
-            data_frame = self.drop_columns_with_missing(
+            all_data = data_frame.copy()
+            data_frame = self._drop_columns_with_missing(
                 data_frame=data_frame, threshold=threshold
             )
             remaining = set(data_frame.columns)
-            # self._update_chemical_annotation()
-            dropped = list(set(all.columns).difference(remaining))
-            print(f"Removed {len(dropped)} elements")
-            dropped = all[dropped]
-            return dropped
-        elif axis == 1:
-            all = data_frame.copy()
-            data_frame = self.drop_rows_with_missing(
+            dropped = list(set(all_data.columns).difference(remaining))
+            print(f"Removed {len(dropped)} columns")
+            remaining_data = all_data.drop(columns=dropped)
+            return remaining_data
+
+        if axis == 1:
+            all_data = data_frame.copy()
+            data_frame = self._drop_rows_with_missing(
                 data_frame=data_frame, threshold=threshold
             )
-            # self._update_sample_metadata()
             remaining = set(data_frame.index)
-            dropped = list(set(all.index).difference(remaining))
-            print(f"Removed {len(dropped)} elements")
-            dropped = all.loc[dropped]
-            return dropped
+            dropped = list(set(all_data.index).difference(remaining))
+            print(f"Removed {len(dropped)} rows")
+            remaining_data = all_data.drop(index=dropped)
+            return remaining_data
