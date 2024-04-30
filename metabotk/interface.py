@@ -31,7 +31,7 @@ class MetaboTK(DatasetManager):
     def stats(self):
         """Lazy initialization of StatisticsHandler instance."""
         if not hasattr(self, "_stats_"):
-            self._stats_ = StatisticsHandler(self)
+            self._stats_ = StatisticsHandler(self.data)
         return self._stats_
 
     @property
