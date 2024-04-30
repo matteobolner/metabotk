@@ -26,7 +26,6 @@ class MetaboTK(DatasetManager):
             sample_id_column=sample_id_column,
             metabolite_id_column=metabolite_id_column,
         )
-        self.stats = StatisticsHandler()
 
     @property
     def stats(self):
