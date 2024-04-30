@@ -11,22 +11,22 @@ from tests.testing_functions import (
 outlier_handler = OutlierHandler()
 # detect_outliers
 
-test_data=pd.read_csv("data/data.csv")
+test_data = pd.read_csv("data/data.csv")
 test_data = test_data[test_data.columns[5:10]].iloc[10:20]
 test_values_series = test_data["212"]
 
 
-
 class TestDetectOutliers:
-    data=test_data
+    data = test_data
+
     def test_input_df(self):
         with pytest.raises(TypeError):
-            outlier_handler.detect_outliers(
-                self.data, threshold=1
-            )
+            outlier_handler.detect_outliers(self.data, threshold=1)
 
     def test_input_series(self):
-        assert (outlier_handler.detect_outliers(test_values_series, threshold=1.5)).sum()==1
+        assert (
+            outlier_handler.detect_outliers(test_values_series, threshold=1.5)
+        ).sum() == 1
 
     def test_input_list(self):
         data = [1, 2, 3, 4, 100]
@@ -71,6 +71,7 @@ class TestDetectOutliers:
 
 
 # get_outliers_matrix
+
 
 class TestGetOutliersMatrix:
     data, outliers_df = (

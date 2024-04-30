@@ -116,8 +116,8 @@ class TestMetaboTK:
 
     def test_compute_stats(self, metabotk_instance):
         # Test compute_stats function
-        sample_stats = metabotk_instance.sample_stats()
-        metabolite_stats = metabotk_instance.metabolite_stats()
+        sample_stats = metabotk_instance.stats.sample_stats()
+        metabolite_stats = metabotk_instance.stats.metabolite_stats()
         assert not sample_stats.empty
         assert not metabolite_stats.empty
 
