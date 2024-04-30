@@ -30,7 +30,7 @@ class MissingDataHandler:
         if not 0 <= threshold <= 1:
             raise ValueError("Threshold must be between 0 and 1")
 
-    def _detect_missing(self, data):
+    def _detect_missing(self, data) -> np.array:
         """
         Detects missing values in a collection.
 
@@ -84,31 +84,14 @@ class MissingDataHandler:
             data_frame (DataFrame): Pandas DataFrame containing only numeric values.
 
         Returns:
-            DataFrame: DataFrame without columns with missingness higher than the threshold.
+            DataFrame: DataFrame with columns with missingness higher than the threshold.
         """
         self._validate_threshold(threshold)
         validate_dataframe(data_frame)
         missing = self._count_missing_in_dataframe(data_frame, axis=0)
         to_drop = missing[missing / len(data_frame) > threshold]
-        data_frame = data_frame.drop(columns=to_drop.index)
-        return data_frame
-
-    def _drop_columns_with_missing(self, data_frame, threshold=0.25):
-        """
-        Removes columns with missing values above the threshold.
-
-        Parameters:
-            data_frame (DataFrame): Pandas DataFrame containing only numeric values.
-
-        Returns:
-            DataFrame: DataFrame without columns with missingness higher than the threshold.
-        """
-        self._validate_threshold(threshold)
-        validate_dataframe(data_frame)
-        missing = self._count_missing_in_dataframe(data_frame, axis=0)
-        to_drop = missing[missing / len(data_frame) > threshold]
-        data_frame = data_frame.drop(columns=to_drop.index)
-        return data_frame
+        to_drop = data_frame[list(to_drop.index)]
+        return to_drop
 
     def _drop_rows_with_missing(self, data_frame, threshold=0.25):
         """
@@ -118,14 +101,14 @@ class MissingDataHandler:
             data_frame (DataFrame): Pandas DataFrame containing only numeric values.
 
         Returns:
-            DataFrame: DataFrame without rows with missingness higher than the threshold.
+            DataFrame: DataFrame with rows with missingness higher than the threshold.
         """
         self._validate_threshold(threshold)
         validate_dataframe(data_frame)
         missing = self._count_missing_in_dataframe(data_frame, axis=1)
         to_drop = missing[missing / len(data_frame.columns) > threshold]
-        data_frame = data_frame.drop(index=to_drop.index)
-        return data_frame
+        to_drop = data_frame.loc[to_drop.index]
+        return to_drop
 
     def drop_missing_from_dataframe(
         self, data_frame: pd.DataFrame, axis: int = 0, threshold: float = 0.25
@@ -141,23 +124,17 @@ class MissingDataHandler:
             DataFrame: DataFrame containing the rows/columns dropped.
         """
         if axis == 0:
-            all_data = data_frame.copy()
-            data_frame = self._drop_columns_with_missing(
+            to_drop = self._drop_columns_with_missing(
                 data_frame=data_frame, threshold=threshold
             )
-            remaining = set(data_frame.columns)
-            dropped = list(set(all_data.columns).difference(remaining))
-            print(f"Removed {len(dropped)} columns")
-            remaining_data = all_data.drop(columns=dropped)
+            print(f"Removed {len(to_drop)} columns")
+            remaining_data = data_frame.drop(columns=to_drop.columns)
             return remaining_data
 
         if axis == 1:
-            all_data = data_frame.copy()
-            data_frame = self._drop_rows_with_missing(
+            to_drop = self._drop_rows_with_missing(
                 data_frame=data_frame, threshold=threshold
             )
-            remaining = set(data_frame.index)
-            dropped = list(set(all_data.index).difference(remaining))
-            print(f"Removed {len(dropped)} rows")
-            remaining_data = all_data.drop(index=dropped)
+            print(f"Removed {len(to_drop)} rows")
+            remaining_data = data_frame.drop(index=to_drop.index)
             return remaining_data
