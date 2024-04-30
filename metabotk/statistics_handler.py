@@ -137,3 +137,18 @@ class StatisticsHandler:
         if axis == 0:
             stats = stats.transpose()
         return stats
+
+    def compute_correlations(self, data_frame, method):
+        """
+        Computes correlations between columns in a pandas DataFrame.
+
+        Parameters:
+            data_frame (DataFrame): Pandas DataFrame containing numerical values.
+            method (str): Method for computing correlations. Default is 'pearson'.
+
+        Returns:
+            DataFrame: Pandas DataFrame containing correlations between columns.
+        """
+        validate_dataframe(data_frame)
+        correlations = data_frame.corr(method=method)
+        return correlations
