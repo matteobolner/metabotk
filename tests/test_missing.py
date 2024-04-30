@@ -89,6 +89,7 @@ class TestDropOverThreshold:
     def test_drop_rows_with_missing_over_threshold_0(self):
         dropped = missing_handler._drop_rows_with_missing(self.data, threshold=0)
         assert np.array_equal(list(dropped.index), [11, 13, 14, 18, 19])
+
     def test_drop_columns_with_missing_over_threshold_1(self):
         dropped = missing_handler._drop_columns_with_missing(self.data, threshold=1)
         assert len(dropped.columns) == 0
@@ -117,14 +118,16 @@ class TestDropOverThreshold:
             list(remaining.columns),
             ["229", "250", "254"],
         )
+
     def test_drop_rows_with_missing_over_threshold_0(self):
         remaining = missing_handler.drop_missing_from_dataframe(
             self.data, axis=1, threshold=0
         )
         assert np.array_equal(
             list(remaining.index),
-            [10,12,15,16,17],
+            [10, 12, 15, 16, 17],
         )
+
     def test_drop_columns_with_missing_over_threshold_1(self):
         remaining = missing_handler.drop_missing_from_dataframe(
             self.data, axis=0, threshold=1
