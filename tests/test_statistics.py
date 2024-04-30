@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import warnings
 
-statistics_handler = StatisticsHandler()
+statistics_handler = StatisticsHandler(data_frame=None)
 
 
 class TestCoefficientOfVariation:
@@ -22,14 +22,14 @@ class TestCoefficientOfVariation:
         ],
     )
     def test_correct_results(self, input_data, expected_output):
-        result = coefficient_of_variation(input_data)
+        result = statistics_handler.coefficient_of_variation(input_data)
         assert result == expected_output
 
-    def test_empty_input(self):
+    def test_empty_or_wrong_input(self):
         with pytest.raises(ValueError):
-            result = coefficient_of_variation([])
+            result = statistics_handler.coefficient_of_variation([])
         with pytest.raises(TypeError):
-            result = coefficient_of_variation([1, 2, "aa"])
+            result = statistics_handler.coefficient_of_variation([1, 2, "aa"])
 
 
 class TestComputeStatistics:
@@ -331,14 +331,31 @@ class TestDataFrameBasicStats:
 
     def test_dataframe_stats(self, test_data):
         data, expected_output, axis = test_data
+        statistics_handler = StatisticsHandler(data_frame=data)
         result = statistics_handler.compute_dataframe_statistics(
-            data_frame=data, axis=axis, outlier_threshold=5
+            axis=axis, outlier_threshold=5
         )
         pd.testing.assert_frame_equal(result, expected_output)
 
     def test_dataframe_stats_different_outlier_threshold(self, test_data):
         data, expected_output, axis = test_data
+        statistics_handler = StatisticsHandler(data_frame=data)
+
         result = statistics_handler.compute_dataframe_statistics(
-            data_frame=data, axis=axis, outlier_threshold=100
+            axis=axis, outlier_threshold=100
         )
         assert result.iloc[-1, -1] == 0
+
+
+test_data = pd.read_csv("data/data.csv")
+test_data = test_data[test_data.columns[5:10]].iloc[10:20]
+test_values_series = test_data["212"]
+
+
+class TestTopCorrelations:
+    statistics_handler = StatisticsHandler(data_frame=test_data)
+
+    def test_top_1_correlations(self):
+        assert self.statistics_handler.get_top_n_correlations(n=1)[
+            "correlated_ids"
+        ].tolist() == ["250", "273", "212", "273", "254"]

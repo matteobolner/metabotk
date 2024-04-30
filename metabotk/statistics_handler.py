@@ -9,34 +9,6 @@ from metabotk.missing_handler import MissingDataHandler
 from metabotk.utils import ensure_numeric_data
 
 
-def coefficient_of_variation(data):
-    """
-    Compute the coefficient of variation in percentage.
-
-    The coefficient of variation (CV) is a measure of the dispersion of a dataset.
-    It is calculated as the standard deviation (σ) divided by the mean (μ).
-    The CV is expressed as a percentage (%).
-
-    Parameters:
-        data (list, array, or Series): Collection containing numerical data.
-
-    Returns:
-        float: Coefficient of Variation % (CV%).
-    """
-    data = ensure_numeric_data(data)
-    # Remove any missing (nan) values.
-    data = data[~np.isnan(data)]
-    # Compute the standard deviation.
-    std = np.std(data)
-    # Compute the mean.
-    mean = np.mean(data)
-    # Compute the coefficient of variation.
-    cv = std / mean
-    # Convert coefficient of variation to a percentage.
-    cv_pctg = cv * 100
-    return cv_pctg
-
-
 class StatisticsHandler:
     """
     Class for obtaining basic statistics about the data.
@@ -46,13 +18,40 @@ class StatisticsHandler:
     for a collection of numerical data or a pandas DataFrame.
     """
 
-    def __init__(self, data_manager):
+    def __init__(self, data_frame):
         """
         Initializes the StatisticsHandler.
         """
         self.outlier_handler = OutlierHandler()
         self.missing_handler = MissingDataHandler()
-        self.data_manager = data_manager
+        self.data_frame = data_frame
+
+    def coefficient_of_variation(self, data):
+        """
+        Compute the coefficient of variation in percentage.
+
+        The coefficient of variation (CV) is a measure of the dispersion of a dataset.
+        It is calculated as the standard deviation (σ) divided by the mean (μ).
+        The CV is expressed as a percentage (%).
+
+        Parameters:
+            data (list, array, or Series): Collection containing numerical data.
+
+        Returns:
+            float: Coefficient of Variation % (CV%).
+        """
+        data = ensure_numeric_data(data)
+        # Remove any missing (nan) values.
+        data = data[~np.isnan(data)]
+        # Compute the standard deviation.
+        std = np.std(data)
+        # Compute the mean.
+        mean = np.mean(data)
+        # Compute the coefficient of variation.
+        cv = std / mean
+        # Convert coefficient of variation to a percentage.
+        cv_pctg = cv * 100
+        return cv_pctg
 
     def total_sum_abundance(self, data_frame, exclude_incomplete=True):
         """
@@ -101,10 +100,10 @@ class StatisticsHandler:
         if len(data) == 0:
             raise ValueError("Input data is empty")
         stats = data_series.describe()
-        cv = coefficient_of_variation(data)
+        cv = self.coefficient_of_variation(data)
         stats["CV%"] = cv
         stats = stats.rename(index={"50%": "median"})
-        stats["missing"] = self.missing_handler.count_missing(data_series)
+        stats["missing"] = self.missing_handler._count_missing(data_series)
         stats["outliers"] = sum(
             self.outlier_handler.detect_outliers(
                 data_series, threshold=outlier_threshold
@@ -136,7 +135,7 @@ class StatisticsHandler:
             - Number of missing values
             - Number of outliers
         """
-        stats = self.data_manager.data.apply(
+        stats = self.data_frame.apply(
             lambda x: self.compute_statistics(x, outlier_threshold=outlier_threshold),
             axis=axis,
         )
@@ -144,7 +143,7 @@ class StatisticsHandler:
             stats = stats.transpose()
         return stats
 
-    def compute_correlations(self, method):
+    def compute_correlations(self, method: str) -> pd.DataFrame:
         """
         Computes correlations between columns in a pandas DataFrame.
 
@@ -155,7 +154,7 @@ class StatisticsHandler:
         Returns:
             DataFrame: Pandas DataFrame containing correlations between columns.
         """
-        correlations = self.data_manager.data.corr(method=method)
+        correlations = self.data_frame.corr(method=method)
         return correlations
 
     def get_top_n_correlations(self, n=10, method="pearson"):
@@ -220,7 +219,7 @@ class StatisticsHandler:
 
         """
         # Ensure that data is set up properly
-        if self.data_manager.data.empty:
+        if self.data_frame.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
@@ -243,7 +242,7 @@ class StatisticsHandler:
              DataFrame containing statistics for each sample across all metabolites.
         """
         # Ensure that data is set up properly
-        if self.data_manager.data.empty:
+        if self.data_frame.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
@@ -251,12 +250,10 @@ class StatisticsHandler:
 
         # Compute Total Sum of Abundance (TSA) for each sample across all metabolites
         tsa_complete_only = self.total_sum_abundance(
-            self.data_manager.data, exclude_incomplete=True
+            self.data_frame, exclude_incomplete=True
         )
         tsa_complete_only.name = "TSA_complete_only"
-        tsa_all = self.total_sum_abundance(
-            self.data_manager.data, exclude_incomplete=False
-        )
+        tsa_all = self.total_sum_abundance(self.data_frame, exclude_incomplete=False)
         tsa_all.name = "TSA_including_incomplete"
         tsa = pd.concat([tsa_complete_only, tsa_all], axis=1)
 
