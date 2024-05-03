@@ -1,8 +1,11 @@
+from metabotk.outliers_handler import OutlierHandler
+from metabotk.missing_handler import MissingDataHandler
 from metabotk.statistics_handler import StatisticsHandler
 from metabotk.dataset_manager import DatasetManager
 from metabotk.models_handler import ModelsHandler
 from metabotk.visualization_handler import Visualization
 from metabotk.dimensionality_reduction import DimensionalityReduction
+from metabotk.imputation import ImputationHandler
 from metabotk.feature_selection import FeatureSelection
 import pandas as pd
 
@@ -28,10 +31,24 @@ class MetaboTK(DatasetManager):
         )
 
     @property
+    def missing(self):
+        """Lazy initialization of MissingDataHandler instance."""
+        if not hasattr(self, "_missing_"):
+            self._missing_ = MissingDataHandler()
+        return self._missing_
+
+    @property
+    def outliers(self):
+        """Lazy initialization of OutlierHandler instance."""
+        if not hasattr(self, "_missing_"):
+            self._outliers_ = OutlierHandler()
+        return self._outliers_
+
+    @property
     def stats(self):
         """Lazy initialization of StatisticsHandler instance."""
         if not hasattr(self, "_stats_"):
-            self._stats_ = StatisticsHandler(self.data)
+            self._stats_ = StatisticsHandler(self)
         return self._stats_
 
     @property
@@ -54,6 +71,13 @@ class MetaboTK(DatasetManager):
         if not hasattr(self, "_visualization_"):
             self._visualization_ = Visualization(self)
         return self._visualization_
+
+    @property
+    def imputation(self):
+        """Lazy initialization of ImputationHandler instance."""
+        if not hasattr(self, "_imputation_"):
+            self._imputation_ = ImputationHandler(self)
+        return self._imputation_
 
     @property
     def feature_selection(self):
