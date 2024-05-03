@@ -9,6 +9,52 @@ from metabotk.missing_handler import MissingDataHandler
 from metabotk.utils import ensure_numeric_data
 
 
+def compute_correlations(data_frame: pd.DataFrame, method: str) -> pd.DataFrame:
+    """
+    Computes correlations between columns in a pandas DataFrame.
+
+    Parameters:
+        data_frame (DataFrame): Pandas DataFrame containing numerical values.
+        method (str): Method for computing correlations. Default is 'pearson'.
+
+    Returns:
+        DataFrame: Pandas DataFrame containing correlations between columns.
+    """
+    correlations = data_frame.corr(method=method)
+    return correlations
+
+
+def get_top_n_correlations(data_frame: pd.DataFrame, n=10, method="pearson"):
+    """
+    Get the top n correlations for each column in a pandas DataFrame.
+
+    Parameters:
+        data_frame (DataFrame): Pandas DataFrame containing numerical values.
+        n (int): Number of top correlations to return. Default is 10.
+        method (str): Method for computing correlations. Default is 'pearson'.
+
+    Returns:
+        DataFrame: Pandas DataFrame containing top n correlations
+        for each id and their values.
+    """
+    correlations = compute_correlations(data_frame, method)
+    top_correlations = []
+
+    for id in correlations.columns:
+        top_n_abs = (
+            correlations[id].abs().sort_values(ascending=False).drop(id).iloc[0:n].index
+        )
+        top_n = correlations[id].loc[top_n_abs]
+        top_n.index.name = "correlated_ids"
+        top_n.name = "correlation"
+        top_n = top_n.reset_index()
+        top_n["id"] = id
+        top_correlations.append(top_n)
+    top_correlations = pd.concat(top_correlations)
+    top_correlations = top_correlations[["id", "correlated_ids", "correlation"]]
+    return top_correlations
+
+
 class StatisticsHandler:
     """
     Class for obtaining basic statistics about the data.
@@ -18,13 +64,13 @@ class StatisticsHandler:
     for a collection of numerical data or a pandas DataFrame.
     """
 
-    def __init__(self, data_frame):
+    def __init__(self, dataset_manager):
         """
         Initializes the StatisticsHandler.
         """
-        self.outlier_handler = OutlierHandler()
-        self.missing_handler = MissingDataHandler()
-        self.data_frame = data_frame
+        self._outlier_handler = OutlierHandler()
+        self._missing_handler = MissingDataHandler()
+        self._dataset_manager = dataset_manager
 
     def coefficient_of_variation(self, data):
         """
@@ -103,9 +149,9 @@ class StatisticsHandler:
         cv = self.coefficient_of_variation(data)
         stats["CV%"] = cv
         stats = stats.rename(index={"50%": "median"})
-        stats["missing"] = self.missing_handler._count_missing(data_series)
+        stats["missing"] = self._missing_handler._count_missing(data_series)
         stats["outliers"] = sum(
-            self.outlier_handler.detect_outliers(
+            self._outlier_handler.detect_outliers(
                 data_series, threshold=outlier_threshold
             )
         )
@@ -135,64 +181,13 @@ class StatisticsHandler:
             - Number of missing values
             - Number of outliers
         """
-        stats = self.data_frame.apply(
+        stats = self._dataset_manager.data.apply(
             lambda x: self.compute_statistics(x, outlier_threshold=outlier_threshold),
             axis=axis,
         )
         if axis == 0:
             stats = stats.transpose()
         return stats
-
-    def compute_correlations(self, method: str) -> pd.DataFrame:
-        """
-        Computes correlations between columns in a pandas DataFrame.
-
-        Parameters:
-            data_frame (DataFrame): Pandas DataFrame containing numerical values.
-            method (str): Method for computing correlations. Default is 'pearson'.
-
-        Returns:
-            DataFrame: Pandas DataFrame containing correlations between columns.
-        """
-        correlations = self.data_frame.corr(method=method)
-        return correlations
-
-    def get_top_n_correlations(self, n=10, method="pearson"):
-        """
-        Get the top n correlations for each column in a pandas DataFrame.
-
-        Parameters:
-            data_frame (DataFrame): Pandas DataFrame containing numerical values.
-            n (int): Number of top correlations to return. Default is 10.
-            method (str): Method for computing correlations. Default is 'pearson'.
-
-        Returns:
-            DataFrame: Pandas DataFrame containing top n correlations
-            for each metabolite and their values.
-        """
-        correlations = self.compute_correlations(method)
-        top_correlations = []
-
-        for metabolite in correlations.columns:
-            top_n_abs = (
-                correlations[metabolite]
-                .abs()
-                .sort_values(ascending=False)
-                .drop(metabolite)
-                .iloc[0:n]
-                .index
-            )
-            top_n = correlations[metabolite].loc[top_n_abs]
-            top_n.index.name = "correlated_ids"
-            top_n.name = "correlation"
-            top_n = top_n.reset_index()
-            top_n["metabolite"] = metabolite
-            top_correlations.append(top_n)
-        top_correlations = pd.concat(top_correlations)
-        top_correlations = top_correlations[
-            ["metabolite", "correlated_ids", "correlation"]
-        ]
-        return top_correlations
 
     def metabolite_stats(self, outlier_threshold=5):
         """
@@ -219,7 +214,7 @@ class StatisticsHandler:
 
         """
         # Ensure that data is set up properly
-        if self.data_frame.empty:
+        if self._dataset_manager.data.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
@@ -242,7 +237,7 @@ class StatisticsHandler:
              DataFrame containing statistics for each sample across all metabolites.
         """
         # Ensure that data is set up properly
-        if self.data_frame.empty:
+        if self._dataset_manager.data.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
@@ -250,10 +245,12 @@ class StatisticsHandler:
 
         # Compute Total Sum of Abundance (TSA) for each sample across all metabolites
         tsa_complete_only = self.total_sum_abundance(
-            self.data_frame, exclude_incomplete=True
+            self._dataset_manager.data, exclude_incomplete=True
         )
         tsa_complete_only.name = "TSA_complete_only"
-        tsa_all = self.total_sum_abundance(self.data_frame, exclude_incomplete=False)
+        tsa_all = self.total_sum_abundance(
+            self._dataset_manager.data, exclude_incomplete=False
+        )
         tsa_all.name = "TSA_including_incomplete"
         tsa = pd.concat([tsa_complete_only, tsa_all], axis=1)
 
