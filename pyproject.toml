@@ -6,7 +6,7 @@ authors = ["matteobolner <matteo.bolner2@unibo.it>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10, <4"
 requests = "^2.31.0"
 pandas = "^2.2.1"
 pytest = "^8.1.1"
@@ -16,6 +16,7 @@ seaborn = "^0.13.2"
 statsmodels = "^0.14.1"
 dill = "^0.3.8"
 boruta = {git = "https://github.com/matteobolner/boruta_py.git"}
+miceforest = {git = "https://github.com/AnotherSamWilson/miceforest.git"}
 
 [tool.poetry.group.docs]
 optional = true
