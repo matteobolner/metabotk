@@ -85,3 +85,28 @@ class MetaboTK(DatasetManager):
         if not hasattr(self, "_feature_selection_"):
             self._feature_selection_ = FeatureSelection(self)
         return self._feature_selection_
+
+    ###FUNCTIONS###
+    def drop_missing_from_dataframe(self, axis=0, threshold=0.25, inplace=False):
+        """
+        Removes rows/columns from the data dataframe based on the threshold of missing
+        values.
+
+        Parameters:
+            axis (int): Axis to drop missing values from (0: rows, 1: columns).
+            threshold (float): Threshold of missing values to drop.
+            inplace (bool): Whether to drop missing values inplace or return the remaining data.
+
+        Returns:
+            DataFrame: DataFrame with missing values over threshold removed.
+        """
+        remaining_data = self.missing._drop_missing_from_dataframe(
+            data_frame=self.data, axis=axis, threshold=threshold
+        )
+        if inplace:
+            self.data = remaining_data
+            self._update_chemical_annotation()
+            print("Removed inplace metabolites with missing data over threshold")
+            return None
+        else:
+            return remaining_data

@@ -110,7 +110,7 @@ class MissingDataHandler:
         to_drop = data_frame.loc[to_drop.index]
         return to_drop
 
-    def drop_missing_from_dataframe(
+    def _drop_missing_from_dataframe(
         self, data_frame: pd.DataFrame, axis: int = 0, threshold: float = 0.25
     ) -> pd.DataFrame:
         """
