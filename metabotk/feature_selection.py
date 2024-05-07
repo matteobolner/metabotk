@@ -10,7 +10,7 @@ Currently implemented methods:
 import dill
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, KFold
-from boruta import BorutaPy
+from boruta_py_versioned import BorutaPy
 import pandas as pd
 from metabotk.utils import create_directory
 

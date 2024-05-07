@@ -15,8 +15,7 @@ scikit-learn = "^1.4.2"
 seaborn = "^0.13.2"
 statsmodels = "^0.14.1"
 dill = "^0.3.8"
-boruta = {git = "https://github.com/matteobolner/boruta_py.git"}
-miceforest = {git = "https://github.com/AnotherSamWilson/miceforest.git"}
+boruta-py-versioned = "^0.1.0"
 
 [tool.poetry.group.docs]
 optional = true

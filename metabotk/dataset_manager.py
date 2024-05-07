@@ -412,10 +412,10 @@ class DatasetManager:
         except ValueError as ve:
             raise ValueError("Error removing metadata from data: {}".format(ve))
 
-    def split_by_sample_column(self, column: str) -> Dict[str, "DatasetManager"]:
+    def _split_by_sample_column(self, column: list) -> Dict[str, "DatasetManager"]:
         """
         Split the dataset (data and sample metadata) in multiple independent DataClass instances
-        based on the values of a sample metadata column.
+        based on the values of one or more sample metadata columns.
 
         This function splits the dataset into multiple independent DataClass instances, each
         containing a subset of the data based on the values of a sample metadata column. The
@@ -450,7 +450,7 @@ class DatasetManager:
             split_data[name] = tempclass
         return split_data
 
-    def split_by_metabolite_column(self, column: str) -> Dict[str, "DatasetManager"]:
+    def _split_by_metabolite_column(self, column: str) -> Dict[str, "DatasetManager"]:
         """
         Split the data in multiple independent DataClass instances
         based on the values of a metabolite metadata column

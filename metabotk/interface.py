@@ -8,6 +8,7 @@ from metabotk.dimensionality_reduction import DimensionalityReduction
 from metabotk.imputation import ImputationHandler
 from metabotk.feature_selection import FeatureSelection
 import pandas as pd
+from typing import List, Dict
 
 
 class MetaboTK(DatasetManager):
@@ -110,3 +111,55 @@ class MetaboTK(DatasetManager):
             return None
         else:
             return remaining_data
+
+    def split_by_sample_column(self, columns: List[str]) -> Dict[str, "MetaboTK"]:
+        """
+        Split the data based on the sample column(s).
+
+        Parameters:
+            columns (list): List of column names containing the sample IDs.
+
+        Returns:
+            dict: Dictionary with the split data and sample metadata, as a MetaboTK instance.
+        """
+        split_data = self._split_by_sample_column(columns)
+        split_data_instanced = {}
+        for dataset_name, dataset_instance in split_data.items():
+            temp_instance = MetaboTK(
+                sample_id_column=self._sample_id_column,
+                data_provider=self._data_provider,
+                metabolite_id_column=self._metabolite_id_column,
+            )
+            temp_instance.import_tables(
+                data=dataset_instance.data.reset_index(),
+                sample_metadata=dataset_instance.sample_metadata.reset_index(),
+                chemical_annotation=dataset_instance.chemical_annotation.reset_index(),
+            )
+            split_data_instanced[dataset_name] = temp_instance
+        return split_data_instanced
+
+    def split_by_metabolite_column(self, columns: List[str]) -> Dict[str, "MetaboTK"]:
+        """
+        Split the data based on the metabolite column(s).
+
+        Parameters:
+            columns (list): List of column names containing the sample IDs.
+
+        Returns:
+            dict: Dictionary with the split data and sample metadata as a MetaboTK instance.
+        """
+        split_data = self._split_by_metabolite_column(columns)
+        split_data_instanced = {}
+        for dataset_name, dataset_instance in split_data.items():
+            temp_instance = MetaboTK(
+                sample_id_column=self._sample_id_column,
+                data_provider=self._data_provider,
+                metabolite_id_column=self._metabolite_id_column,
+            )
+            temp_instance.import_tables(
+                data=dataset_instance.data.reset_index(),
+                sample_metadata=dataset_instance.sample_metadata.reset_index(),
+                chemical_annotation=dataset_instance.chemical_annotation.reset_index(),
+            )
+            split_data_instanced[dataset_name] = temp_instance
+        return split_data_instanced
