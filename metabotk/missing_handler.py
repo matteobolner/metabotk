@@ -127,7 +127,7 @@ class MissingDataHandler:
             to_drop = self._drop_columns_with_missing(
                 data_frame=data_frame, threshold=threshold
             )
-            print(f"Removed {len(to_drop)} columns")
+            print(f"Removed {len(to_drop.columns)} columns")
             remaining_data = data_frame.drop(columns=to_drop.columns)
             return remaining_data
 
@@ -135,6 +135,6 @@ class MissingDataHandler:
             to_drop = self._drop_rows_with_missing(
                 data_frame=data_frame, threshold=threshold
             )
-            print(f"Removed {len(to_drop)} rows")
+            print(f"Removed {len(to_drop.index)} rows")
             remaining_data = data_frame.drop(index=to_drop.index)
             return remaining_data
