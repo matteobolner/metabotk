@@ -34,7 +34,6 @@ class ImputationHandler:
     def miceforest(
         self,
         n_correlated_metabolites,
-        additional_prediction_columns=None,
         n_imputed_datasets=5,
         n_iterations=5,
         random_state=None,
@@ -53,9 +52,7 @@ class ImputationHandler:
         )
         corrs_dict = {}
         for name, group in corrs.groupby(by="id"):
-            corrs_dict[name] = (
-                additional_prediction_columns + group["correlated_ids"].tolist()
-            )
+            corrs_dict[name] = group["correlated_ids"].tolist()
         kds = mf.ImputationKernel(
             data=self._dataset_manager.data,
             datasets=n_imputed_datasets,
