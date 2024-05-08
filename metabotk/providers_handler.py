@@ -28,13 +28,20 @@ class MetabolonCDT:
         self.data_key_and_explanation = None
         self.sample_metadata = None
         self.chemical_annotation = None
+        self.generic_data = None
         self.peak_area_data = None
         self.batch_normalized_data = None
         self.batch_normalized_imputed_data = None
         self.log_transformed_data = None
         self.additional_data = {}
 
-    def import_excel(self, file_path: str) -> None:
+    def import_excel(
+        self,
+        file_path: str,
+        sample_metadata: str = "Sample Meta Data",
+        chemical_annotation: str = "Chemical Annotation",
+        data: str = "Peak Area Data",
+    ) -> None:
         """
         Read the Metabolon Client Data Table Excel file and assign its sheets to class attributes.
 
@@ -52,9 +59,9 @@ class MetabolonCDT:
         missing_sheets = [
             sheet_name
             for sheet_name in [
-                "Sample Meta Data",
-                "Chemical Annotation",
-                "Peak Area Data",
+                sample_metadata,
+                chemical_annotation,
+                data,
             ]
             if sheet_name not in sheets
         ]
@@ -65,9 +72,10 @@ class MetabolonCDT:
 
         # Assign sheets to attributes
         self.data_key_and_explanation = sheets.pop("Data Key & Explanation", None)
-        self.sample_metadata = sheets.pop("Sample Meta Data")
-        self.chemical_annotation = sheets.pop("Chemical Annotation")
-        self.peak_area_data = sheets.pop("Peak Area Data")
+        self.sample_metadata = sheets.pop(sample_metadata)
+        self.chemical_annotation = sheets.pop(chemical_annotation)
+        self.generic_data = sheets.pop(data)
+        self.peak_area_data = sheets.pop("Peak Area Data", None)
         self.batch_normalized_data = sheets.pop("Batch-normalized Data", None)
         self.batch_normalized_imputed_data = sheets.pop("Batch-norm Imputed Data", None)
         self.log_transformed_data = sheets.pop("Log Transformed Data", None)

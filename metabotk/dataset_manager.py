@@ -126,7 +126,13 @@ class DatasetManager:
         except ValueError as ve:
             raise ValueError(f"Error setting up data: {ve}")
 
-    def import_excel(self, file_path: str, data_sheet: str) -> None:
+    def import_excel(
+        self,
+        file_path: str,
+        sample_metadata: str = "sample_metadata",
+        chemical_annotation: str = "chemical_annotation",
+        data_sheet: str = "data",
+    ) -> None:
         """
         Import data from an Excel file and set up the class.
 
@@ -147,7 +153,9 @@ class DatasetManager:
             If there is an error importing the data.
         """
         try:
-            self.parser.import_excel(file_path)
+            self.parser.import_excel(
+                file_path, sample_metadata, chemical_annotation, data_sheet
+            )
             data = getattr(self.parser, data_sheet)
             self._setup_data(
                 self.parser.chemical_annotation,
