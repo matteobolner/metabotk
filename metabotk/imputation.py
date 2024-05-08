@@ -37,6 +37,7 @@ class ImputationHandler:
         n_imputed_datasets=5,
         n_iterations=5,
         random_state=None,
+        get_kernel=False,
     ):
         """
         Perform missing data imputation using MICE (Mixed-effects Imputation by Chained Equations).
@@ -71,4 +72,7 @@ class ImputationHandler:
             dataset + 1: kds.complete_data(dataset=dataset)
             for dataset in range(n_imputed_datasets)
         }
-        return imputed
+        if get_kernel == True:
+            return kds, imputed
+        else:
+            return imputed
