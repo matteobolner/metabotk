@@ -156,11 +156,10 @@ class DatasetManager:
             self.parser.import_excel(
                 file_path, sample_metadata, chemical_annotation, data_sheet
             )
-            data = getattr(self.parser, data_sheet)
             self._setup_data(
                 self.parser.chemical_annotation,
                 self.parser.sample_metadata,
-                data,
+                self.parser.generic_data,
             )
             self._remove_metadata_from_data()
         except FileNotFoundError as fnfe:
