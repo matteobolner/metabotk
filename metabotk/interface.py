@@ -7,7 +7,7 @@ from metabotk.visualization_handler import Visualization
 from metabotk.dimensionality_reduction import DimensionalityReduction
 from metabotk.imputation import ImputationHandler
 from metabotk.feature_selection import FeatureSelection
-import pandas as pd
+from metabotk.normalization import NormalizationHandler
 from typing import List, Dict
 
 
