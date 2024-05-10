@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "metabotk"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python toolkit for working with metabolomics data"
 authors = ["matteobolner <matteo.bolner2@unibo.it>"]
 readme = "README.md"
