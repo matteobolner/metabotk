@@ -81,6 +81,13 @@ class MetaboTK(DatasetManager):
         return self._imputation_
 
     @property
+    def normalization(self):
+        """Lazy initialization of NormalizationHandler instance."""
+        if not hasattr(self, "_normalization_"):
+            self._normalization_ = NormalizationHandler(self)
+        return self._normalization_
+
+    @property
     def feature_selection(self):
         """Lazy initialization of FeatureSelection instance."""
         if not hasattr(self, "_feature_selection_"):

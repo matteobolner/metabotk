@@ -977,6 +977,25 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
+name = "pyserrf"
+version = "0.1.5"
+description = "Python implementation of the Systematic Error Removal Using Random Forest algorithm"
+optional = false
+python-versions = "<4.0,>=3.10"
+files = [
+    {file = "pyserrf-0.1.5-py3-none-any.whl", hash = "sha256:8d7a6af39644e11f40b2427432249493912ba738ed4946e84aeddfba53275ac2"},
+    {file = "pyserrf-0.1.5.tar.gz", hash = "sha256:c421fe779aaed302995181cac370e7f110751ffaddc1df3ebb62fc1dfc83434c"},
+]
+
+[package.dependencies]
+numpy = ">=1.26.4,<2.0.0"
+pandas = ">=2.2.2,<3.0.0"
+pytest = ">=8.2.0,<9.0.0"
+scikit-learn = ">=1.4.2,<2.0.0"
+sphinx-rtd-theme = ">=2.0.0,<3.0.0"
+tqdm = ">=4.66.4,<5.0.0"
+
+[[package]]
 name = "pytest"
 version = "8.2.0"
 description = "pytest: simple powerful testing with Python"
@@ -1401,6 +1420,26 @@ files = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.66.4"
+description = "Fast, Extensible Progress Meter"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tqdm-4.66.4-py3-none-any.whl", hash = "sha256:b75ca56b413b030bc3f00af51fd2c1a1a5eac6a0c1cca83cbb37a5c52abce644"},
+    {file = "tqdm-4.66.4.tar.gz", hash = "sha256:e4d936c9de8727928f3be6079590e97d9abfe8d39a590be678eb5919ffc186bb"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-xdist"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "tzdata"
 version = "2024.1"
 description = "Provider of IANA time zone data"
@@ -1431,4 +1470,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <4"
-content-hash = "e64d6baa48d7488dbddda09e287fb6e478da825e9fed134a932615bb723fb7b7"
+content-hash = "3cce908c44a32131377d7eaf072c7207a75c04299e228e2f762df5af92453bac"
