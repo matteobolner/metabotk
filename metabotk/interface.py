@@ -84,7 +84,7 @@ class MetaboTK(DatasetManager):
     def normalization(self):
         """Lazy initialization of NormalizationHandler instance."""
         if not hasattr(self, "_normalization_"):
-            self._normalization_ = NormalizationHandler(self)
+            self._normalization_ = NormalizationHandler()
         return self._normalization_
 
     @property

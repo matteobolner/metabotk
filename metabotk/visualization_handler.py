@@ -29,7 +29,7 @@ class Visualization:
         )
         """Instance of DimensionalityReduction class"""
 
-    def plot_pca(self, pca=None, x="PC1", y="PC2", hue=None, savepath=None):
+    def plot_pca(self, pca=None, x="PC1", y="PC2", hue=None, style=None, savepath=None):
         """
         Plot the results of principal component analysis (PCA).
 
@@ -48,6 +48,8 @@ class Visualization:
             Name of the Y-axis.
         hue: str, optional
             Column name in sample metadata DataFrame to color the points by.
+        style: str, optional
+            Column name in sample metadata DataFrame to shape the points by.
         savepath: str, optional
             Path to save the plot as an image file. If not provided, the plot
             will not be saved.
@@ -60,7 +62,7 @@ class Visualization:
         if not pca:
             print("PCA not found, computing now with 3 components...")
             pca = self.dimensionality_reduction.get_pca(n_components=3)
-        plot = sns.scatterplot(data=pca, x=x, y=y, hue=hue)
+        plot = sns.scatterplot(data=pca, x=x, y=y, hue=hue, style=style)
         if savepath:
             plot.figure.savefig(savepath)
         return plot
@@ -69,6 +71,7 @@ class Visualization:
         self,
         pca: pd.DataFrame = None,
         hue: Optional[str] = None,
+        style: Optional[str] = None,
         savepath: Optional[str] = None,
     ) -> sns.axisgrid.PairGrid:
         """
@@ -81,6 +84,8 @@ class Visualization:
             using the `get_pca` function from the `DimensionalityReduction` class.
         hue: str, optional
             Column name in sample metadata DataFrame to color the points by.
+        style: str, optional
+            Column name in sample metadata DataFrame to shape the points by.
         savepath: str, optional
             Path to save the plot as an image file. If not provided, the plot
             will not be saved.
@@ -97,6 +102,7 @@ class Visualization:
             data=pca,
             vars=[col for col in pca.columns if col.startswith("PC")],
             hue=hue,
+            style=style,
             diag_kind="kde",
             diag_kws={"linewidth": 0, "shade": False},
         )
