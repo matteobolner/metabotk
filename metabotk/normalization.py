@@ -11,15 +11,16 @@ class NormalizationHandler:
 
     def __init__(
         self,
-        dataset_manager,
+        # dataset_manager,
     ):
         """
         Initialize the class.
         """
-        self._dataset_manager = dataset_manager
+        # self._dataset_manager = dataset_manager
 
     def serrf(
         self,
+        dataset,
         sample_type_column="measurement_group",
         batch_column="batch",
         time_column="time",
@@ -69,13 +70,5 @@ class NormalizationHandler:
             random_state=random_state,
             threads=threads,
         )
-        input_dataset = self._dataset_manager.sample_metadata[
-            [
-                self._dataset_manager._sample_id_column,
-                sample_type_column,
-                batch_column,
-                time_column,
-            ]
-        ].merge(self._dataset_manager.data, left_index=True, right_index=True)
-        normalized = serrf_instance.fit_transform(input_dataset, return_data_only=True)
+        normalized = serrf_instance.fit_transform(dataset, return_data_only=True)
         return normalized
