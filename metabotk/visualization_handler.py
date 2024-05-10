@@ -71,7 +71,6 @@ class Visualization:
         self,
         pca: pd.DataFrame = None,
         hue: Optional[str] = None,
-        style: Optional[str] = None,
         savepath: Optional[str] = None,
     ) -> sns.axisgrid.PairGrid:
         """
@@ -84,8 +83,6 @@ class Visualization:
             using the `get_pca` function from the `DimensionalityReduction` class.
         hue: str, optional
             Column name in sample metadata DataFrame to color the points by.
-        style: str, optional
-            Column name in sample metadata DataFrame to shape the points by.
         savepath: str, optional
             Path to save the plot as an image file. If not provided, the plot
             will not be saved.
@@ -102,7 +99,6 @@ class Visualization:
             data=pca,
             vars=[col for col in pca.columns if col.startswith("PC")],
             hue=hue,
-            style=style,
             diag_kind="kde",
             diag_kws={"linewidth": 0, "shade": False},
         )
