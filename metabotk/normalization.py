@@ -71,7 +71,7 @@ class NormalizationHandler:
         )
         input_dataset = self._dataset_manager.sample_metadata[
             [
-                self._dataset_manager.sample_id_column,
+                self._dataset_manager._sample_id_column,
                 sample_type_column,
                 batch_column,
                 time_column,
