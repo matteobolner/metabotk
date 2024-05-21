@@ -58,7 +58,7 @@ class DimensionalityReduction:
         pca_transformed = pd.DataFrame(
             pca.transform(scaled_data),
             columns=[f"PC{i}" for i in range(1, n_components + 1)],
-            index=self.data_manager.samples,
+            index=self.data_manager.data.index,
         )
 
         # Concatenate with sample metadata
