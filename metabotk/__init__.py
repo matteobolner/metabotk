@@ -7,3 +7,10 @@ from .visualization_handler import Visualization
 from .dimensionality_reduction import DimensionalityReduction
 from .imputation import ImputationHandler
 from .feature_selection import FeatureSelection
+
+from ._version import __version__
+from .interface import MetaboTK
+
+__all__ = [
+    "__version__",
+]
