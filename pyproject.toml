@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "metabotk"
-version = "0.1.34"
+version = "0.1.35"
 description = "Python toolkit for working with metabolomics data"
 authors = ["matteobolner <matteo.bolner2@unibo.it>"]
 readme = "README.md"
@@ -18,6 +18,7 @@ dill = "^0.3.8"
 boruta-py-versioned = "^0.1.0"
 sphinx-rtd-theme = "^2.0.0"
 pyserrf = "^0.1.5"
+skloess = "^0.1.1"
 
 [tool.poetry.group.docs]
 optional = true
