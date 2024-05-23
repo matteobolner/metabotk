@@ -636,3 +636,25 @@ class DatasetManager:
             metabolites_to_extract = [metabolites_to_extract]
         # convert to string to match the CHEM_ID column in chemical_annotation
         return self.chemical_annotation.loc[[str(i) for i in metabolites_to_extract]]
+
+    def sort_samples(self, by, ascending=True):
+        """
+        Sort samples in the dataset.
+
+        Parameters
+        ----------
+        by : str
+            Column name to sort by.
+        ascending : bool, optional
+            If True, sort in ascending order, by default True
+
+        Returns
+        -------
+        pandas.DataFrame
+            Sorted dataset
+        """
+        self.sample_metadata = self.sample_metadata.sort_values(
+            by=by, ascending=ascending
+        )
+        self.data = self.data.loc[self.sample_metadata.index]
+        self.samples = self.sample_metadata.index
