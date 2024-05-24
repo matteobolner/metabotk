@@ -1,4 +1,7 @@
+from typing import List
+import pandas as pd
 import pyserrf as srf
+from skloess import LOESS
 
 
 class NormalizationHandler:
@@ -11,12 +14,12 @@ class NormalizationHandler:
 
     def __init__(
         self,
-        # dataset_manager,
+        dataset_manager,
     ):
         """
         Initialize the class.
         """
-        # self._dataset_manager = dataset_manager
+        self._dataset_manager = dataset_manager
 
     def serrf(
         self,
@@ -140,3 +143,105 @@ class NormalizationHandler:
             threads=threads,
         )
         return raw_variations, normalized_variations
+
+    def loess_single_metabolite(
+        self,
+        metabolite: str,
+        degree: int,
+        smoothing: float,
+        rescale: bool,
+        qc_samples: List[str],
+        injection_order_col: str,
+    ) -> pd.Series:
+        """
+        Perform LOESS normalization on a single metabolite.
+
+        Parameters
+        ----------
+        metabolite : str
+            The name of the metabolite to normalize.
+        degree : int
+            The degree of the LOESS polynomial.
+        smoothing : float
+            The smoothing parameter for LOESS.
+        rescale : bool
+            Whether to rescale the normalized values to the median.
+        qc_samples : List[str]
+            The names of the QC samples.
+        injection_order_col : str
+            The name of the column containing the injection order.
+
+        Returns
+        -------
+        pd.Series
+            The normalized values for the metabolite.
+        """
+        # Extract the metabolite and remove missing values
+        data = self._dataset_manager.extract_metabolites(metabolite)
+
+        # Extract the QC samples
+        qc = data.loc[qc_samples]
+        x_qc = qc[injection_order_col]
+        y_qc = qc[metabolite]
+
+        # Perform LOESS normalization
+        loess = LOESS(degree=degree, smoothing=smoothing)
+        loess.fit(x_qc.values, y_qc.values)
+        pred = loess.predict(data[injection_order_col].values)
+        norm = data[metabolite] - pred
+
+        # Rescale the normalized values if requested
+        if rescale:
+            median = data[metabolite].median()
+            norm = norm + median
+
+        return norm
+
+    def loess(
+        self,
+        degree: int,
+        smoothing: float,
+        rescale: bool,
+        qc_samples: List[str],
+        injection_order_col: str,
+        inplace: bool = True,
+    ):
+        """
+        Perform LOESS normalization on all metabolites in the dataset.
+
+        Parameters
+        ----------
+        degree : int
+            The degree of the LOESS polynomial.
+        smoothing : float
+            The smoothing parameter for LOESS.
+        rescale : bool
+            Whether to rescale the normalized values to the median.
+        qc_samples : List[str]
+            The names of the QC samples.
+        injection_order_col : str
+            The name of the column containing the injection order.
+        inplace : bool, optional
+            Whether to perform the normalization inplace. Default is True.
+
+        Returns
+        -------
+        pd.DataFrame
+            The normalized data.
+        """
+        # Loop over all metabolites in the dataset
+        data = self._dataset_manager.data
+        for metabolite in self._dataset_manager.metabolites:
+            normalized_metabolite = self.loess_single_metabolite(
+                metabolite,
+                degree,
+                smoothing,
+                rescale,
+                qc_samples,
+                injection_order_col,
+            )
+            data[metabolite] = normalized_metabolite
+        if inplace:
+            self._dataset_manager.data = data
+        else:
+            return data
