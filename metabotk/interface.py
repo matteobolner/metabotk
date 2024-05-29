@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 from metabotk.outliers_handler import OutlierHandler
 from metabotk.missing_handler import MissingDataHandler
 from metabotk.statistics_handler import StatisticsHandler
@@ -8,7 +10,7 @@ from metabotk.dimensionality_reduction import DimensionalityReduction
 from metabotk.imputation import ImputationHandler
 from metabotk.feature_selection import FeatureSelection
 from metabotk.normalization import NormalizationHandler
-from typing import List, Dict
+from metabotk.scaling import ScalingHandler
 
 
 class MetaboTK(DatasetManager):
@@ -86,6 +88,13 @@ class MetaboTK(DatasetManager):
         if not hasattr(self, "_normalization_"):
             self._normalization_ = NormalizationHandler(self)
         return self._normalization_
+
+    @property
+    def scaling(self):
+        """Lazy initialization of ScalingHandler instance."""
+        if not hasattr(self, "_scaling_"):
+            self._scaling_ = ScalingHandler(self)
+        return self._scaling_
 
     @property
     def feature_selection(self):

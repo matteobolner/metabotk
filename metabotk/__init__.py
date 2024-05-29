@@ -7,6 +7,8 @@ from .visualization_handler import Visualization
 from .dimensionality_reduction import DimensionalityReduction
 from .imputation import ImputationHandler
 from .feature_selection import FeatureSelection
+from .normalization import NormalizationHandler
+from .scaling import ScalingHandler
 
 from ._version import __version__
 from .interface import MetaboTK
