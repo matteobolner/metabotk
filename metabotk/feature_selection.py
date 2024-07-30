@@ -8,7 +8,7 @@ Currently implemented methods:
 """
 
 import dill
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import StratifiedKFold, KFold
 from boruta_py_versioned import BorutaPy
 import pandas as pd
@@ -35,7 +35,14 @@ class FeatureSelection:
         """
         self.data_manager = data_manager
 
-    def setup_random_forest(self, random_state, threads, max_depth, class_weight):
+    def setup_random_forest(
+        self,
+        random_state,
+        threads,
+        max_depth,
+        class_weight,
+        kind="classifier",
+    ):
         """
         Setup random forest
 
@@ -47,17 +54,26 @@ class FeatureSelection:
         Returns:
             RandomForestClassifier: Random Forest classifier
         """
-        rf = RandomForestClassifier(
-            n_jobs=threads,
-            class_weight=class_weight,
-            max_depth=max_depth,
-            random_state=random_state,
-        )
+        if kind == "classifier":
+
+            rf = RandomForestClassifier(
+                n_jobs=threads,
+                class_weight=class_weight,
+                max_depth=max_depth,
+                random_state=random_state,
+            )
+        elif kind == "regressor":
+            rf = RandomForestRegressor(
+                n_jobs=threads,
+                max_depth=max_depth,
+                random_state=random_state,
+            )
         return rf
 
     def boruta(
         self,
         y_column,
+        kind="classifier",
         threads=1,
         random_state=42,
         max_depth=None,
@@ -102,6 +118,7 @@ class FeatureSelection:
             threads=threads,
             max_depth=max_depth,
             class_weight=class_weight,
+            kind=kind,
         )
         feat_selector = BorutaPy(
             rf,
@@ -112,7 +129,7 @@ class FeatureSelection:
             max_iter=max_iterations,
         )
         feat_selector.fit(X, y)
-        print(feat_selector.importance_history_)
+
         importance_history = pd.DataFrame(
             feat_selector.importance_history_,
             index=range(len(feat_selector.importance_history_)),
