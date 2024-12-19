@@ -162,7 +162,7 @@ class FeatureSelection:
         self,
         n_splits: int,
         stratification_column: str,
-        output_dir: str,
+        output_dir=None,
     ) -> dict:
         """Split the dataset using a stratified approach for cross-validation.
 
@@ -182,20 +182,23 @@ class FeatureSelection:
             Dictionary with keys as fold numbers and values as the train
             dataframes.
         """
-        create_directory(output_dir)
         X = self.data_manager.data
         split_train = {}
         split_val = {}
         y = self.data_manager.sample_metadata[stratification_column]
         skf = StratifiedKFold(n_splits=int(n_splits))
         skf_splits = skf.split(X, y)
+        if output_dir:
+            create_directory(output_dir)
+
         for fold, (train_idx, val_idx) in enumerate(skf_splits):
             foldname = fold + 1
             train = X.iloc[train_idx]
             val = X.iloc[val_idx]
-            train.to_csv(f"{output_dir}/{foldname}_train.tsv", sep="\t")
-            val.to_csv(f"{output_dir}/{foldname}_val.tsv", sep="\t")
             split_train[foldname] = train
             split_val[foldname] = val
+            if output_dir:
+                train.to_csv(f"{output_dir}/{foldname}_train.tsv", sep="\t")
+                val.to_csv(f"{output_dir}/{foldname}_val.tsv", sep="\t")
 
         return split_train, split_val
