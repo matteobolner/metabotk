@@ -179,3 +179,28 @@ class MetaboTK(DatasetManager):
             )
             split_data_instanced[dataset_name] = temp_instance
         return split_data_instanced
+
+    def subset_samples(self, samples_to_extract):
+        """
+        Extract a subset of the dataset containing only the specified samples.
+
+        Parameters
+        ----------
+        samples_to_extract : str or list
+            ID(s) of sample(s) to extract.
+
+        Returns
+        -------
+        MetaboTK object containing the subset of the dataset.
+        """
+        subset = self._subset_samples(samples_to_extract)
+        temp_instance = MetaboTK(
+            sample_id_column=self._sample_id_column,
+            data_provider=self._data_provider,
+            metabolite_id_column=self._metabolite_id_column,
+        )
+        temp_instance.import_tables(
+            data=subset.data.reset_index(),
+            sample_metadata=subset.sample_metadata.reset_index(),
+            chemical_annotation=subset.chemical_annotation.reset_index(),
+        )
