@@ -204,3 +204,4 @@ class MetaboTK(DatasetManager):
             sample_metadata=subset.sample_metadata.reset_index(),
             chemical_annotation=subset.chemical_annotation.reset_index(),
         )
+        return temp_instance
