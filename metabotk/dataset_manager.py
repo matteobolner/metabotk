@@ -658,3 +658,28 @@ class DatasetManager:
         )
         self.data = self.data.loc[self.sample_metadata.index]
         self.samples = self.sample_metadata.index
+
+    def subset_samples(self, samples_to_extract):
+        """
+        Extract a subset of the dataset containing only the specified samples.
+
+        Parameters
+        ----------
+        samples_to_extract : str or list
+            ID(s) of sample(s) to extract.
+
+        Returns
+        -------
+        MetaboTK object containing the subset of the dataset.
+        """
+        temp_instance = MetaboTK(
+            sample_id_column=self._sample_id_column,
+            data_provider=self._data_provider,
+            metabolite_id_column=self._metabolite_id_column,
+        )
+        temp_instance.import_tables(
+            data=self.data.loc[samples_to_extract].reset_index(),
+            sample_metadata=self.sample_metadata.loc[samples_to_extract].reset_index(),
+            chemical_annotation=self.chemical_annotation.reset_index(),
+        )
+        return temp_instance
