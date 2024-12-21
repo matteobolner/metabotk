@@ -1,36 +1,16 @@
-[tool.poetry]
+[project]
 name = "metabotk"
-version = "0.1.4.4"
-description = "Python toolkit for working with metabolomics data"
-authors = ["matteobolner <matteo.bolner2@unibo.it>"]
+version = "0.2"
+description = "Add your description here"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = ">=3.10, <4"
-requests = "^2.31.0"
-pandas = "^2.2.1"
-pytest = "^8.1.1"
-coverage = "^7.4.4"
-scikit-learn = "^1.4.2"
-seaborn = "^0.13.2"
-statsmodels = "^0.14.1"
-dill = "^0.3.8"
-boruta-py-versioned = "^0.1.0"
-sphinx-rtd-theme = "^2.0.0"
-pyserrf = "^0.1.5"
-skloess = "^0.1.1"
-miceforest = "^6.0.2"
-openpyxl = "^3.1.5"
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = ">7.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-metabotk = "metabotk.cli:cli" 
+requires-python = ">=3.12"
+dependencies = [
+    "boruta-py-versioned>=0.1.0",
+    "miceforest>=6.0.3",
+    "numpy>=2.2.0",
+    "pandas>=2.2.3",
+    "pyserrf>=0.2.1",
+    "pytest>=8.3.4",
+    "scikit-learn>=1.6.0",
+    "seaborn>=0.13.2",
+]
