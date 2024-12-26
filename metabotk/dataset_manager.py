@@ -1,7 +1,6 @@
 from typing import Union, Optional, Dict
 import pandas as pd
-from metabotk.providers_handler import MetabolonCDT
-from metabotk.utils import parse_input
+from metabotk.utils.io import parse_input, read_excel, read_tables
 import warnings
 
 
@@ -14,14 +13,12 @@ class DatasetManager:
 
     Attributes:
         _data_provider (str): name of the data provider
-        parser (object): parser for the data provider
         _sample_id_column (str): name of the sample id column
     """
 
     def __init__(
         self,
-        data_provider: str = "metabolon",
-        sample_id_column: str = None,
+        sample_id_column: str = "sample",
         metabolite_id_column: str = "CHEM_ID",
     ) -> None:
         """
@@ -32,27 +29,27 @@ class DatasetManager:
             sample_id_column (str): name of the sample id column
             metabolite_id_column (str): name of the metabolite id column
         """
-        self._data_provider = data_provider.lower()
-        if self._data_provider == "metabolon":
-            self.parser = MetabolonCDT()
-        else:
-            raise NotImplementedError("This data provider is not supported yet")
-        self._sample_id_column = sample_id_column
-        self.sample_metadata = pd.DataFrame()
+        self._sample_id_column: str = sample_id_column
+        self.sample_metadata: pd.DataFrame = pd.DataFrame()
         # list of sample names
-        self.samples = []
-        self._metabolite_id_column = metabolite_id_column
-        self.chemical_annotation = pd.DataFrame()
+        self.samples: list[str] = []
+        self._metabolite_id_column: str = metabolite_id_column
+        self.chemical_annotation: pd.DataFrame = pd.DataFrame()
         # list of metabolite IDs
-        self.metabolites = []
+        self.metabolites: list[str] = []
         # dataframe with sample x metabolite data
-        self.data = pd.DataFrame()
+        self.data: pd.DataFrame = pd.DataFrame()
 
     ###
     # Functions to import, setup and write data and metadata
     ###
 
-    def _setup_data(self, chemical_annotation, sample_metadata, data) -> None:
+    def _setup_data(
+        self,
+        chemical_annotation: str | pd.DataFrame,
+        sample_metadata: str | pd.DataFrame,
+        data: str | pd.DataFrame,
+    ) -> None:
         """
         Setup the class with chemical annotation, sample metadata, and data.
 
@@ -76,7 +73,7 @@ class DatasetManager:
             parsed_data = parse_input(data)
             if not self._sample_id_column:
                 if parsed_data.columns[0] in parsed_sample_metadata.columns:
-                    self._sample_id_column = parsed_data.columns[0]
+                    self._sample_id_column = str(parsed_data.columns[0])
                 else:
                     raise ValueError(
                         "No sample ID column found in data with correspondence in sample metadata"
@@ -129,8 +126,8 @@ class DatasetManager:
     def import_excel(
         self,
         file_path: str,
-        sample_metadata: str = "sample_metadata",
-        chemical_annotation: str = "chemical_annotation",
+        sample_metadata_sheet: str = "sample_metadata",
+        chemical_annotation_sheet: str = "chemical_annotation",
         data_sheet: str = "data",
     ) -> None:
         """
@@ -153,21 +150,17 @@ class DatasetManager:
             If there is an error importing the data.
         """
         try:
-            self.parser.import_excel(
-                file_path, sample_metadata, chemical_annotation, data_sheet
+            parsed = read_excel(
+                file_path, sample_metadata_sheet, chemical_annotation_sheet, data_sheet
             )
             self._setup_data(
-                self.parser.chemical_annotation,
-                self.parser.sample_metadata,
-                self.parser.generic_data,
+                parsed["chemical_annotation"],
+                parsed["sample_metadata"],
+                parsed["data"],
             )
             self._remove_metadata_from_data()
         except FileNotFoundError as fnfe:
             raise FileNotFoundError(f"File '{file_path}' not found.") from fnfe
-        except AttributeError as ae:
-            raise AttributeError(
-                f"Data sheet '{data_sheet}' not found in the Excel file."
-            ) from ae
         except ValueError as ve:
             raise ValueError(f"Error importing data: {ve}") from ve
 
@@ -187,15 +180,15 @@ class DatasetManager:
 
         """
         try:
-            self.parser.import_tables(
-                sample_metadata=sample_metadata,
-                chemical_annotation=chemical_annotation,
-                generic_data=data,
+            parsed = read_tables(
+                sample_metadata,
+                chemical_annotation,
+                data,
             )
             self._setup_data(
-                self.parser.chemical_annotation,
-                self.parser.sample_metadata,
-                self.parser.generic_data,
+                parsed["chemical_annotation"],
+                parsed["sample_metadata"],
+                parsed["data"],
             )
             self._remove_metadata_from_data()
         except ValueError as ve:
@@ -221,28 +214,6 @@ class DatasetManager:
             self.data, left_index=True, right_index=True, how="inner"
         )
         return merged
-
-    def save_merged(self, data_path, chemical_annotation_path=None):
-        """
-        Save the merged sample data and metabolite abundance data to TSV files.
-
-        This function merges the sample metadata and metabolite abundance data
-        and saves the resulting DataFrame to a TSV file. The chemical
-        annotation is saved optionally.
-
-        Parameters:
-        data_path (str): Path to save the merged sample data.
-        chemical_annotation_path (str, optional): Path to save the chemical annotation data. Default is None.
-
-        Raises:
-        ValueError: If attempting to save an empty DataFrame.
-        """
-        merged = self.merge_sample_metadata_data()
-        if len(merged) == 0:
-            raise ValueError("Trying to save an empty dataframe")
-        merged.to_csv(data_path, sep="\t")
-        if chemical_annotation_path:
-            self.chemical_annotation.to_csv(chemical_annotation_path, sep="\t")
 
     def save_tables(
         self,

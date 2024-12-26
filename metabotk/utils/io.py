@@ -3,6 +3,21 @@ import pandas as pd
 from pathlib import Path
 
 
+def create_directory(directory_path):
+    """
+    Creates a directory at the given path.
+
+    This function creates a directory at the given path and all parent directories
+    if they do not already exist. If the directory already exists, nothing is done.
+
+    Parameters
+    ----------
+    directory_path : str
+        Path of the directory to be created.
+    """
+    Path(directory_path).mkdir(parents=True, exist_ok=True)
+
+
 def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame):
     """
     Parse input data as pandas dataframe or as file path to TSV or CSV file
@@ -47,16 +62,47 @@ def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame):
         )
 
 
-def create_directory(directory_path):
-    """
-    Creates a directory at the given path.
+def read_excel(
+    file_path: str | os.PathLike[str],
+    sample_metadata_sheet: str = "Sample Meta Data",
+    chemical_annotation_sheet: str = "Chemical Annotation",
+    data_sheet: str = "Batch-normalized Data",
+) -> dict[str, pd.DataFrame]:
+    sheets = pd.read_excel(file_path, sheet_name=None)
+    dataset_dict = {
+        "sample_metadata": sheets.pop(sample_metadata_sheet),
+        "chemical_annotation": sheets.pop(chemical_annotation_sheet),
+        "data": sheets.pop(data_sheet),
+    }
+    return dataset_dict
 
-    This function creates a directory at the given path and all parent directories
-    if they do not already exist. If the directory already exists, nothing is done.
 
-    Parameters
-    ----------
-    directory_path : str
-        Path of the directory to be created.
-    """
-    Path(directory_path).mkdir(parents=True, exist_ok=True)
+def read_tables(
+    sample_metadata: str | os.PathLike[str] | pd.DataFrame,
+    chemical_annotation: str | os.PathLike[str] | pd.DataFrame,
+    data: str | os.PathLike[str] | pd.DataFrame,
+):
+    dataset_dict = {
+        "sample_metadata": parse_input(sample_metadata),
+        "chemical_annotation": parse_input(chemical_annotation),
+        "data": parse_input(data),
+    }
+    return dataset_dict
+
+
+def dataset_from_prefix(prefix: str, extension: str):
+    prefix_dict = {
+        "sample_metadata": f"{prefix}.sm.{extension}",
+        "chemical_annotation": f"{prefix}.ca.{extension}",
+        "data": f"{prefix}.data.{extension}",
+    }
+    return prefix_dict
+
+
+def read_dataset_from_prefix(prefix: str, extension: str = "tsv"):
+    prefix_dict = dataset_from_prefix(prefix, extension)
+    return read_tables(
+        sample_metadata=prefix_dict["sample_metadata"],
+        chemical_annotation=prefix_dict["chemical_annotation"],
+        data=prefix_dict["data"],
+    )
