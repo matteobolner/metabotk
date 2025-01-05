@@ -1,8 +1,90 @@
-from typing import Union, Optional, Dict
 import pandas as pd
-from metabotk.utils.io import parse_input, read_excel, read_tables
+from metabotk.utils.io import (
+    dataset_from_prefix,
+    parse_input,
+    # read_dataset_from_prefix,
+    read_excel,
+    read_tables,
+    read_prefix,
+)
 import warnings
 
+
+def setup_data(data: pd.DataFrame, sample_id_column: str):
+    """
+
+    Args:
+        data:
+        sample_id_column:
+
+    Returns:
+
+    """
+    data.columns = [str(i) for i in data.columns]
+    data.set_index(sample_id_column, inplace=True)
+    return data
+
+def setup_sample_metadata(sample_metadata: pd.DataFrame, sample_id_column: str):
+    """
+    Args:
+        sample_metadata:
+        sample_id_column:
+        data:
+
+    Returns:
+
+
+    Raises:
+        ValueError:
+    """
+    # check that sample ID column is found in data
+    if sample_id_column in sample_metadata.columns:
+        # set metadata and data
+        if len(sample_metadata) == 0:
+            raise ValueError("Sample metadata is empty or not properly initialized.")
+        if sample_metadata[sample_id_column].duplicated().any():
+            warnings.warn(
+                "Warning: there are duplicate values in the chosen sample column.\
+                        Consider choosing another column or renaming the duplicated samples"
+            )
+        sample_metadata[sample_id_column] = sample_metadata[sample_id_column].astype(
+            str
+        )
+        sample_metadata.set_index(sample_id_column, inplace=True)
+    else:
+        raise ValueError(f"No sample ID column '{sample_id_column}' found in data")
+    return sample_metadata
+
+
+def setup_chemical_annotation(
+    chemical_annotation: pd.DataFrame, metabolite_id_column: str
+):
+    """
+
+    Args:
+        chemical_annotation:
+        metabolite_id_column:
+
+    Returns:
+
+
+    Raises:
+        ValueError:
+    """
+    # check that metabolite ID column is found in chemical annotation
+    if metabolite_id_column in chemical_annotation.columns:
+        chemical_annotation = chemical_annotation
+        chemical_annotation[metabolite_id_column] = chemical_annotation[
+            metabolite_id_column
+        ].astype(str)
+        chemical_annotation.set_index(metabolite_id_column, inplace=True)
+        # Cleanup data from metadata
+        # self._remove_metadata_from_data()
+        # Update the chemical annotation data in the class
+        # self._update_chemical_annotation()
+    else:
+        raise ValueError("No metabolite ID column found in chemical annotation")
+    return chemical_annotation
 
 class DatasetManager:
     """
@@ -18,6 +100,9 @@ class DatasetManager:
 
     def __init__(
         self,
+        data: pd.DataFrame,
+        sample_metadata: pd.DataFrame,
+        chemical_annotation: pd.DataFrame,
         sample_id_column: str = "sample",
         metabolite_id_column: str = "CHEM_ID",
     ) -> None:
@@ -25,103 +110,46 @@ class DatasetManager:
         Initialize the class.
 
         Parameters:
-            data_provider (str): name of the data provider
             sample_id_column (str): name of the sample id column
             metabolite_id_column (str): name of the metabolite id column
         """
-        self._sample_id_column: str = sample_id_column
-        self.sample_metadata: pd.DataFrame = pd.DataFrame()
-        # list of sample names
-        self.samples: list[str] = []
-        self._metabolite_id_column: str = metabolite_id_column
-        self.chemical_annotation: pd.DataFrame = pd.DataFrame()
-        # list of metabolite IDs
-        self.metabolites: list[str] = []
-        # dataframe with sample x metabolite data
-        self.data: pd.DataFrame = pd.DataFrame()
+        self.sample_id_column: str = sample_id_column
+        self.metabolite_id_column: str = metabolite_id_column
+        self.data = data
+        self.sample_metadata = sample_metadata
+        self.chemical_annotation = chemical_annotation
 
-    ###
-    # Functions to import, setup and write data and metadata
-    ###
+        self.samples = list(sample_metadata.index)
+        self.metabolites = list(self.chemical_annotation.index)
 
-    def _setup_data(
-        self,
-        chemical_annotation: str | pd.DataFrame,
-        sample_metadata: str | pd.DataFrame,
-        data: str | pd.DataFrame,
-    ) -> None:
-        """
-        Setup the class with chemical annotation, sample metadata, and data.
+    @classmethod
+    def setup(cls,
+        data: pd.DataFrame,
+        sample_metadata: pd.DataFrame,
+        chemical_annotation: pd.DataFrame,
+        sample_id_column: str = "sample",
+        metabolite_id_column: str = "CHEM_ID",
+    ):
+        data=setup_data(data, sample_id_column)
+        sample_metadata=setup_sample_metadata(sample_metadata, sample_id_column)
+        chemical_annotation=setup_chemical_annotation(chemical_annotation, metabolite_id_column)
+        
+        # TODO: check if this line below is really necessary or complicates things
+        sample_metadata = sample_metadata.loc[data.index]
+        return cls(data=data, sample_metadata=sample_metadata, chemical_annotation=chemical_annotation, sample_id_column = sample_id_column, metabolite_id_column=metabolite_id_column)
 
-        This function loads the data and sets up the class instance.
-        It checks that the sample ID column is found in the data and the
-        metabolite ID column is found in the chemical annotation.
-        If any of these checks fail, a ValueError is raised.
 
-        Parameters:
-            chemical_annotation (DataFrame or str): DataFrame or path of file containing chemical annotation.
-            sample_metadata (DataFrame or str): DataFrame or path of file containing sample metadata.
-            data (DataFrame or str): DataFrame containing or path of file the main data.
 
-        Raises:
-            ValueError: If the sample ID column is not found in the data or the metabolite ID column is not found in chemical annotation.
-        """
+def import_dataset(self, parsed: dict[str, pd.DataFrame]) -> None:
         try:
-            # parse input data
-            parsed_chemical_annotation = parse_input(chemical_annotation)
-            parsed_sample_metadata = parse_input(sample_metadata)
-            parsed_data = parse_input(data)
-            if not self._sample_id_column:
-                if parsed_data.columns[0] in parsed_sample_metadata.columns:
-                    self._sample_id_column = str(parsed_data.columns[0])
-                else:
-                    raise ValueError(
-                        "No sample ID column found in data with correspondence in sample metadata"
-                    )
-            # check that sample ID column is found in data
-            if (self._sample_id_column in parsed_data.columns) and (
-                self._sample_id_column in parsed_sample_metadata.columns
-            ):
-                # set metadata and data
-                self.sample_metadata = parsed_sample_metadata
-                if self.sample_metadata is None:
-                    raise ValueError("Sample metadata is not properly initialized.")
-                if self.sample_metadata[self._sample_id_column].duplicated().any():
-                    warnings.warn(
-                        "Warning: there are duplicate values in the chosen sample column.\
-                        Consider choosing another column or renaming the duplicated samples"
-                    )
-                self.sample_metadata[self._sample_id_column] = self.sample_metadata[
-                    self._sample_id_column
-                ].astype(str)
-                self.sample_metadata.set_index(self._sample_id_column, inplace=True)
-                self.data = parsed_data
-                self.data.columns = [str(i) for i in self.data.columns]
-                self.data.set_index(self._sample_id_column, inplace=True)
-                # Drop samples not in data
-                self.sample_metadata = self.sample_metadata.loc[self.data.index]
-                self.samples = list(self.sample_metadata.index)
-            else:
-                raise ValueError("No sample ID column found in data")
-
-            # check that metabolite ID column is found in chemical annotation
-            if self._metabolite_id_column in parsed_chemical_annotation.columns:
-                self.chemical_annotation = parsed_chemical_annotation
-                self.chemical_annotation[self._metabolite_id_column] = (
-                    self.chemical_annotation[self._metabolite_id_column].astype(str)
-                )
-                self.chemical_annotation.set_index(
-                    self._metabolite_id_column, inplace=True
-                )
-                # Cleanup data from metadata
-                self._remove_metadata_from_data()
-                # Update the chemical annotation data in the class
-                self._update_chemical_annotation()
-
-            else:
-                raise ValueError("No metabolite ID column found in chemical annotation")
+            self._setup_data(
+                parsed["chemical_annotation"],
+                parsed["sample_metadata"],
+                parsed["data"],
+            )
+            self.import_dataset
         except ValueError as ve:
-            raise ValueError(f"Error setting up data: {ve}")
+            raise ValueError("Error importing data: {}".format(ve)) from ve
 
     def import_excel(
         self,
@@ -139,36 +167,17 @@ class DatasetManager:
             Path to the Excel file.
         data_sheet : str
             Name of the sheet containing the main data.
-
-        Raises
-        ------
-        FileNotFoundError
-            If the Excel file is not found.
-        AttributeError
-            If the data sheet is not found in the Excel file.
-        ValueError
-            If there is an error importing the data.
         """
-        try:
-            parsed = read_excel(
-                file_path, sample_metadata_sheet, chemical_annotation_sheet, data_sheet
-            )
-            self._setup_data(
-                parsed["chemical_annotation"],
-                parsed["sample_metadata"],
-                parsed["data"],
-            )
-            self._remove_metadata_from_data()
-        except FileNotFoundError as fnfe:
-            raise FileNotFoundError(f"File '{file_path}' not found.") from fnfe
-        except ValueError as ve:
-            raise ValueError(f"Error importing data: {ve}") from ve
+        parsed = read_excel(
+            file_path, sample_metadata_sheet, chemical_annotation_sheet, data_sheet
+        )
+        self.import_dataset(parsed)
 
     def import_tables(
         self,
-        data: Union[pd.DataFrame, str],
-        chemical_annotation: Union[pd.DataFrame, str] = "config/metabolites.tsv",
-        sample_metadata: Union[pd.DataFrame, str] = "config/samples.tsv",
+        data: pd.DataFrame | str,
+        chemical_annotation: pd.DataFrame | str,
+        sample_metadata: pd.DataFrame | str,
     ) -> None:
         """
         Import data from tables and set up the class.
@@ -179,22 +188,19 @@ class DatasetManager:
             sample_metadata: DataFrame or path to the file containing sample metadata.
 
         """
-        try:
-            parsed = read_tables(
-                sample_metadata,
-                chemical_annotation,
-                data,
-            )
-            self._setup_data(
-                parsed["chemical_annotation"],
-                parsed["sample_metadata"],
-                parsed["data"],
-            )
-            self._remove_metadata_from_data()
-        except ValueError as ve:
-            raise ValueError("Error importing data: {}".format(ve)) from ve
+        parsed = read_tables(
+            sample_metadata,
+            chemical_annotation,
+            data,
+        )
+        self.import_dataset(parsed)
+
+    def import_prefix(self, prefix: str) -> None:
+        parsed = read_prefix(prefix)
+        self.import_dataset(parsed)
 
     def merge_sample_metadata_data(self) -> pd.DataFrame:
+        # TODO: move to independent function
         """
         Merge sample metadata and metabolite abundance data into a single DataFrame.
 
@@ -215,12 +221,24 @@ class DatasetManager:
         )
         return merged
 
+    def save_prefix(self, prefix: str):
+        prefix_dict = dataset_from_prefix(prefix)
+        self.data.to_csv(prefix_dict["data"], sep="\t", index=True)
+        self.sample_metadata.to_csv(
+            prefix_dict["sample_metadata"], sep="\t", index=True
+        )
+        self.chemical_annotation.to_csv(
+            prefix_dict["chemical_annotation"], sep="\t", index=True
+        )
+        print(f"Saved to {prefix}")
+        return
+
     def save_tables(
         self,
-        data_path: Optional[str] = None,
-        chemical_annotation_path: Optional[str] = None,
-        sample_metadata_path: Optional[str] = None,
-    ) -> None:
+        data_path: str | None = None,
+        chemical_annotation_path: str | None = None,
+        sample_metadata_path: str | None = None,
+    ):
         """
         Save individual parts of the dataset to TSV files.
 
@@ -276,6 +294,7 @@ class DatasetManager:
             self.data.to_excel(writer, sheet_name=data_sheet)
 
     def add_to_excel(self, file_path, new_sheet, new_sheet_name):
+        # TODO: remove unused function
         """
         Add a new sheet to an Excel file.
         This function adds a new sheet to an Excel file.
@@ -296,6 +315,16 @@ class DatasetManager:
     ###
     # Utility functions to manipulate the class attributes
     ###
+
+    def update_chemical_annotation(self):
+        """
+        Update the chemical annotation based on the current data columns.
+        This function ensures that the chemical annotation DataFrame only contains
+        the columns present in the data, and update the metabolites attribute with the
+        new list of metabolites.
+        """
+        self.chemical_annotation = self.chemical_annotation.loc[list(self.data.columns)]
+        self.metabolites = list(self.chemical_annotation.index)
 
     def replace_column_names(self, new_column: str) -> None:
         """
@@ -346,17 +375,6 @@ class DatasetManager:
         # Update the chemical annotation data in the class
         self._update_chemical_annotation()
 
-    def _update_chemical_annotation(self):
-        """
-        Update the chemical annotation based on the current data columns.
-
-        This function ensures that the chemical annotation DataFrame only contains
-        the columns present in the data, and update the metabolites attribute with the
-        new list of metabolites.
-        """
-        self.chemical_annotation = self.chemical_annotation.loc[list(self.data.columns)]
-        self.metabolites = list(self.chemical_annotation.index)
-
     def _update_sample_metadata(self):
         """
         This function updates the sample metadata based on the current data index.
@@ -373,6 +391,7 @@ class DatasetManager:
         self.samples = list(self.sample_metadata.index)
 
     def _remove_metadata_from_data(self):
+        # TODO: remove unused function
         """
         Remove metadata columns from the data.
 
@@ -390,7 +409,7 @@ class DatasetManager:
         except ValueError as ve:
             raise ValueError("Error removing metadata from data: {}".format(ve))
 
-    def _split_by_sample_column(self, column: list) -> Dict[str, "DatasetManager"]:
+    def _split_by_sample_column(self, column: list) -> dict[str, "DatasetManager"]:
         """
         Split the dataset (data and sample metadata) in multiple independent DataClass instances
         based on the values of one or more sample metadata columns.
@@ -409,11 +428,10 @@ class DatasetManager:
             values of the sample metadata column and the values are the DataClass instances
             containing the split data.
         """
-        split_data: Dict[str, DatasetManager] = {}
+        split_data: dict[str, DatasetManager] = {}
         for name, group in self.sample_metadata.groupby(by=column):
             tempdata = self.data.loc[group.index]
             tempclass = DatasetManager(
-                data_provider=self._data_provider,
                 sample_id_column=self._sample_id_column,
                 metabolite_id_column=self._metabolite_id_column,
             )
@@ -424,11 +442,11 @@ class DatasetManager:
             )
             tempclass._update_chemical_annotation()
             tempclass._update_sample_metadata()
-            tempclass._remove_metadata_from_data()
+            # tempclass._remove_metadata_from_data()
             split_data[name] = tempclass
         return split_data
 
-    def _split_by_metabolite_column(self, column: str) -> Dict[str, "DatasetManager"]:
+    def _split_by_metabolite_column(self, column: str) -> dict[str, "DatasetManager"]:
         """
         Split the data in multiple independent DataClass instances
         based on the values of a metabolite metadata column
@@ -437,9 +455,9 @@ class DatasetManager:
         column (str): Name of the column in the metabolite metadata table to use for splitting
 
         Returns:
-        Dict[str, DatasetManager]: dictionary where keys are the unique values present in the column and values are the corresponding DataClass instances
+        dict[str, DatasetManager]: dictionary where keys are the unique values present in the column and values are the corresponding DataClass instances
         """
-        split_data: Dict[str, "DatasetManager"] = {}
+        split_data: dict[str, "DatasetManager"] = {}
         for name, group in self.chemical_annotation.groupby(by=column):
             tempdata = self.data[list(group.index)]
             tempclass = DatasetManager(
