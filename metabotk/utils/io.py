@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 
 
-def create_directory(directory_path):
+def create_directory(directory_path: str):
     """
     Creates a directory at the given path.
 
@@ -82,6 +82,16 @@ def read_tables(
     chemical_annotation: str | os.PathLike[str] | pd.DataFrame,
     data: str | os.PathLike[str] | pd.DataFrame,
 ):
+    """
+
+    Args:
+        sample_metadata:
+        chemical_annotation:
+        data:
+
+    Returns:
+
+    """
     dataset_dict = {
         "sample_metadata": parse_input(sample_metadata),
         "chemical_annotation": parse_input(chemical_annotation),
@@ -90,19 +100,38 @@ def read_tables(
     return dataset_dict
 
 
-def dataset_from_prefix(prefix: str, extension: str):
+def dataset_from_prefix(prefix: str):
+    """
+
+    Args:
+        prefix:
+    Returns:
+
+    """
     prefix_dict = {
-        "sample_metadata": f"{prefix}.sm.{extension}",
-        "chemical_annotation": f"{prefix}.ca.{extension}",
-        "data": f"{prefix}.data.{extension}",
+        "sample_metadata": f"{prefix}.samples",
+        "chemical_annotation": f"{prefix}.metabolites",
+        "data": f"{prefix}.data",
     }
     return prefix_dict
 
 
-def read_dataset_from_prefix(prefix: str, extension: str = "tsv"):
-    prefix_dict = dataset_from_prefix(prefix, extension)
+def read_prefix(prefix: str) -> dict[str, pd.DataFrame]:
+    """
+    Parse files from prefix
+    Args:
+        prefix: prefix valid for all three dataset files
+    Returns:
+        Dict of dataframes
+    """
+    prefix_dict = dataset_from_prefix(prefix)
     return read_tables(
         sample_metadata=prefix_dict["sample_metadata"],
         chemical_annotation=prefix_dict["chemical_annotation"],
         data=prefix_dict["data"],
     )
+
+
+class DatasetIO:
+    def __init__(self) -> None:
+        pass
