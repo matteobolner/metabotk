@@ -40,9 +40,6 @@ class MetabolomicDataset:
         self.sample_metadata = sample_metadata
         self.chemical_annotation = chemical_annotation
 
-        self._samples = list(sample_metadata.index)
-        self._metabolites = list(self.chemical_annotation.index)
-
     @staticmethod
     def _setup(
         data: pd.DataFrame,
@@ -74,8 +71,8 @@ class MetabolomicDataset:
 
     @property
     def samples(self) -> list[str]:
-        return self._samples
+        return list(self.sample_metadata.index)
 
     @property
     def metabolites(self) -> list[str]:
-        return self._metabolites
+        return list(self.chemical_annotation.index)

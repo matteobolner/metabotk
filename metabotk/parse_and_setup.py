@@ -1,24 +1,9 @@
-import os
 import pandas as pd
-from pathlib import Path
+import os
+import warnings
 
 
-def create_directory(directory_path: str):
-    """
-    Creates a directory at the given path.
-
-    This function creates a directory at the given path and all parent directories
-    if they do not already exist. If the directory already exists, nothing is done.
-
-    Parameters
-    ----------
-    directory_path : str
-        Path of the directory to be created.
-    """
-    Path(directory_path).mkdir(parents=True, exist_ok=True)
-
-
-def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame):
+def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame) -> pd.DataFrame:
     """
     Parse input data as pandas dataframe or as file path to TSV or CSV file
 
@@ -46,15 +31,15 @@ def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame):
         data = input_data.reset_index()
         return data
     elif isinstance(input_data, str):
-        if input_data.endswith((".tsv", ".csv")):
-            if input_data.endswith(".tsv"):
-                data = pd.read_table(input_data, sep="\t")
-            elif input_data.endswith(".csv"):
-                data = pd.read_csv(input_data)
+        if input_data.endswith(".tsv"):
+            data = pd.read_table(input_data, sep="\t")
+            return data
+        elif input_data.endswith(".csv"):
+            data = pd.read_csv(input_data)
             return data
         else:
             raise TypeError(
-                "Input should be a Pandas DataFrame or a file path to a TSV or CSV file."
+                "Invalid file extension: input should be a Pandas DataFrame or a file path to a TSV or CSV file."
             )
     else:
         raise TypeError(
@@ -81,7 +66,7 @@ def read_tables(
     sample_metadata: str | os.PathLike[str] | pd.DataFrame,
     chemical_annotation: str | os.PathLike[str] | pd.DataFrame,
     data: str | os.PathLike[str] | pd.DataFrame,
-):
+) -> dict[str, pd.DataFrame]:
     """
 
     Args:
@@ -100,7 +85,7 @@ def read_tables(
     return dataset_dict
 
 
-def dataset_from_prefix(prefix: str):
+def dataset_from_prefix(prefix: str) -> dict[str, str]:
     """
 
     Args:
@@ -132,6 +117,79 @@ def read_prefix(prefix: str) -> dict[str, pd.DataFrame]:
     )
 
 
-class DatasetIO:
-    def __init__(self) -> None:
-        pass
+"""
+Functions to setup dataset files for the main class 
+"""
+
+
+def setup_data(data: pd.DataFrame, sample_id_column: str):
+    """
+
+    Args:
+        data:
+        sample_id_column:
+
+    Returns:
+
+    """
+    data.columns = [str(i) for i in data.columns]
+    data.set_index(sample_id_column, inplace=True)
+    return data
+
+
+def setup_sample_metadata(sample_metadata: pd.DataFrame, sample_id_column: str):
+    """
+    Args:
+        sample_metadata:
+        sample_id_column:
+        data:
+
+    Returns:
+
+
+    Raises:
+        ValueError:
+    """
+    # check that sample ID column is found in data
+    if sample_id_column in sample_metadata.columns:
+        # set metadata and data
+        if len(sample_metadata) == 0:
+            raise ValueError("Sample metadata is empty or not properly initialized.")
+        if sample_metadata[sample_id_column].duplicated().any():
+            warnings.warn(
+                "Warning: there are duplicate values in the chosen sample column.\
+                        Consider choosing another column or renaming the duplicated samples"
+            )
+        sample_metadata[sample_id_column] = sample_metadata[sample_id_column].astype(
+            str
+        )
+        sample_metadata.set_index(sample_id_column, inplace=True)
+    else:
+        raise ValueError(f"No sample ID column '{sample_id_column}' found in data")
+    return sample_metadata
+
+
+def setup_chemical_annotation(
+    chemical_annotation: pd.DataFrame, metabolite_id_column: str
+):
+    """
+
+    Args:
+        chemical_annotation:
+        metabolite_id_column:
+
+    Returns:
+
+
+    Raises:
+        ValueError:
+    """
+    # check that metabolite ID column is found in chemical annotation
+    if metabolite_id_column in chemical_annotation.columns:
+        chemical_annotation[metabolite_id_column] = chemical_annotation[
+            metabolite_id_column
+        ].astype(str)
+        chemical_annotation.set_index(metabolite_id_column, inplace=True)
+    else:
+        raise ValueError("No metabolite ID column found in chemical annotation")
+    return chemical_annotation

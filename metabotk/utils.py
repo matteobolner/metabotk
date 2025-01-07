@@ -1,5 +1,21 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
+
+
+def create_directory(directory_path: str):
+    """
+    Creates a directory at the given path.
+
+    This function creates a directory at the given path and all parent directories
+    if they do not already exist. If the directory already exists, nothing is done.
+
+    Parameters
+    ----------
+    directory_path : str
+        Path of the directory to be created.
+    """
+    Path(directory_path).mkdir(parents=True, exist_ok=True)
 
 
 def validate_dataframe(data_frame):

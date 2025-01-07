@@ -1,9 +1,20 @@
 from metabotk.metabolomic_dataset import MetabolomicDataset
 import pandas as pd
 from typing import Literal
+from metabotk.dataset_io import from_excel, read_excel
 
 
-class DatasetProcessor(MetabolomicDataset):
+class DatasetManipulator:
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        sample_metadata: pd.DataFrame,
+        chemical_annotation: pd.DataFrame,
+        sample_id_column: str = "sample",
+        metabolite_id_column: str = "CHEM_ID",
+    ):
+        return
+
     def merge_sample_metadata_data(self) -> pd.DataFrame:
         """
         Merge sample metadata and metabolite abundance data into a single DataFrame.
