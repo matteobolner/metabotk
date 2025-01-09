@@ -1,5 +1,5 @@
 import pandas as pd
-from metabotk.metabolomic_dataset import MetabolomicDataset
+from metabotk.metabolomic_dataset import MetaboTK
 from metabotk.parse_and_setup import read_excel, read_prefix, dataset_from_prefix
 
 """
@@ -18,7 +18,7 @@ def from_excel(
     parsed = read_excel(
         file_path, sample_metadata_sheet, chemical_annotation_sheet, data_sheet
     )
-    return MetabolomicDataset._setup(
+    return MetaboTK._setup(
         data=parsed["data"],
         sample_metadata=parsed["sample_metadata"],
         chemical_annotation=parsed["chemical_annotation"],
@@ -43,7 +43,7 @@ def from_prefix(
 
     """
     parsed = read_prefix(prefix)
-    return MetabolomicDataset._setup(
+    return MetaboTK._setup(
         data=parsed["data"],
         sample_metadata=parsed["sample_metadata"],
         chemical_annotation=parsed["chemical_annotation"],
@@ -57,7 +57,7 @@ Save dataset to file(s)
 """
 
 
-def save_prefix(dataset: MetabolomicDataset, prefix: str):
+def save_prefix(dataset: MetaboTK, prefix: str):
     """
 
     Args:
@@ -72,7 +72,7 @@ def save_prefix(dataset: MetabolomicDataset, prefix: str):
     print(f"Saved to {prefix}")
 
 
-def save_excel(dataset: MetabolomicDataset, file_path, data_sheet="data"):
+def save_excel(dataset: MetaboTK, file_path, data_sheet="data"):
     """
     Save the dataset to an Excel file.
 
