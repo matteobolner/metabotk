@@ -1,50 +1,7 @@
 import pandas as pd
 import os
 import warnings
-
-
-def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame) -> pd.DataFrame:
-    """
-    Parse input data as pandas dataframe or as file path to TSV or CSV file
-
-    This function allows users to provide input data as a pandas DataFrame or
-    as a file path to a TSV or CSV file. If the input is a DataFrame, it is
-    returned as is. If the input is a file path, the function loads the data
-    from the file and returns it as a DataFrame.
-
-    Parameters
-    ----------
-    input_data : pandas.DataFrame or str
-        Input data to be parsed.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Input data as a pandas DataFrame.
-
-    Raises
-    ------
-    TypeError
-        If the input is not a pandas DataFrame or a file path.
-    """
-    if isinstance(input_data, pd.DataFrame):
-        data = input_data.reset_index()
-        return data
-    elif isinstance(input_data, str):
-        if input_data.endswith(".tsv"):
-            data = pd.read_table(input_data, sep="\t")
-            return data
-        elif input_data.endswith(".csv"):
-            data = pd.read_csv(input_data)
-            return data
-        else:
-            raise TypeError(
-                "Invalid file extension: input should be a Pandas DataFrame or a file path to a TSV or CSV file."
-            )
-    else:
-        raise TypeError(
-            "Input should be a Pandas DataFrame or a file path to a TSV or CSV file."
-        )
+from metabotk.utils import parse_input, reset_index_if_not_none
 
 
 def read_excel(
@@ -132,6 +89,9 @@ def setup_data(data: pd.DataFrame, sample_id_column: str):
     Returns:
 
     """
+    data = reset_index_if_not_none(data)
+    if sample_id_column not in data.columns:
+        raise ValueError(f"No sample ID column '{sample_id_column}' found in data")
     data.columns = [str(i) for i in data.columns]
     data.set_index(sample_id_column, inplace=True)
     return data
@@ -150,11 +110,11 @@ def setup_sample_metadata(sample_metadata: pd.DataFrame, sample_id_column: str):
     Raises:
         ValueError:
     """
+
+    sample_metadata = reset_index_if_not_none(sample_metadata)
     # check that sample ID column is found in data
     if sample_id_column in sample_metadata.columns:
         # set metadata and data
-        if len(sample_metadata) == 0:
-            raise ValueError("Sample metadata is empty or not properly initialized.")
         if sample_metadata[sample_id_column].duplicated().any():
             warnings.warn(
                 "Warning: there are duplicate values in the chosen sample column.\
@@ -184,8 +144,16 @@ def setup_chemical_annotation(
     Raises:
         ValueError:
     """
+
+    chemical_annotation = reset_index_if_not_none(chemical_annotation)
     # check that metabolite ID column is found in chemical annotation
     if metabolite_id_column in chemical_annotation.columns:
+        if chemical_annotation[metabolite_id_column].duplicated().any():
+            warnings.warn(
+                "Warning: there are duplicate values in the chosen metabolite column.\
+                        Consider choosing another column or renaming the duplicated metabolites"
+            )
+
         chemical_annotation[metabolite_id_column] = chemical_annotation[
             metabolite_id_column
         ].astype(str)
