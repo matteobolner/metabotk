@@ -5,6 +5,8 @@ from metabotk.parse_and_setup import (
     setup_chemical_annotation,
 )
 
+from metabotk.utils import validate_new_df_shape_index
+
 
 class MetabolomicDataset:
     """
@@ -59,9 +61,9 @@ class MetabolomicDataset:
         # TODO: check if the lines below are really necessary or complicate things
         #######
         sample_metadata = sample_metadata.loc[data.index]
-        sample_metadata.index.name = sample_id_column
+        # sample_metadata.index.name = sample_id_column
         chemical_annotation = chemical_annotation.loc[data.columns]
-        chemical_annotation.index.name = metabolite_id_column
+        # chemical_annotation.index.name = metabolite_id_column
         #######
         return MetabolomicDataset(
             data=data,
@@ -77,8 +79,7 @@ class MetabolomicDataset:
 
     @data.setter
     def data(self, new_data):
-        if new_data.shape != self.data.shape:
-            raise ValueError("Number of samples must match number of data rows")
+        validate_new_df_shape_index(self.data, new_data)
         self.__data = new_data
 
     @property
@@ -87,8 +88,7 @@ class MetabolomicDataset:
 
     @sample_metadata.setter
     def sample_metadata(self, new_sample_metadata):
-        if new_sample_metadata.shape != self.sample_metadata.shape:
-            raise ValueError("Number of metabolites must match number of data columns")
+        validate_new_df_shape_index(self.sample_metadata, new_sample_metadata)
         self.__sample_metadata = new_sample_metadata
 
     @property
@@ -97,8 +97,7 @@ class MetabolomicDataset:
 
     @chemical_annotation.setter
     def chemical_annotation(self, new_chemical_annotation):
-        if new_chemical_annotation.shape != self.chemical_annotation.shape:
-            raise ValueError("Number of metabolites must match number of data columns")
+        validate_new_df_shape_index(self.chemical_annotation, new_chemical_annotation)
         self.__chemical_annotation = new_chemical_annotation
 
     @property
