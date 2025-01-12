@@ -6,10 +6,12 @@ from metabotk.parse_and_setup import (
     read_tables,
     dataset_from_prefix,
     read_prefix,
+    reset_index_if_not_none,
     setup_data,
     setup_sample_metadata,
     setup_chemical_annotation,
 )
+import numpy as np
 
 
 class Helper:
@@ -25,30 +27,6 @@ class Helper:
 @pytest.fixture
 def helper():
     return Helper
-
-
-class TestParseInput:
-    def test_parse_input_pandas_dataframe(self):
-        input_data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
-        assert parse_input(input_data).equals(input_data)
-
-    def test_parse_input_tsv_file(self):
-        tsv_file_path = "data/data.tsv"
-        assert isinstance(parse_input(tsv_file_path), pd.DataFrame)
-
-    def test_parse_input_csv_file(self):
-        csv_file_path = "data/data.csv"
-        assert isinstance(parse_input(csv_file_path), pd.DataFrame)
-
-    def test_parse_invalid_extension(self):
-        file_path = "data/test.pls"
-        with pytest.raises(TypeError):
-            parse_input(file_path)
-
-    def test_parse_input_invalid_input(self):
-        invalid_input = 123  # Not a DataFrame or a file path
-        with pytest.raises(TypeError):
-            parse_input(invalid_input)
 
 
 def test_read_excel(helper):
@@ -79,3 +57,88 @@ def test_dataset_from_prefix():
 def test_read_prefix(helper):
     parsed = read_prefix("data/test")
     helper.test_parsed_dict(parsed)
+
+
+class TestSetupData:
+    def test_setup_data_already_indexed(self):
+        data = pd.read_csv("data/data.csv")
+        data_with_index = data.set_index("PARENT_SAMPLE_NAME")
+        ready_data = setup_data(data_with_index, "PARENT_SAMPLE_NAME")
+        assert ready_data.index.name == "PARENT_SAMPLE_NAME"
+
+    def test_setup_data_not_indexed(self):
+        data = pd.read_csv("data/data.csv")
+        ready_data = setup_data(data, "PARENT_SAMPLE_NAME")
+        assert ready_data.index.name == "PARENT_SAMPLE_NAME"
+
+    def test_setup_data_invalid_sample_id_column(self):
+        data = pd.read_csv("data/data.csv")
+        with pytest.raises(ValueError):
+            setup_data(data, "INVALID_COLUMN_NAME")
+
+    def test_setup_data_column_types(self):
+        data = pd.read_csv("data/data.csv")
+        data_with_index = data.set_index("PARENT_SAMPLE_NAME")
+        ready_data = setup_data(data_with_index, "PARENT_SAMPLE_NAME")
+        ready_data.columns = [int(i) for i in ready_data.columns]
+        assert type(ready_data.columns[1]) is np.int64
+        ready_data = setup_data(ready_data, "PARENT_SAMPLE_NAME")
+        assert type(ready_data.columns[1]) is str
+
+
+class TestSetupSampleMetadata:
+    def test_setup_metadata_already_indexed(self):
+        data = pd.read_csv("data/sample_metadata.csv")
+        data_with_index = data.set_index("PARENT_SAMPLE_NAME")
+        ready_data = setup_sample_metadata(data_with_index, "PARENT_SAMPLE_NAME")
+        assert ready_data.index.name == "PARENT_SAMPLE_NAME"
+
+    def test_setup_metadata_not_indexed(self):
+        data = pd.read_csv("data/sample_metadata.csv")
+        ready_data = setup_sample_metadata(data, "PARENT_SAMPLE_NAME")
+        assert ready_data.index.name == "PARENT_SAMPLE_NAME"
+
+    def test_setup_metadata_invalid_sample_id_column(self):
+        data = pd.read_csv("data/sample_metadata.csv")
+        with pytest.raises(ValueError):
+            setup_sample_metadata(data, "INVALID_COLUMN_NAME")
+
+    def test_setup_metadata_column_types(self):
+        data = pd.read_csv("data/sample_metadata.csv")
+        data_with_index = data.set_index("PARENT_SAMPLE_NAME")
+        ready_data = setup_sample_metadata(data_with_index, "PARENT_SAMPLE_NAME")
+        assert type(ready_data.columns[1]) is str
+
+    def test_setup_metadata_duplicated_values(self):
+        data = pd.read_csv("data/sample_metadata.csv")
+        with pytest.warns():
+            setup_sample_metadata(data, "SUBGROUP")
+
+
+class TestSetupChemicalAnnotation:
+    def test_setup_metadata_already_indexed(self):
+        data = pd.read_csv("data/chemical_annotation.csv")
+        data_with_index = data.set_index("CHEM_ID")
+        ready_data = setup_chemical_annotation(data_with_index, "CHEM_ID")
+        assert ready_data.index.name == "CHEM_ID"
+
+    def test_setup_metadata_not_indexed(self):
+        data = pd.read_csv("data/chemical_annotation.csv")
+        ready_data = setup_chemical_annotation(data, "CHEM_ID")
+        assert ready_data.index.name == "CHEM_ID"
+
+    def test_setup_metadata_invalid_sample_id_column(self):
+        data = pd.read_csv("data/chemical_annotation.csv")
+        with pytest.raises(ValueError):
+            setup_chemical_annotation(data, "INVALID_COLUMN_NAME")
+
+    def test_setup_metadata_column_types(self):
+        data = pd.read_csv("data/chemical_annotation.csv")
+        data_with_index = data.set_index("CHEM_ID")
+        ready_data = setup_chemical_annotation(data_with_index, "CHEM_ID")
+        assert type(ready_data.columns[1]) is str
+
+    def test_setup_metadata_duplicated_values(self):
+        data = pd.read_csv("data/chemical_annotation.csv")
+        with pytest.warns():
+            setup_chemical_annotation(data, "SUPER_PATHWAY")
