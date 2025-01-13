@@ -1,37 +1,36 @@
 from metabotk.metabolomic_dataset import MetabolomicDataset
-from metabotk.dataset_manipulator import DatasetManipulator
-from metabotk.dataset_io import read_excel, read_prefix, save_excel, save_prefix
+from metabotk.dataset_io import DatasetIO
+from metabotk.dataset_operations import DatasetOperations
+import pandas as pd
 
 
 class MetaboTK(MetabolomicDataset):
     def __init__(
         self,
-        data,
-        sample_metadata,
-        chemical_annotation,
+        data=pd.DataFrame(),
+        sample_metadata=pd.DataFrame(),
+        chemical_annotation=pd.DataFrame(),
         sample_id_column="sample",
         metabolite_id_column="CHEM_ID",
     ) -> None:
         super().__init__(
-            data,
-            sample_metadata,
-            chemical_annotation,
-            sample_id_column,
-            metabolite_id_column,
+            data=data,
+            sample_metadata=sample_metadata,
+            chemical_annotation=chemical_annotation,
+            sample_id_column=sample_id_column,
+            metabolite_id_column=metabolite_id_column,
         )
-        self.manipulator = DatasetManipulator()
-        return
 
-    def __getattr__(self, name):
-        if hasattr(self.processor, name):
-            processor_method = getattr(self.processor, name)
+    @property
+    def io(self):
+        """Lazy initialization of DatasetIO instance."""
+        if not hasattr(self, "_io_"):
+            self._io_ = DatasetIO(self)
+        return self._io_
 
-            def wrapper(*args, **kwargs):
-                result = processor_method(self.data, *args, **kwargs)
-                if isinstance(result, list):
-                    self.data = result
-                    return self
-                return result
-
-            return wrapper
-        raise AttributeError(f"'Dataset' object has no attribute '{name}'")
+    @property
+    def ops(self):
+        """Lazy initialization of DatasetEditor instance."""
+        if not hasattr(self, "_operations_"):
+            self._operations_ = DatasetOperations(self)
+        return self._operations_
