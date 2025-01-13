@@ -44,8 +44,9 @@ class MetabolomicDataset:
         self.__samples = list(sample_metadata.index)
         self.__metabolites = list(chemical_annotation.index)
 
-    @staticmethod
+    @classmethod
     def _setup(
+        cls,
         data: pd.DataFrame,
         sample_metadata: pd.DataFrame,
         chemical_annotation: pd.DataFrame,
@@ -65,7 +66,7 @@ class MetabolomicDataset:
         chemical_annotation = chemical_annotation.loc[data.columns]
         chemical_annotation.index.name = metabolite_id_column
         #######
-        return MetabolomicDataset(
+        return cls(
             data=data,
             sample_metadata=sample_metadata,
             chemical_annotation=chemical_annotation,
