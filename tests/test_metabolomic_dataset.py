@@ -4,21 +4,6 @@ import pandas as pd
 import numpy as np
 
 
-def set_pandas_display_options() -> None:
-    """Set pandas display options."""
-    # Ref: https://stackoverflow.com/a/52432757/
-    display = pd.options.display
-    display.max_columns = 1000
-    display.max_rows = 10_000
-    display.max_colwidth = 199
-    display.width = 1000
-    # display.precision = 2  # set as needed
-    # display.float_format = lambda x: '{:,.2f}'.format(x)  # set as needed
-
-
-set_pandas_display_options()
-
-
 @pytest.fixture
 def dataset():
     dataset = MetabolomicDataset._setup(
@@ -80,28 +65,3 @@ class TestMetabolomicDataset:
         new_metabolites = [np.nan for i in dataset.metabolites[0:10]]
         with pytest.raises(ValueError):
             dataset.metabolites = new_metabolites
-
-
-"""
-    def test_setter_getter_name(self):
-        person = Person("Alice", 30)
-        person.set_name("Bob")
-        assert person.get_name() == "Bob"
-
-    def test_setter_getter_age(self):
-        person = Person("Alice", 30)
-        person.set_age(35)
-        assert person.get_age() == 35
-
-    def test_getter_before_setter(self):
-        person = Person("Alice", 30)
-        assert person.get_name() == "Alice"
-        assert person.get_age() == 30
-
-    def test_setter_update_values(self):
-        person = Person("Alice", 30)
-        person.set_name("Charlie")
-        person.set_age(40)
-        assert person.get_name() == "Charlie"
-        assert person.get_age() == 40
-    """
