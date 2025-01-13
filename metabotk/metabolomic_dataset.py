@@ -61,9 +61,9 @@ class MetabolomicDataset:
         # TODO: check if the lines below are really necessary or complicate things
         #######
         sample_metadata = sample_metadata.loc[data.index]
-        # sample_metadata.index.name = sample_id_column
+        sample_metadata.index.name = sample_id_column
         chemical_annotation = chemical_annotation.loc[data.columns]
-        # chemical_annotation.index.name = metabolite_id_column
+        chemical_annotation.index.name = metabolite_id_column
         #######
         return MetabolomicDataset(
             data=data,
