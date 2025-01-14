@@ -20,7 +20,7 @@ class DatasetIO:
         file_path: str,
         sample_metadata_sheet: str = "Sample Meta Data",
         chemical_annotation_sheet: str = "Chemical Annotation",
-        data_sheet: str = "Batch-normalized Data",
+        data_sheet: str = "Data",
         sample_id_column: str = "sample",
         metabolite_id_column: str = "CHEM_ID",
     ):
