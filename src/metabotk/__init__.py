@@ -1,3 +1,8 @@
+from .metabolomic_dataset import MetabolomicDataset
+from .dataset_io import DatasetIO
+from .dataset_operations import DatasetOperations
+from .statistics_handler import Statistics
+
 from .main import MetaboTK
 
 __all__ = ["MetaboTK"]

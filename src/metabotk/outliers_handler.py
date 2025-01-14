@@ -23,7 +23,8 @@ def detect_outliers(data, threshold):
         raise ValueError("Input is empty.")
     if isinstance(data, pd.DataFrame):
         raise TypeError("DataFrame input is not supported.")
-
+    if np.isnan(data).all():
+        return np.zeros(len(data), dtype=bool)
     median = np.nanmedian(data)
     q1 = np.nanquantile(data, 0.25)
     q3 = np.nanquantile(data, 0.75)
