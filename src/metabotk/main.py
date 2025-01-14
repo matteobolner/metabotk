@@ -55,5 +55,5 @@ class MetaboTK(MetabolomicDataset):
     def stats(self):
         """Lazy initialization of Statistics instance."""
         if not hasattr(self, "_statistics_"):
-            self._statistics_ = Statistics(self.data)
+            self._statistics_ = Statistics(self)
         return self._statistics_

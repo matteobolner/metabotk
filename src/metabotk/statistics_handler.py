@@ -189,12 +189,12 @@ class Statistics:
     for a collection of numerical data or a pandas DataFrame.
     """
 
-    def __init__(self, data_frame: pd.DataFrame):
+    def __init__(self, dataset):
         """
         Initializes the StatisticsHandler.
         """
 
-        self.data = data_frame
+        self.dataset = dataset
 
     def metabolite_stats(self, outlier_threshold=5):
         """
@@ -221,14 +221,14 @@ class Statistics:
 
         """
         # Ensure that data is set up properly
-        if self.data.empty:
+        if self.dataset.data.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
 
         # Compute statistics using StatisticsHandler
         metabolite_stats = compute_dataframe_statistics(
-            self.data, outlier_threshold, axis=0
+            self.dataset.data, outlier_threshold, axis=0
         )
         # self.metabolite_stats=metabolite_stats
         return metabolite_stats
@@ -246,18 +246,20 @@ class Statistics:
              DataFrame containing statistics for each sample across all metabolites.
         """
         # Ensure that data is set up properly
-        if self.data.empty:
+        if self.dataset.data.empty:
             raise ValueError(
                 "No data available. Please import data before computing statistics."
             )
         sample_stats = compute_dataframe_statistics(
-            self.data, outlier_threshold, axis=1
+            self.dataset.data, outlier_threshold, axis=1
         )
 
         # Compute Total Sum of Abundance (TSA) for each sample across all metabolites
-        tsa_complete_only = total_sum_abundance(self.data, exclude_incomplete=True)
+        tsa_complete_only = total_sum_abundance(
+            self.dataset.data, exclude_incomplete=True
+        )
         tsa_complete_only.name = "TSA_complete_only"
-        tsa_all = total_sum_abundance(self.data, exclude_incomplete=False)
+        tsa_all = total_sum_abundance(self.dataset.data, exclude_incomplete=False)
         tsa_all.name = "TSA_including_incomplete"
         tsa = pd.concat([tsa_complete_only, tsa_all], axis=1)
 
@@ -267,10 +269,10 @@ class Statistics:
         return sample_stats
 
     def corr(self, method: str = "pearson"):
-        return compute_correlations(self.data, method)
+        return compute_correlations(self.dataset.data, method)
 
     def top_corr(self, n: int = 10, method: str = "pearson"):
-        return get_top_n_correlations(self.data, n, method)
+        return get_top_n_correlations(self.dataset.data, n, method)
 
     def remove_outliers(
         self, threshold: float, on: Literal["samples", "metabolites"] = "metabolites"
@@ -279,7 +281,7 @@ class Statistics:
             axis = 0
         elif on == "samples":
             axis = 1
-        return outliers.remove_outliers(self.data, threshold, axis)
+        return outliers.remove_outliers(self.dataset.data, threshold, axis)
 
     def remove_missing(
         self, threshold: float, on: Literal["samples", "metabolites"] = "metabolites"
@@ -288,4 +290,4 @@ class Statistics:
             axis = 0
         elif on == "samples":
             axis = 1
-        return missing.drop_missing_from_dataframe(self.data, threshold, axis)
+        return missing.drop_missing_from_dataframe(self.dataset.data, threshold, axis)
