@@ -59,13 +59,15 @@ class MetabolomicDataset:
             chemical_annotation, metabolite_id_column
         )
 
-        # TODO: check if the lines below are really necessary or complicate things
-        #######
+        metabolites = list(
+            set(data.columns).intersection(set(chemical_annotation.index))
+        )
         sample_metadata = sample_metadata.loc[data.index]
         sample_metadata.index.name = sample_id_column
+        data = data[metabolites]
         chemical_annotation = chemical_annotation.loc[data.columns]
         chemical_annotation.index.name = metabolite_id_column
-        #######
+
         return cls(
             data=data,
             sample_metadata=sample_metadata,
