@@ -97,7 +97,7 @@ class DatasetIO:
         )
         print(f"Saved to {prefix}")
 
-    def save_excel(self, file_path, data_sheet="data"):
+    def save_excel(self, file_path, data_sheet="Data"):
         """
         Save the dataset to an Excel file.
 
@@ -114,7 +114,7 @@ class DatasetIO:
         """
         with pd.ExcelWriter(file_path) as writer:
             self.dataset.chemical_annotation.to_excel(
-                writer, sheet_name="chemical_annotation"
+                writer, sheet_name="Chemical Annotation"
             )
-            self.dataset.sample_metadata.to_excel(writer, sheet_name="sample_metadata")
+            self.dataset.sample_metadata.to_excel(writer, sheet_name="Sample Meta Data")
             self.dataset.data.to_excel(writer, sheet_name=data_sheet)
