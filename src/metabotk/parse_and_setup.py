@@ -120,9 +120,9 @@ def setup_sample_metadata(sample_metadata: pd.DataFrame, sample_id_column: str):
                 "Warning: there are duplicate values in the chosen sample column.\
                         Consider choosing another column or renaming the duplicated samples"
             )
-        sample_metadata[sample_id_column] = sample_metadata[sample_id_column].astype(
-            str
-        )
+        # sample_metadata[sample_id_column] = sample_metadata[sample_id_column].astype(
+        #    str
+        # )
         sample_metadata.set_index(sample_id_column, inplace=True)
     else:
         raise ValueError(f"No sample ID column '{sample_id_column}' found in data")
@@ -156,7 +156,7 @@ def setup_chemical_annotation(
 
         chemical_annotation[metabolite_id_column] = chemical_annotation[
             metabolite_id_column
-        ].astype(str)
+        ]  # .astype(str)
         chemical_annotation.set_index(metabolite_id_column, inplace=True)
     else:
         raise ValueError("No metabolite ID column found in chemical annotation")
