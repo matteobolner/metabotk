@@ -1,5 +1,10 @@
 import pandas as pd
-from metabotk.parse_and_setup import read_excel, read_prefix, dataset_from_prefix
+from metabotk.parse_and_setup import (
+    read_excel,
+    read_prefix,
+    dataset_from_prefix,
+    read_tables,
+)
 
 """
 Setup dataset from file(s)
@@ -22,6 +27,23 @@ class DatasetIO:
         parsed = read_excel(
             file_path, sample_metadata_sheet, chemical_annotation_sheet, data_sheet
         )
+        return self.dataset._setup(
+            data=parsed["data"],
+            sample_metadata=parsed["sample_metadata"],
+            chemical_annotation=parsed["chemical_annotation"],
+            sample_id_column=sample_id_column,
+            metabolite_id_column=metabolite_id_column,
+        )
+
+    def from_tables(
+        self,
+        sample_metadata,
+        chemical_annotation,
+        data,
+        sample_id_column: str = "sample",
+        metabolite_id_column: str = "CHEM_ID",
+    ):
+        parsed = read_tables(sample_metadata, chemical_annotation, data)
         return self.dataset._setup(
             data=parsed["data"],
             sample_metadata=parsed["sample_metadata"],
