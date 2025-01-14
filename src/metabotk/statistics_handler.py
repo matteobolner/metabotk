@@ -196,6 +196,15 @@ class Statistics:
 
         self.dataset = dataset
 
+    def show_methods(self):
+        methods = [attr for attr in dir(self) if callable(getattr(self, attr))]
+
+        user_methods = [method for method in methods if not method.startswith("__")]
+
+        print(f"Available methods in {self.__class__.__name__}:")
+        for method in user_methods:
+            print(f"- {method}")
+
     def metabolite_stats(self, outlier_threshold=5):
         """
         Computes basic statistics for the metabolomics data metabolite-wise
