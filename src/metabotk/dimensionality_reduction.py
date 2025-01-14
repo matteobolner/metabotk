@@ -12,14 +12,8 @@ class DimensionalityReduction:
     Analysis (PCA) on the data.
     """
 
-    def __init__(self, data_manager):
-        """
-        Initialize the class.
-
-        Parameters:
-            data_manager (DataManager): DataManager instance containing the data.
-        """
-        self.data_manager = data_manager
+    def __init__(self, dataset):
+        self.dataset = dataset
 
     def get_pca(self, n_components=3, get_pca_object=False):
         """
@@ -35,7 +29,7 @@ class DimensionalityReduction:
             pca_transformed (DataFrame): DataFrame containing the PCA-transformed data.
             pca (PCA): sklearn PCA object.
         """
-        input_data = self.data_manager.data
+        input_data = self.dataset.data
         # Check if all columns have numeric data types
         if input_data.isnull().any().any():
             # Ignore columns with empty values
@@ -58,14 +52,14 @@ class DimensionalityReduction:
         pca_transformed = pd.DataFrame(
             pca.transform(scaled_data),
             columns=[f"PC{i}" for i in range(1, n_components + 1)],
-            index=self.data_manager.data.index,
+            index=self.dataset.data.index,
         )
 
         # Concatenate with sample metadata
-        pca_transformed = self.data_manager.sample_metadata.merge(
+        pca_transformed = self.dataset.sample_metadata.merge(
             pca_transformed, left_index=True, right_index=True
         )
-        if get_pca_object == True:
+        if get_pca_object:
             return pca_transformed, pca
         else:
             return pca_transformed

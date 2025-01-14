@@ -4,6 +4,8 @@ from metabotk.dataset_operations import DatasetOperations
 from metabotk.statistics_handler import Statistics
 from metabotk.feature_selection import FeatureSelection
 from metabotk.models_handler import ModelsHandler
+from metabotk.dimensionality_reduction import DimensionalityReduction
+from metabotk.visualization_handler import Visualization
 import pandas as pd
 
 
@@ -73,3 +75,17 @@ class MetaboTK(MetabolomicDataset):
         if not hasattr(self, "_models_handler_"):
             self._models_handler_ = ModelsHandler(self)
         return self._models_handler_
+
+    @property
+    def dimred(self):
+        """Lazy initialization of DimensionalityReduction instance."""
+        if not hasattr(self, "_dimensionality_reduction_"):
+            self._dimensionality_reduction_ = DimensionalityReduction(self)
+        return self._dimensionality_reduction_
+
+    @property
+    def viz(self):
+        """Lazy initialization of VisualizationHandler instance."""
+        if not hasattr(self, "_visualization_"):
+            self._visualization_ = Visualization(self)
+        return self._visualization_

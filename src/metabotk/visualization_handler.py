@@ -12,21 +12,19 @@ from metabotk.dimensionality_reduction import DimensionalityReduction
 
 
 class Visualization:
-    def __init__(self, data_manager) -> None:
+    def __init__(self, dataset) -> None:
         """
         Initialize the class.
 
         Parameters:
         ----------
-        data_manager: Object
+        dataset: Object
             Instance of DataManager class
         """
-        self.data_manager = data_manager
+        self.dataset = dataset
         """Instance of DataManager class"""
 
-        self.dimensionality_reduction = DimensionalityReduction(
-            data_manager=self.data_manager
-        )
+        self.dimensionality_reduction = DimensionalityReduction(self.dataset)
         """Instance of DimensionalityReduction class"""
 
     def plot_pca(self, pca=None, x="PC1", y="PC2", hue=None, style=None, savepath=None):
@@ -69,7 +67,7 @@ class Visualization:
 
     def plot_pca_grid(
         self,
-        pca: pd.DataFrame = None,
+        pca: Optional[pd.DataFrame] = None,
         hue: Optional[str] = None,
         savepath: Optional[str] = None,
     ) -> sns.axisgrid.PairGrid:
@@ -104,7 +102,7 @@ class Visualization:
         )
 
         if savepath:
-            plot.fig.savefig(savepath)
+            plot.figure.savefig(savepath)
 
     def plot_metabolite(self, metabolite, x=None, hue=None, savepath=None):
         """
@@ -128,8 +126,8 @@ class Visualization:
             Seaborn scatterplot object.
         """
         if not x:
-            x = self.data_manager._sample_id_column
-        data = self.data_manager.extract_metabolites(metabolite)
+            x = self.dataset._sample_id_column
+        data = self.dataset.extract_metabolites(metabolite)
         plot = sns.scatterplot(data=data, x=x, y=str(metabolite), hue=hue)
         if savepath:
             plot.figure.savefig(savepath)
