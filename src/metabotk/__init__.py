@@ -1,4 +1,6 @@
-# from src.metabotk.main import MetaboTK
+from .main import MetaboTK
+
+__all__ = ["MetaboTK"]
 
 # from .main import MetaboTK
 
