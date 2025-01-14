@@ -16,24 +16,24 @@ class ModelsHandler:
     pickle files in that directory.
 
     Attributes:
-        data_manager (DataManager): DataManager instance containing the data
+        dataset (DataManager): DataManager instance containing the data
         formula (str): formula used to fit the linear model
         merged (DataFrame): merged dataframe of sample metadata and data
         residuals (DataFrame): dataframe of residuals, initially full of NaNs
     """
 
-    def __init__(self, data_manager) -> None:
+    def __init__(self, dataset) -> None:
         """
         Initialize the class.
 
         Parameters:
-            data_manager (DataManager): DataManager instance containing the data
+            dataset (DataManager): DataManager instance containing the data
             formula (str): formula used to fit the linear model
             models_path (str): path to directory where models will be saved
         """
-        self.data_manager = data_manager
-        self.merged = self.data_manager.merge_sample_metadata_data()
-        self.residuals = self.data_manager.data.copy()
+        self.dataset = dataset
+        self.merged = self.dataset.ops.merge_sample_metadata_data()
+        self.residuals = self.dataset.data.copy()
         self.residuals.loc[:] = np.nan
 
     def fit_linear_model(self, metabolite, formula):
@@ -64,7 +64,7 @@ class ModelsHandler:
         """
         if models_path:
             create_directory(models_path)
-        for metabolite in self.data_manager.metabolites:
+        for metabolite in self.dataset.metabolites:
             residuals, model = self.fit_linear_model(metabolite, formula)
             self.residuals[metabolite] = residuals
             if models_path:

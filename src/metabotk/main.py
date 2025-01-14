@@ -2,6 +2,7 @@ from metabotk.metabolomic_dataset import MetabolomicDataset
 from metabotk.dataset_io import DatasetIO
 from metabotk.dataset_operations import DatasetOperations
 from metabotk.statistics_handler import Statistics
+from metabotk.feature_selection import FeatureSelection
 import pandas as pd
 
 
@@ -57,3 +58,17 @@ class MetaboTK(MetabolomicDataset):
         if not hasattr(self, "_statistics_"):
             self._statistics_ = Statistics(self)
         return self._statistics_
+
+    @property
+    def fs(self):
+        """Lazy initialization of FeatureSelection instance."""
+        if not hasattr(self, "_feature_selection_"):
+            self._feature_selection_ = FeatureSelection(self)
+        return self._feature_selection_
+
+    @property
+    def lm(self):
+        """Lazy initialization of ModelsHandler instance."""
+        if not hasattr(self, "_models_handler_"):
+            self._models_handler_ = FeatureSelection(self)
+        return self._models_handler_
