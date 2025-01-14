@@ -1,4 +1,4 @@
-from src.metabotk.main import MetaboTK
+# from src.metabotk.main import MetaboTK
 
 # from .main import MetaboTK
 
