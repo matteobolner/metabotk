@@ -1,6 +1,7 @@
-from .utils import *
 from .metabolomic_dataset import MetabolomicDataset
-from .parse_and_setup import *
+
+from metabotk.main import MetaboTK
+
 
 """
 from .outliers_handler import OutlierHandler
