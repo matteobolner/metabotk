@@ -7,9 +7,9 @@ import numpy as np
 @pytest.fixture
 def dataset():
     dataset = MetabolomicDataset._setup(
-        data=pd.read_csv("data/data.csv"),
-        sample_metadata=pd.read_csv("data/sample_metadata.csv"),
-        chemical_annotation=pd.read_csv("data/chemical_annotation.csv"),
+        data=pd.read_csv("tests/test_data/data.csv"),
+        sample_metadata=pd.read_csv("tests/test_data/sample_metadata.csv"),
+        chemical_annotation=pd.read_csv("tests/test_data/chemical_annotation.csv"),
         sample_id_column="PARENT_SAMPLE_NAME",
         metabolite_id_column="CHEM_ID",
     )

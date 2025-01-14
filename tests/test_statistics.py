@@ -1,5 +1,5 @@
 import pytest
-from metabotk.statistics_handler import (
+from src.metabotk.statistics_handler import (
     Statistics,
     compute_correlations,
     get_top_n_correlations,
@@ -342,7 +342,7 @@ class TestDataFrameBasicStats:
         assert result.iloc[-1, -1] == 0
 
 
-test_data = pd.read_csv("data/data.csv")
+test_data = pd.read_csv("tests/test_data/data.csv")
 test_data = test_data[test_data.columns[5:10]].iloc[10:20]
 test_values_series = test_data["212"]
 

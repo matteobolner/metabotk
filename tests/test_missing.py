@@ -5,7 +5,7 @@ import pandas as pd
 import metabotk.missing_handler as missing
 
 # setup test data
-test_data = pd.read_csv("data/data.csv")
+test_data = pd.read_csv("tests/test_data/data.csv")
 test_data = test_data[test_data.columns[5:10]].iloc[10:20]
 test_values_series = test_data["212"]
 test_values_list = test_values_series.tolist()

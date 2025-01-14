@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 import numpy as np
-from metabotk.utils import (
+from src.metabotk.utils import (
     validate_dataframe,
     ensure_numeric_data,
     parse_input,
@@ -12,20 +12,20 @@ from metabotk.utils import (
 
 class TestValidateNewShapeIndex:
     def test_validate_new_shape_index(self):
-        data = pd.read_csv("data/data.csv")
+        data = pd.read_csv("tests/test_data/data.csv")
         data = data.set_index("PARENT_SAMPLE_NAME")
         new_data = pd.DataFrame(np.nan, index=data.index, columns=data.columns)
         validate_new_df_shape_index(data, new_data)
 
     def test_different_shape(self):
-        data = pd.read_csv("data/data.csv")
+        data = pd.read_csv("tests/test_data/data.csv")
         data = data.set_index("PARENT_SAMPLE_NAME")
         new_data = data.iloc[0:10]
         with pytest.raises(ValueError):
             validate_new_df_shape_index(data, new_data)
 
     def test_different_index(self):
-        data = pd.read_csv("data/data.csv")
+        data = pd.read_csv("tests/test_data/data.csv")
         data = data.set_index("PARENT_SAMPLE_NAME")
         new_data = data.copy()
         new_data.index.name = "INVALID_INDEX"
@@ -91,7 +91,7 @@ class TestEnsureNumericData:
 
 
 def test_reset_index_if_not_none():
-    data = pd.read_csv("data/sample_metadata.csv")
+    data = pd.read_csv("tests/test_data/sample_metadata.csv")
     data_after = reset_index_if_not_none(data)
     assert data.index.name is None
     data = data.set_index("PARENT_SAMPLE_NAME")
@@ -106,11 +106,11 @@ class TestParseInput:
         assert parse_input(input_data).equals(input_data)
 
     def test_parse_input_tsv_file(self):
-        tsv_file_path = "data/data.tsv"
+        tsv_file_path = "tests/test_data/data.tsv"
         assert isinstance(parse_input(tsv_file_path), pd.DataFrame)
 
     def test_parse_input_csv_file(self):
-        csv_file_path = "data/data.csv"
+        csv_file_path = "tests/test_data/data.csv"
         assert isinstance(parse_input(csv_file_path), pd.DataFrame)
 
     def test_parse_input_invalid_input(self):
@@ -119,13 +119,13 @@ class TestParseInput:
             parse_input(invalid_input)
 
     def test_parse_input_invalid_extension(self):
-        invalid_input = "data/test.invalid"  # Not a DataFrame or a file path
+        invalid_input = "tests/test_data/test.invalid"  # Not a DataFrame or a file path
         with pytest.raises(TypeError):
             parse_input(invalid_input)
 
     def test_parse_input_custom_prefix_ending(self):
-        data = "data/test.data"
-        samples = "data/test.samples"
-        metabolites = "data/test.metabolites"
+        data = "tests/test_data/test.data"
+        samples = "tests/test_data/test.samples"
+        metabolites = "tests/test_data/test.metabolites"
         for i in [data, samples, metabolites]:
             assert isinstance(parse_input(i), pd.DataFrame)
