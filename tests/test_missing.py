@@ -59,13 +59,13 @@ class TestCountMissingValues:
     data = test_data
 
     def test_count_missing_values_column_wise(self):
-        missing_counts = missing._count_missing_in_dataframe(self.data, axis=0)
+        missing_counts = missing.count_missing_in_dataframe(self.data, axis=0)
         missing_counts_to_assert = pd.Series([2, 0, 0, 0, 4])
         missing_counts_to_assert.index = self.data.columns
         assert missing_counts_to_assert.equals(missing_counts)
 
     def test_count_missing_values_row_wise(self):
-        missing_counts = missing._count_missing_in_dataframe(self.data, axis=1)
+        missing_counts = missing.count_missing_in_dataframe(self.data, axis=1)
         missing_counts_to_assert = pd.Series([0, 1, 0, 1, 2, 0, 0, 0, 1, 1])
         missing_counts_to_assert.index = self.data.index
         assert missing_counts_to_assert.equals(missing_counts)
@@ -107,23 +107,23 @@ class TestDropOverThreshold2:
     data = test_data
 
     def test_drop_columns_with_missing_over_threshold_0(self):
-        remaining = missing._drop_missing_from_dataframe(self.data, axis=0, threshold=0)
+        remaining = missing.drop_missing_from_dataframe(self.data, axis=0, threshold=0)
         assert np.array_equal(
             list(remaining.columns),
             ["229", "250", "254"],
         )
 
     def test_drop_rows_with_missing_over_threshold_0(self):
-        remaining = missing._drop_missing_from_dataframe(self.data, axis=1, threshold=0)
+        remaining = missing.drop_missing_from_dataframe(self.data, axis=1, threshold=0)
         assert np.array_equal(
             list(remaining.index),
             [10, 12, 15, 16, 17],
         )
 
     def test_drop_columns_with_missing_over_threshold_1(self):
-        remaining = missing._drop_missing_from_dataframe(self.data, axis=0, threshold=1)
+        remaining = missing.drop_missing_from_dataframe(self.data, axis=0, threshold=1)
         assert self.data.equals(remaining)
 
     def test_drop_rows_with_missing_over_threshold_1(self):
-        remaining = missing._drop_missing_from_dataframe(self.data, axis=1, threshold=1)
+        remaining = missing.drop_missing_from_dataframe(self.data, axis=1, threshold=1)
         assert self.data.equals(remaining)

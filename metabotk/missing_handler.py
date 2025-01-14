@@ -2,7 +2,7 @@ import numpy as np
 
 import pandas as pd
 from metabotk.utils import validate_dataframe
-
+from typing import Literal
 
 """
 Module for detecting and counting missing values in data,
@@ -41,7 +41,7 @@ def _detect_missing(data):
     return is_missing
 
 
-def _count_missing(data):
+def count_missing(data):
     """
     Counts missing values in a collection.
 
@@ -57,7 +57,7 @@ def _count_missing(data):
     return n_missing
 
 
-def _count_missing_in_dataframe(data_frame, axis=0):
+def count_missing_in_dataframe(data_frame, axis=0):
     """
     Counts missing values in each row or column of a DataFrame.
 
@@ -87,7 +87,7 @@ def _drop_columns_with_missing(data_frame, threshold=0.25):
     """
     _validate_threshold(threshold)
     validate_dataframe(data_frame)
-    missing = _count_missing_in_dataframe(data_frame, axis=0)
+    missing = count_missing_in_dataframe(data_frame, axis=0)
     to_drop = missing[missing / len(data_frame) > threshold]
     to_drop = data_frame[list(to_drop.index)]
     return to_drop
@@ -105,14 +105,16 @@ def _drop_rows_with_missing(data_frame, threshold=0.25):
     """
     _validate_threshold(threshold)
     validate_dataframe(data_frame)
-    missing = _count_missing_in_dataframe(data_frame, axis=1)
+    missing = count_missing_in_dataframe(data_frame, axis=1)
     to_drop = missing[missing / len(data_frame.columns) > threshold]
     to_drop = data_frame.loc[to_drop.index]
     return to_drop
 
 
-def _drop_missing_from_dataframe(
-    data_frame: pd.DataFrame, axis: int = 0, threshold: float = 0.25
+def drop_missing_from_dataframe(
+    data_frame: pd.DataFrame,
+    threshold: float = 0.25,
+    axis: Literal[0, 1] = 0,
 ):
     """
     Remove columns or rows with missing values above the threshold.
@@ -130,7 +132,7 @@ def _drop_missing_from_dataframe(
         remaining_data = data_frame.drop(columns=to_drop.columns)
         return remaining_data
 
-    if axis == 1:
+    elif axis == 1:
         to_drop = _drop_rows_with_missing(data_frame=data_frame, threshold=threshold)
         print(f"Removed {len(to_drop.index)} rows")
         remaining_data = data_frame.drop(index=to_drop.index)

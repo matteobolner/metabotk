@@ -1,14 +1,19 @@
 import pytest
-from metabotk.statistics_handler import *
+from metabotk.statistics_handler import (
+    Statistics,
+    compute_correlations,
+    get_top_n_correlations,
+    coefficient_of_variation,
+    compute_statistics,
+    compute_dataframe_statistics,
+)
+from metabotk.metabolomic_dataset import MetabolomicDataset
 from tests.testing_functions import (
     create_test_dataframe_with_missing,
     create_test_dataframe_with_outliers,
 )
 import numpy as np
 import pandas as pd
-import warnings
-
-statistics_handler = StatisticsHandler(data_frame=None)
 
 
 class TestCoefficientOfVariation:
@@ -22,14 +27,14 @@ class TestCoefficientOfVariation:
         ],
     )
     def test_correct_results(self, input_data, expected_output):
-        result = statistics_handler.coefficient_of_variation(input_data)
+        result = coefficient_of_variation(input_data)
         assert result == expected_output
 
     def test_empty_or_wrong_input(self):
         with pytest.raises(ValueError):
-            result = statistics_handler.coefficient_of_variation([])
+            coefficient_of_variation([])
         with pytest.raises(TypeError):
-            result = statistics_handler.coefficient_of_variation([1, 2, "aa"])
+            coefficient_of_variation([1, 2, "aa"])
 
 
 class TestComputeStatistics:
@@ -111,27 +116,23 @@ class TestComputeStatistics:
         ],
     )
     def test_compute_statistics(self, input_data, expected_output):
-        result = statistics_handler.compute_statistics(input_data, outlier_threshold=5)
+        result = compute_statistics(input_data, outlier_threshold=5)
         pd.testing.assert_series_equal(result, expected_output)
 
     def test_input_validation(self):
         # Test with invalid input types
         with pytest.raises(TypeError):
-            statistics_handler.compute_statistics("invalid_input", outlier_threshold=5)
+            compute_statistics("invalid_input", outlier_threshold=5)
 
         with pytest.raises(TypeError):
-            statistics_handler.compute_statistics(
-                {"a": 1, "b": 2, "c": 3}, outlier_threshold=5
-            )
+            compute_statistics({"a": 1, "b": 2, "c": 3}, outlier_threshold=5)
 
         # Test with empty input
         with pytest.raises(ValueError):
-            statistics_handler.compute_statistics([], outlier_threshold=5)
+            compute_statistics([], outlier_threshold=5)
         # Test with input containing non-numeric elements
         with pytest.raises(TypeError):
-            statistics_handler.compute_statistics(
-                [1, 2, "a", 4, 5], outlier_threshold=5
-            )
+            compute_statistics([1, 2, "a", 4, 5], outlier_threshold=5)
 
 
 class TestDataFrameBasicStats:
@@ -331,19 +332,13 @@ class TestDataFrameBasicStats:
 
     def test_dataframe_stats(self, test_data):
         data, expected_output, axis = test_data
-        statistics_handler = StatisticsHandler(data_frame=data)
-        result = statistics_handler.compute_dataframe_statistics(
-            axis=axis, outlier_threshold=5
-        )
+        result = compute_dataframe_statistics(data, axis=axis, outlier_threshold=5)
         pd.testing.assert_frame_equal(result, expected_output)
 
     def test_dataframe_stats_different_outlier_threshold(self, test_data):
         data, expected_output, axis = test_data
-        statistics_handler = StatisticsHandler(data_frame=data)
 
-        result = statistics_handler.compute_dataframe_statistics(
-            axis=axis, outlier_threshold=100
-        )
+        result = compute_dataframe_statistics(data, axis=axis, outlier_threshold=100)
         assert result.iloc[-1, -1] == 0
 
 
@@ -353,9 +348,11 @@ test_values_series = test_data["212"]
 
 
 class TestTopCorrelations:
-    statistics_handler = StatisticsHandler(data_frame=test_data)
-
     def test_top_1_correlations(self):
-        assert self.statistics_handler.get_top_n_correlations(n=1)[
-            "correlated_ids"
-        ].tolist() == ["250", "273", "212", "273", "254"]
+        assert get_top_n_correlations(test_data, n=1)["correlated_ids"].tolist() == [
+            "250",
+            "273",
+            "212",
+            "273",
+            "254",
+        ]
