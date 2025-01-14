@@ -8,7 +8,7 @@ def read_excel(
     file_path: str | os.PathLike[str],
     sample_metadata_sheet: str = "Sample Meta Data",
     chemical_annotation_sheet: str = "Chemical Annotation",
-    data_sheet: str = "Batch-normalized Data",
+    data_sheet: str = "Data",
 ) -> dict[str, pd.DataFrame]:
     sheets = pd.read_excel(file_path, sheet_name=None)
     dataset_dict = {
