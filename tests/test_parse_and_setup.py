@@ -33,7 +33,7 @@ def helper():
 
 def test_read_excel(helper):
     file_path = "tests/test_data/cdt_demo.xlsx"
-    parsed = read_excel(file_path)
+    parsed = read_excel(file_path, data_sheet="Batch-normalized Data")
     helper.test_parsed_dict(parsed)
 
 
