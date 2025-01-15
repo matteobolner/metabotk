@@ -192,6 +192,8 @@ class FeatureSelection:
 
         for fold, (train_idx, val_idx) in enumerate(skf_splits):
             foldname = fold + 1
+            train_idx = X.iloc[train_idx].index
+            val_idx = X.iloc[val_idx].index
             train = self.dataset.ops.subset(what="samples", ids=train_idx)
             val = self.dataset.ops.subset(what="samples", ids=val_idx)
             # train = X.iloc[train_idx]
