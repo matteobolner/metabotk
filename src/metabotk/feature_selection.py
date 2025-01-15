@@ -9,7 +9,7 @@ Currently implemented methods:
 
 import dill
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.model_selection import StratifiedKFold
 from boruta_py_versioned import BorutaPy
 import pandas as pd
 from metabotk.utils import create_directory
@@ -26,14 +26,14 @@ class FeatureSelection:
         group (str): Column name containing sample class information
     """
 
-    def __init__(self, data_manager):
+    def __init__(self, dataset):
         """
         Initiate the class
 
         Args:
             data_manager (DatasetManager): DatasetManager object with data to be selected
         """
-        self.data_manager = data_manager
+        self.dataset = dataset
 
     def setup_random_forest(
         self,
@@ -55,7 +55,6 @@ class FeatureSelection:
             RandomForestClassifier: Random Forest classifier
         """
         if kind == "classifier":
-
             rf = RandomForestClassifier(
                 n_jobs=threads,
                 class_weight=class_weight,
@@ -109,9 +108,9 @@ class FeatureSelection:
         """
         if not y_column:
             raise ValueError("y value must be specified")
-        X = self.data_manager.data.values
+        X = self.dataset.data.values
 
-        y = self.data_manager.sample_metadata[y_column].values
+        y = self.dataset.sample_metadata[y_column].values
 
         rf = self.setup_random_forest(
             random_state=random_state,
@@ -134,14 +133,14 @@ class FeatureSelection:
             feat_selector.importance_history_,
             index=range(len(feat_selector.importance_history_)),
         )
-        importance_history.columns = self.data_manager.metabolites
+        importance_history.columns = self.dataset.metabolites
         importance_history.index.name = "iteration"
         importance_history = importance_history.reset_index()
 
         ranking = pd.DataFrame(
             feat_selector.ranking_,
             columns=["rank"],
-            index=self.data_manager.metabolites,
+            index=self.dataset.metabolites,
         )
         ranking.index.name = "metabolite"
         ranking = ranking.reset_index()
@@ -182,23 +181,28 @@ class FeatureSelection:
             Dictionary with keys as fold numbers and values as the train
             dataframes.
         """
-        X = self.data_manager.data
+        X = self.dataset.data
         split_train = {}
-        split_val = {}
-        y = self.data_manager.sample_metadata[stratification_column]
+        split_test = {}
+        y = self.dataset.sample_metadata[stratification_column]
         skf = StratifiedKFold(n_splits=int(n_splits))
         skf_splits = skf.split(X, y)
         if output_dir:
             create_directory(output_dir)
 
-        for fold, (train_idx, val_idx) in enumerate(skf_splits):
+        for fold, (train_idx, test_idx) in enumerate(skf_splits):
             foldname = fold + 1
-            train = X.iloc[train_idx]
-            val = X.iloc[val_idx]
+            train_idx = X.iloc[train_idx].index
+            test_idx = X.iloc[test_idx].index
+            train = self.dataset.ops.subset(what="samples", ids=train_idx)
+            test = self.dataset.ops.subset(what="samples", ids=test_idx)
+            # train = X.iloc[train_idx]
+            # test = X.iloc[test_idx]
             split_train[foldname] = train
-            split_val[foldname] = val
-            if output_dir:
-                train.to_csv(f"{output_dir}/{foldname}_train.tsv", sep="\t")
-                val.to_csv(f"{output_dir}/{foldname}_val.tsv", sep="\t")
+            split_test[foldname] = test
 
-        return split_train, split_val
+            if output_dir:
+                train.io.save_excel(f"{output_dir}/{foldname}_train.xlsx")
+                test.io.save_excel(f"{output_dir}/{foldname}_test.xlsx")
+
+        return {"training_set": split_train, "test_set": split_test}

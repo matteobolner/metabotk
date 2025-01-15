@@ -3,6 +3,6 @@ src/__pycache__/
 tests/__pycache__/
 .ftpconfig
 .coverage
-data
+tests/test_data
 metabotk/local_test.py
 .venv/

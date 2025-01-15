@@ -1,1 +1,2 @@
-Controlla metaboprep e metabolomicsR
+- Controlla metaboprep e metabolomicsR
+- Handle all-nan columns in statitsics

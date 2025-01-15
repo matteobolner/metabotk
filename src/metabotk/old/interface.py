@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 from metabotk.outliers_handler import OutlierHandler
 from metabotk.missing_handler import MissingDataHandler
 from metabotk.statistics_handler import StatisticsHandler
@@ -20,9 +18,9 @@ class MetaboTK(DatasetManager):
 
     def __init__(
         self,
-        data_provider="metabolon",
-        sample_id_column=None,
-        metabolite_id_column="CHEM_ID",
+        data_provider: str = "metabolon",
+        sample_id_column: str | None = None,
+        metabolite_id_column: str = "CHEM_ID",
     ) -> None:
         """
         Initialize the class.
@@ -128,12 +126,12 @@ class MetaboTK(DatasetManager):
         else:
             return remaining_data
 
-    def split_by_sample_column(self, columns: List[str]) -> Dict[str, "MetaboTK"]:
+    def split_by_sample_column(self, columns: list[str]) -> Dict[str, "MetaboTK"]:
         """
         Split the data based on the sample column(s).
 
         Parameters:
-            columns (list): List of column names containing the sample IDs.
+            columns (list): list of column names containing the sample IDs.
 
         Returns:
             dict: Dictionary with the split data and sample metadata, as a MetaboTK instance.
@@ -154,12 +152,12 @@ class MetaboTK(DatasetManager):
             split_data_instanced[dataset_name] = temp_instance
         return split_data_instanced
 
-    def split_by_metabolite_column(self, columns: List[str]) -> Dict[str, "MetaboTK"]:
+    def split_by_metabolite_column(self, columns: list[str]) -> Dict[str, "MetaboTK"]:
         """
         Split the data based on the metabolite column(s).
 
         Parameters:
-            columns (list): List of column names containing the sample IDs.
+            columns (list): list of column names containing the sample IDs.
 
         Returns:
             dict: Dictionary with the split data and sample metadata as a MetaboTK instance.
