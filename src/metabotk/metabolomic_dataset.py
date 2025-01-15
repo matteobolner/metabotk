@@ -59,13 +59,13 @@ class MetabolomicDataset:
             chemical_annotation, metabolite_id_column
         )
         chemical_annotation.index = chemical_annotation.index.map(str)
-        sample_metadata.columns = sample_metadata.columns.map(str)
+        sample_metadata.index = sample_metadata.index.map(str)
         data.columns = data.columns.map(str)
         data.index = data.index.map(str)
         metabolites = [i for i in data.columns if i in list(chemical_annotation.index)]
+        data = data[metabolites]
         sample_metadata = sample_metadata.loc[data.index]
         sample_metadata.index.name = sample_id_column
-        data = data[metabolites]
         chemical_annotation = chemical_annotation.loc[data.columns]
         chemical_annotation.index.name = metabolite_id_column
 
