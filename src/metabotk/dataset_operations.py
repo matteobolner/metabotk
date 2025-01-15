@@ -31,7 +31,7 @@ class DatasetOperations:
 
     def _subset_samples(self, samples_to_subset: list[str] | str):
         if not isinstance(samples_to_subset, list):
-            samples_to_subset = [samples_to_subset]
+            samples_to_subset = list(samples_to_subset)
         remaining_data = self.dataset.data.loc[samples_to_subset]
         remaining_sample_metadata = self.dataset.sample_metadata.loc[samples_to_subset]
         return self.dataset._setup(
@@ -52,7 +52,7 @@ class DatasetOperations:
 
         """
         if not isinstance(metabolites_to_subset, list):
-            metabolites_to_subset = [metabolites_to_subset]
+            metabolites_to_subset = list(metabolites_to_subset)
 
         remaining_data = self.dataset.data[metabolites_to_subset]
 
@@ -96,7 +96,7 @@ class DatasetOperations:
 
         """
         if not isinstance(samples_to_drop, list):
-            samples_to_drop = [samples_to_drop]
+            samples_to_drop = list(samples_to_drop)
         remaining_samples = list(
             set(self.dataset.samples).difference(set(samples_to_drop))
         )
