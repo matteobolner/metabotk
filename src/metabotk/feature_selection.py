@@ -183,28 +183,30 @@ class FeatureSelection:
         """
         X = self.dataset.data
         split_train = {}
-        split_val = {}
+        split_test = {}
         y = self.dataset.sample_metadata[stratification_column]
         skf = StratifiedKFold(n_splits=int(n_splits))
         skf_splits = skf.split(X, y)
         if output_dir:
             create_directory(output_dir)
 
-        for fold, (train_idx, val_idx) in enumerate(skf_splits):
+        for fold, (train_idx, test_idx) in enumerate(skf_splits):
             foldname = fold + 1
             train_idx = X.iloc[train_idx].index
-            val_idx = X.iloc[val_idx].index
+            test_idx = X.iloc[test_idx].index
             train = self.dataset.ops.subset(what="samples", ids=train_idx)
-            val = self.dataset.ops.subset(what="samples", ids=val_idx)
+            test = self.dataset.ops.subset(what="samples", ids=test_idx)
             # train = X.iloc[train_idx]
-            # val = X.iloc[val_idx]
+            # test = X.iloc[test_idx]
             split_train[foldname] = train
-            split_val[foldname] = val
+            split_test[foldname] = test
 
             if output_dir:
                 train.dataset.io.save_excel(
                     f"{output_dir}/{foldname}_train.xlsx", sep="\t"
                 )
-                val.dataset.io.save_excel(f"{output_dir}/{foldname}_val.xlsx", sep="\t")
+                test.dataset.io.save_excel(
+                    f"{output_dir}/{foldname}_test.xlsx", sep="\t"
+                )
 
-        return split_train, split_val
+        return {"training_set": split_train, "test_set": split_test}
