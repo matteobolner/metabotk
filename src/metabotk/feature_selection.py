@@ -202,11 +202,7 @@ class FeatureSelection:
             split_test[foldname] = test
 
             if output_dir:
-                train.dataset.io.save_excel(
-                    f"{output_dir}/{foldname}_train.xlsx", sep="\t"
-                )
-                test.dataset.io.save_excel(
-                    f"{output_dir}/{foldname}_test.xlsx", sep="\t"
-                )
+                train.io.save_excel(f"{output_dir}/{foldname}_train.xlsx", sep="\t")
+                test.io.save_excel(f"{output_dir}/{foldname}_test.xlsx", sep="\t")
 
         return {"training_set": split_train, "test_set": split_test}
