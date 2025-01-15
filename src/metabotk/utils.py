@@ -137,7 +137,6 @@ def ensure_numeric_data(data):
     if not np.issubdtype(data.dtype, np.number):
         raise TypeError("Data must contain only numeric values")
     return data
-<<<<<<< HEAD:metabotk/utils.py
 
 
 def parse_input(input_data):
@@ -205,4 +204,3 @@ def is_int(s):
         return True
     except ValueError:
         return False
-
