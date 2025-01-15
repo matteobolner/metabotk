@@ -192,12 +192,15 @@ class FeatureSelection:
 
         for fold, (train_idx, val_idx) in enumerate(skf_splits):
             foldname = fold + 1
-            train = X.iloc[train_idx]
-            val = X.iloc[val_idx]
+            train = self.ops.subset(what="samples", ids=train_idx)
+            val = self.ops.subset(what="samples", ids=val_idx)
+            # train = X.iloc[train_idx]
+            # val = X.iloc[val_idx]
             split_train[foldname] = train
             split_val[foldname] = val
+
             if output_dir:
-                train.to_csv(f"{output_dir}/{foldname}_train.tsv", sep="\t")
-                val.to_csv(f"{output_dir}/{foldname}_val.tsv", sep="\t")
+                train.io.save_excel(f"{output_dir}/{foldname}_train.xlsx", sep="\t")
+                val.io.save_excel(f"{output_dir}/{foldname}_val.xlsx", sep="\t")
 
         return split_train, split_val
