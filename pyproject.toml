@@ -1,6 +1,6 @@
 [project]
 name = "metabotk"
-version = "0.3.1"
+version = "0.3.2"
 description = "MetabolomicsToolKit (metabotk) is a Python library for working with metabolomics data. It provides a variety of tools and methods for importing, exploring, manipulating and analyzing metabolomics data."
 readme = "README.md"
 requires-python = ">=3.12"
