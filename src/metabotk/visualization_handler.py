@@ -24,7 +24,7 @@ class Visualization:
         self.dataset = dataset
         """Instance of DataManager class"""
 
-        self.dimensionality_reduction = DimensionalityReduction(self.dataset)
+        self.dimred = DimensionalityReduction(self.dataset)
         """Instance of DimensionalityReduction class"""
 
     def plot_pca(self, pca=None, x="PC1", y="PC2", hue=None, style=None, savepath=None):
@@ -59,7 +59,7 @@ class Visualization:
         """
         if not pca:
             print("PCA not found, computing now with 3 components...")
-            pca = self.dimensionality_reduction.get_pca(n_components=3)
+            pca = self.dimred.get_pca(n_components=3)
         plot = sns.scatterplot(data=pca, x=x, y=y, hue=hue, style=style)
         if savepath:
             plot.figure.savefig(savepath)
@@ -92,13 +92,13 @@ class Visualization:
         """
         if pca is None:
             print("PCA not found, computing now with 3 components...")
-            pca = self.dimensionality_reduction.get_pca(n_components=3)
+            pca = self.dimred.get_pca(n_components=3)
         plot = sns.pairplot(
             data=pca,
             vars=[col for col in pca.columns if col.startswith("PC")],
             hue=hue,
             diag_kind="kde",
-            diag_kws={"linewidth": 0, "shade": False},
+            diag_kws={"linewidth": 0, "fill": False},
         )
 
         if savepath:
