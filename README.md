@@ -50,6 +50,7 @@ metabotk provides a centralized interface for working with metabolomics data fro
 
 The following modules constitute metabotk:
 
+#TODO: UPDATE
 - interface - the main point of access for the end user, with the MetaboTK class; all other modules can be accessed from here
 - dataset manager - the main module for manipulating, importing and saving datasets
 - providers - functions to read data from different providers into metabotk
@@ -78,12 +79,12 @@ Import the library and initiate the class
 ```shell
 from metabotk import MetaboTK
 
-dataset = MetaboTK(data_provider="metabolon", sample_id_column='Sample', metabolite_id_column="CHEM_ID",)
+dataset = MetaboTK()
 ```
 Import the data in tabular or excel format
 ```shell
 #TABLES
-dataset.import_tables(data="data.tsv", sample_metadata="samples.tsv", chemical_annotation="config/metabolites.tsv")
+dataset.io.import_tables(data="data.tsv", sample_metadata="samples.tsv", chemical_annotation="config/metabolites.tsv")
 
 #EXCEL -> the sheet names for data, sample metadata and chemical annotation must be specified
 dataset.import_excel(file_path="dataset.xlsx", sample_metadata = "sample_metadata", chemical_annotation = "chemical_annotation", data_sheet = "peak_data",

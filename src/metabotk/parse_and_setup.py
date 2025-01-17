@@ -147,7 +147,7 @@ def setup_chemical_annotation(
 
     chemical_annotation = reset_index_if_not_none(chemical_annotation)
     # check that metabolite ID column is found in chemical annotation
-    if metabolite_id_column in chemical_annotation.columns:
+    if metabolite_id_column in list(chemical_annotation.columns):
         if chemical_annotation[metabolite_id_column].duplicated().any():
             warnings.warn(
                 "Warning: there are duplicate values in the chosen metabolite column.\

@@ -99,9 +99,16 @@ def reset_index_if_not_none(df: pd.DataFrame):
         return df
 
 
-def validate_new_df_shape_index(old, new):
+def validate_new_data(old, new):
     if old.shape != new.shape:
         raise ValueError("New dataframe must have the same shape")
+    if old.index.name != new.index.name:
+        raise ValueError("New index name must be the same as the previous one")
+
+
+def validate_new_metadata(old, new):
+    if len(old) != len(new):
+        raise ValueError("New dataframe must have the same length")
     if old.index.name != new.index.name:
         raise ValueError("New index name must be the same as the previous one")
 

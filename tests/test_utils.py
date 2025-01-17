@@ -5,7 +5,7 @@ from src.metabotk.utils import (
     validate_dataframe,
     ensure_numeric_data,
     parse_input,
-    validate_new_df_shape_index,
+    validate_new_data,
     reset_index_if_not_none,
 )
 
@@ -15,14 +15,14 @@ class TestValidateNewShapeIndex:
         data = pd.read_csv("tests/test_data/data.csv")
         data = data.set_index("PARENT_SAMPLE_NAME")
         new_data = pd.DataFrame(np.nan, index=data.index, columns=data.columns)
-        validate_new_df_shape_index(data, new_data)
+        validate_new_data(data, new_data)
 
     def test_different_shape(self):
         data = pd.read_csv("tests/test_data/data.csv")
         data = data.set_index("PARENT_SAMPLE_NAME")
         new_data = data.iloc[0:10]
         with pytest.raises(ValueError):
-            validate_new_df_shape_index(data, new_data)
+            validate_new_data(data, new_data)
 
     def test_different_index(self):
         data = pd.read_csv("tests/test_data/data.csv")
@@ -30,7 +30,7 @@ class TestValidateNewShapeIndex:
         new_data = data.copy()
         new_data.index.name = "INVALID_INDEX"
         with pytest.raises(ValueError):
-            validate_new_df_shape_index(data, new_data)
+            validate_new_data(data, new_data)
 
 
 class TestValidateDataFrame:

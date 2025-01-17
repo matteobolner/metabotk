@@ -5,7 +5,7 @@ from metabotk.parse_and_setup import (
     setup_chemical_annotation,
 )
 
-from metabotk.utils import validate_new_df_shape_index
+from metabotk.utils import validate_new_data, validate_new_metadata
 
 
 class MetabolomicDataset:
@@ -83,7 +83,7 @@ class MetabolomicDataset:
 
     @data.setter
     def data(self, new_data):
-        validate_new_df_shape_index(self.data, new_data)
+        validate_new_data(self.data, new_data)
         self.__data = new_data
 
     @property
@@ -92,7 +92,7 @@ class MetabolomicDataset:
 
     @sample_metadata.setter
     def sample_metadata(self, new_sample_metadata):
-        validate_new_df_shape_index(self.sample_metadata, new_sample_metadata)
+        validate_new_metadata(self.sample_metadata, new_sample_metadata)
         self.__sample_metadata = new_sample_metadata
 
     @property
@@ -101,7 +101,7 @@ class MetabolomicDataset:
 
     @chemical_annotation.setter
     def chemical_annotation(self, new_chemical_annotation):
-        validate_new_df_shape_index(self.chemical_annotation, new_chemical_annotation)
+        validate_new_metadata(self.chemical_annotation, new_chemical_annotation)
         self.__chemical_annotation = new_chemical_annotation
 
     @property
