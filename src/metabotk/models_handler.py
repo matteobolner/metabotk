@@ -38,10 +38,11 @@ class ModelsHandler:
 
     def fit_linear_model(self, metabolite, formula):
         """
-        Fit a linear model using the formula specified in the constructor.
+        Fit an ordinary least squares (OLS) linear model using the formula specified in the constructor.
 
         Parameters:
             metabolite (str): name of metabolite to fit model for
+            formula (str): list of variables to include in the formula after '~' , in form var1 + var2 + C(var3) where C indicates a categorical variable. !!! DO NOT INCLUDE THE METABOLITE NAME, IT IS AUTOMATICALLY INCLUDED BEFORE THE ~
 
         Returns:
             residuals (Series): residuals from the fitted model
@@ -54,20 +55,25 @@ class ModelsHandler:
 
     def get_linear_model_residuals(self, formula, models_path=None):
         """
-        Fit a linear model for each metabolite and extract residuals.
+        Fit linear model for each metabolite and extract residuals.
 
         Parameters:
+            formula (str): list of variables to include in the formula after '~' , in form var1 + var2 + C(var3) where C indicates a categorical variable.
             models_path (str): path to directory where models will be saved
 
         Returns:
             residuals (DataFrame): dataframe of residuals for all metabolites
         """
-        if models_path:
-            create_directory(models_path)
-        for metabolite in self.dataset.metabolites:
-            residuals, model = self.fit_linear_model(metabolite, formula)
-            self.residuals[metabolite] = residuals
+        if formula == "":
+            self.residuals = self.dataset.data.copy()
+            return self.residuals
+        else:
             if models_path:
-                with open(f"{models_path}/{metabolite}.pickle", "wb") as handle:
-                    dill.dump(model, handle)
-        return self.residuals
+                create_directory(models_path)
+            for metabolite in self.dataset.metabolites:
+                residuals, model = self.fit_linear_model(metabolite, formula)
+                self.residuals[metabolite] = residuals
+                if models_path:
+                    with open(f"{models_path}/{metabolite}.pickle", "wb") as handle:
+                        dill.dump(model, handle)
+            return self.residuals
