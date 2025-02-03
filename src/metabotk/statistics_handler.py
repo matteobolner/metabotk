@@ -51,13 +51,13 @@ def get_top_n_correlations(
             correlations[id].abs().sort_values(ascending=False).drop(id).iloc[0:n].index
         )
         top_n = correlations[id].loc[top_n_abs]
-        top_n.index.name = "correlated_ids"
+        top_n.index.name = "id_2"
         top_n.name = "correlation"
         top_n = top_n.reset_index()
-        top_n["id"] = id
+        top_n["id_1"] = id
         top_correlations.append(top_n)
     top_correlations = pd.concat(top_correlations)
-    top_correlations = top_correlations[["id", "correlated_ids", "correlation"]]
+    top_correlations = top_correlations[["id_1", "id_2", "correlation"]]
     return top_correlations
 
 

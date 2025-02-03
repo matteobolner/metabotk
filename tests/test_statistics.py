@@ -349,7 +349,7 @@ test_values_series = test_data["212"]
 
 class TestTopCorrelations:
     def test_top_1_correlations(self):
-        assert get_top_n_correlations(test_data, n=1)["correlated_ids"].tolist() == [
+        assert get_top_n_correlations(test_data, n=1)["id_2"].tolist() == [
             "250",
             "273",
             "212",

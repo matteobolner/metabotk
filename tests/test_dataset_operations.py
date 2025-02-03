@@ -1,3 +1,4 @@
+from doctest import script_from_examples
 import pytest
 import pandas as pd
 from metabotk.metabolomic_dataset import MetabolomicDataset
@@ -47,3 +48,16 @@ class TestOperations:
         assert len(subsetted.samples) == len(ops.dataset.samples)
         assert subsetted.metabolites == metabolites
         assert len(subsetted.metabolites) == len(metabolites)
+
+    def test_replace_sample_names_in_data(self, ops):
+        renamed = ops.replace_sample_names_in_data(new_index="CLIENT_IDENTIFIER")
+        assert (
+            renamed.samples
+            == ops.dataset.sample_metadata["CLIENT_IDENTIFIER"].astype(str).tolist()
+        )
+        assert list(renamed.sample_metadata.index) == renamed.samples
+        assert list(renamed.data.index) == renamed.samples
+
+    def test_replace_sample_names_in_data_wrong_colname(self, ops):
+        with pytest.raises(ValueError):
+            ops.replace_sample_names_in_data(new_index="INVALID_NAME")

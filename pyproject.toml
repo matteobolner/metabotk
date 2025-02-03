@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "boruta-py-versioned>=0.1.0",
+    "coverage>=7.6.10",
     "dill>=0.3.9",
     "miceforest>=6.0.3",
     "numpy>=2.2.0",

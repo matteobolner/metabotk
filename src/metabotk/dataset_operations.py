@@ -210,6 +210,18 @@ class DatasetOperations:
             split_dataset[name] = temp_dataset
         return split_dataset
 
+    # TODO: implement dataset merging/concatenation
+    """
+    def concat(self, other):
+        merged_data = pd.concat([self.data, other.data])
+        merged_sample_metadata = pd.concat(
+            [self.sample_metadata, other.sample_metadata]
+        )
+        merged_chemical_annotation = self.chemical_annotation.merge(
+            other.chemical_annotation, left_index=True, right_index=True
+        )
+        return self.
+    """
     """
     Utility functions
     """
@@ -250,7 +262,9 @@ class DatasetOperations:
     def replace_sample_names_in_data(self, new_index: str):
         # Check that the column exists in the sample metadata
         if new_index not in self.dataset.sample_metadata.columns:
-            raise ValueError(f"No column named {new_index} in the metabolite metadata")
+            raise ValueError(f"No column named {new_index} in the sample metadata")
+        new_data = self.dataset.data
+        new_data.index = self.dataset.sample_metadata[new_index]
         return self.dataset._setup(
             data=self.dataset.data,
             sample_metadata=self.dataset.sample_metadata,
