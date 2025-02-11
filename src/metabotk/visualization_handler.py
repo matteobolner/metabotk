@@ -127,7 +127,7 @@ class Visualization:
         """
         if not x:
             x = self.dataset._sample_id_column
-        data = self.dataset.extract_metabolites(metabolite)
+        data = self.dataset.ops.merge_sample_metadata_data()
         plot = sns.scatterplot(data=data, x=x, y=str(metabolite), hue=hue)
         if savepath:
             plot.figure.savefig(savepath)
