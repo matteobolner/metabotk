@@ -269,7 +269,7 @@ wheels = [
 
 [[package]]
 name = "metabotk"
-version = "0.3.2"
+version = "0.3.4"
 source = { editable = "." }
 dependencies = [
     { name = "boruta-py-versioned" },
@@ -292,7 +292,7 @@ requires-dist = [
     { name = "boruta-py-versioned", specifier = ">=0.1.0" },
     { name = "coverage", specifier = ">=7.6.10" },
     { name = "dill", specifier = ">=0.3.9" },
-    { name = "miceforest", specifier = ">=6.0.3" },
+    { name = "miceforest", specifier = "==6.0.3" },
     { name = "numpy", specifier = ">=2.2.0" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=2.2.3" },

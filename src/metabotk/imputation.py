@@ -1,78 +1,76 @@
 import miceforest as mf
-import numpy as np
-import pandas as pd
-from sklearn.utils import check_random_state
 from metabotk.statistics_handler import get_top_n_correlations
 
 
-class ImputationHandler:
+def miceforest(
+    data,
+    n_correlated_metabolites,
+    n_imputed_datasets=5,
+    n_iterations=5,
+    random_state=42,
+    get_kernel=False,
+):
     """
-    Class for performing missing data imputation on metabolomics data.
+    Perform missing data imputation using MICE (Mixed-effects Imputation by Chained Equations).
 
-    This class provides a simple interface to perform missing value imputation on the data using various approaches.
-    For now only miceforest is included.
+    Parameters:
+        data: Numeric pandas DataFrame containing the dataset to impute
+        n_correlated_metabolites (int): Number of metabolites to use for correlated imputation.
 
-    Attributes:
-        stats (StatisticsHandler): StatisticsHandler instance containing the data.
+    Returns:
+        dict: Dictionary with imputed datasets, keys are integers starting from 1.
     """
+    corrs = get_top_n_correlations(data_frame=data, n=n_correlated_metabolites)
+    corrs_dict = {}
+    for name, group in corrs.groupby(by="id_1"):
+        corrs_dict[name] = group["id_2"].tolist()
+    kds = mf.ImputationKernel(
+        data=data,
+        num_datasets=n_imputed_datasets,
+        variable_schema=corrs_dict,
+        save_all_iterations_data=True,
+        random_state=random_state,
+        # train_nonmissing=False,
+        mean_match_strategy="shap",
+    )
+    kds.mice(
+        iterations=n_iterations,
+        verbose=True,
+    )
 
-    def __init__(
-        self,
-        dataset_manager,
-    ):
-        """
-        Initialize the class.
+    imputed = {
+        dataset + 1: kds.complete_data(dataset=dataset)
+        for dataset in range(n_imputed_datasets)
+    }
+    if get_kernel == True:
+        return kds, imputed
+    else:
+        return imputed
 
-        Parameters:
-            statistics_handler (StatisticsHandler): StatisticsHandler instance containing the data.
-            n_imputed_datasets (int): Number of imputed datasets to generate (default: 5).
-            n_iterations (int): Number of iterations of MICE to perform (default: 5).
-            random_state (int): Random seed (default: None).
+
+class Imputation:
+    """ """
+
+    def __init__(self, dataset):
         """
-        self._dataset_manager = dataset_manager
+        Initializes the class.
+        """
+
+        self.dataset = dataset
 
     def miceforest(
         self,
-        n_correlated_metabolites,
+        n_correlated_metabolites=10,
         n_imputed_datasets=5,
         n_iterations=5,
-        random_state=None,
+        random_state=42,
         get_kernel=False,
     ):
-        """
-        Perform missing data imputation using MICE (Mixed-effects Imputation by Chained Equations).
-
-        Parameters:
-            n_correlated_metabolites (int): Number of metabolites to use for correlated imputation.
-
-        Returns:
-            dict: Dictionary with imputed datasets, keys are integers starting from 1.
-        """
-        corrs = get_top_n_correlations(
-            data_frame=self._dataset_manager.data, n=n_correlated_metabolites
+        return miceforest(
+            self.dataset.data.reset_index(drop=True),
+            n_correlated_metabolites,
+            n_imputed_datasets,
+            n_iterations,
+            random_state,
+            get_kernel,
         )
-        corrs_dict = {}
-        for name, group in corrs.groupby(by="id"):
-            corrs_dict[name] = group["correlated_ids"].tolist()
-        kds = mf.ImputationKernel(
-            data=self._dataset_manager.data,
-            datasets=n_imputed_datasets,
-            variable_schema=corrs_dict,
-            save_all_iterations=True,
-            random_state=random_state,
-            train_nonmissing=False,
-            mean_match_scheme=mf.mean_match_shap,
-        )
-        kds.mice(
-            iterations=n_iterations,
-            verbose=True,
-        )
-
-        imputed = {
-            dataset + 1: kds.complete_data(dataset=dataset)
-            for dataset in range(n_imputed_datasets)
-        }
-        if get_kernel == True:
-            return kds, imputed
-        else:
-            return imputed

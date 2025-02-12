@@ -2,6 +2,7 @@ from metabotk.metabolomic_dataset import MetabolomicDataset
 from metabotk.dataset_io import DatasetIO
 from metabotk.dataset_operations import DatasetOperations
 from metabotk.statistics_handler import Statistics
+from metabotk.imputation import Imputation
 from metabotk.feature_selection import FeatureSelection
 from metabotk.models_handler import ModelsHandler
 from metabotk.dimensionality_reduction import DimensionalityReduction
@@ -61,6 +62,13 @@ class MetaboTK(MetabolomicDataset):
         if not hasattr(self, "_statistics_"):
             self._statistics_ = Statistics(self)
         return self._statistics_
+
+    @property
+    def imp(self):
+        """Lazy initialization of Imputation instance."""
+        if not hasattr(self, "_imputation_"):
+            self._imputation_ = Imputation(self)
+        return self._imputation_
 
     @property
     def fs(self):
