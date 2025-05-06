@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Bolner"
+  given-names: "Matteo"
+  orcid: "https://orcid.org/0000-0002-4985-0191"
+title: "MetabolomicsToolKit : a python toolkit for metabolomics data analysis"
+version: 0.3.4
+date-released: 2025-05-06
+url: "https://github.com/matteobolner/metabotk"
