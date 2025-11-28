@@ -1,7 +1,8 @@
-import pandas as pd
+import polars as pl
 import numpy as np
 from pathlib import Path
 import os
+from typing import List
 
 
 def create_directory(directory_path: str):
@@ -21,7 +22,7 @@ def create_directory(directory_path: str):
 
 def validate_dataframe(data_frame):
     """
-    Validates that the input is a pandas DataFrame.
+    Validates that the input is a polars DataFrame.
 
     Parameters
     ----------
@@ -31,56 +32,67 @@ def validate_dataframe(data_frame):
     Raises
     ------
     TypeError
-        If the input is not a pandas DataFrame.
+        If the input is not a polars DataFrame.
     """
-    if not isinstance(data_frame, pd.DataFrame):
-        raise TypeError("Data must be a pandas DataFrame.")
+    if not isinstance(data_frame, pl.DataFrame):
+        raise TypeError("Data must be a polars DataFrame.")
 
 
-def parse_input(input_data: str | os.PathLike[str] | pd.DataFrame) -> pd.DataFrame:
+def check_duplicate_ids(input_data: pl.DataFrame, id_column: str) -> bool:
+    if input_data[id_column].is_duplicated().any():
+        return True
+    else:
+        return False
+
+
+def check_all_ids_present(ids: List, to_check: List):
+    if set(ids).issubset(set(to_check)):
+        return True
+    else:
+        return False
+
+
+def parse_input(input_data: str | os.PathLike[str] | pl.DataFrame) -> pl.DataFrame:
     """
-    Parse input data as pandas dataframe or as file path to TSV or CSV file
+    Parse input data as polars dataframe or as file path to TSV or CSV file
 
-    This function allows users to provide input data as a pandas DataFrame or
+    This function allows users to provide input data as a polars DataFrame or
     as a file path to a TSV or CSV file. If the input is a DataFrame, it is
     returned as is. If the input is a file path, the function loads the data
     from the file and returns it as a DataFrame.
 
     Parameters
     ----------
-    input_data : pandas.DataFrame or str
+    input_data : polars.DataFrame or str
         Input data to be parsed.
 
     Returns
     -------
-    pandas.DataFrame
-        Input data as a pandas DataFrame.
+    polars.DataFrame
+        Input data as a polars DataFrame.
 
     Raises
     ------
     TypeError
-        If the input is not a pandas DataFrame or a file path.
+        If the input is not a polars DataFrame or a file path.
     """
-    if isinstance(input_data, pd.DataFrame):
+    if isinstance(input_data, pl.DataFrame):
         # data = input_data.reset_index()
         return input_data
     elif isinstance(input_data, str):
-        if input_data.endswith(".tsv"):
-            data = pd.read_table(input_data, sep="\t")
+        if input_data.endswith((".tsv", ".data", ".samples", ".metabolites")):
+            data = pl.read_csv(input_data, sep="\t")
             return data
         elif input_data.endswith(".csv"):
-            data = pd.read_csv(input_data)
-            return data
-        elif input_data.endswith((".data", ".samples", ".metabolites")):
-            data = pd.read_table(input_data)
+            data = pd.read_csv(input_data, sep=",")
             return data
         else:
             raise TypeError(
-                "Invalid file extension: input should be a Pandas DataFrame or a file path to a TSV or CSV file."
+                "Invalid file extension: input should be a Polars DataFrame or a file path to a TSV or CSV file."
             )
     else:
         raise TypeError(
-            "Input should be a Pandas DataFrame or a file path to a TSV or CSV file."
+            "Input should be a Polars DataFrame or a file path to a TSV or CSV file."
         )
 
 
