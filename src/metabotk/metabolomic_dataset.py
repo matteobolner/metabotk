@@ -1,11 +1,6 @@
-import pandas as pd
-from metabotk.parse_and_setup import (
-    setup_data,
-    setup_sample_metadata,
-    setup_chemical_annotation,
-)
-
-from metabotk.utils import validate_new_data, validate_new_metadata
+import polars as pl
+from polars import meta
+from metabotk.utils import validate_new_data, validate_new_metadata, check_duplicate_ids, check_all_ids_present
 
 
 class MetabolomicDataset:
@@ -15,18 +10,18 @@ class MetabolomicDataset:
     Attributes:
         sample_id_column: name of the sample id column
         metabolite_id_column: name of the metabolite id column
-        data: pd.DataFrame containing the metabolomic data, with samples as rows and metabolites as columns
-        sample_metadata: pd.DataFrame containing the sample metadata, with samples as rows and sample metadata as columns
-        chemical_annotation: pd.DataFrame containing the chemical annotation, with metabolites as rows and metabolite metadata as columns
+        data: pl.DataFrame containing the metabolomic data, with samples as rows and metabolites as columns
+        sample_metadata: pl.DataFrame containing the sample metadata, with samples as rows and sample metadata as columns
+        chemical_annotation: pl.DataFrame containing the chemical annotation, with metabolites as rows and metabolite metadata as columns
         samples: list of sample ids
         metabolites: list of metabolite ids
     """
 
     def __init__(
         self,
-        data: pd.DataFrame,
-        sample_metadata: pd.DataFrame,
-        chemical_annotation: pd.DataFrame,
+        data: pl.DataFrame,
+        sample_metadata: pl.DataFrame,
+        chemical_annotation: pl.DataFrame,
         sample_id_column: str,
         metabolite_id_column: str,
     ) -> None:
@@ -36,9 +31,9 @@ class MetabolomicDataset:
         Parameters:
             sample_id_column (str): name of the sample id column
             metabolite_id_column (str): name of the metabolite id column
-            data (pd.DataFrame): metabolomic data, with samples as rows and metabolites as columns
-            sample_metadata (pd.DataFrame): sample metadata, with samples as rows and sample metadata as columns
-            chemical_annotation (pd.DataFrame): chemical annotation, with metabolites as rows and metabolite metadata as columns
+            data (pl.DataFrame): metabolomic data, with samples as rows and metabolites as columns
+            sample_metadata (pl.DataFrame): sample metadata, with samples as rows and sample metadata as columns
+            chemical_annotation (pl.DataFrame): chemical annotation, with metabolites as rows and metabolite metadata as columns
         """
         self._sample_id_column: str = sample_id_column
         self._metabolite_id_column: str = metabolite_id_column
@@ -51,9 +46,9 @@ class MetabolomicDataset:
     @classmethod
     def _setup(
         cls,
-        data: pd.DataFrame,
-        sample_metadata: pd.DataFrame,
-        chemical_annotation: pd.DataFrame,
+        data: pl.DataFrame,
+        sample_metadata: pl.DataFrame,
+        chemical_annotation: pl.DataFrame,
         sample_id_column: str,
         metabolite_id_column: str,
     ):
@@ -63,22 +58,53 @@ class MetabolomicDataset:
         Parameters:
             sample_id_column (str): name of the sample id column
             metabolite_id_column (str): name of the metabolite id column
-            data (pd.DataFrame): metabolomic data, with samples as rows and metabolites as columns
-            sample_metadata (pd.DataFrame): sample metadata, with samples as rows and sample metadata as columns
-            chemical_annotation (pd.DataFrame): chemical annotation, with metabolites as rows and metabolite metadata as columns
+            data (pl.DataFrame): metabolomic data, with samples as rows and metabolites as columns
+            sample_metadata (pl.DataFrame): sample metadata, with samples as rows and sample metadata as columns
+            chemical_annotation (pl.DataFrame): chemical annotation, with metabolites as rows and metabolite metadata as columns
         Returns:
             MetabolomicDataset populated instance
         """
-        data = setup_data(data, sample_id_column)
-        sample_metadata = setup_sample_metadata(sample_metadata, sample_id_column)
-        chemical_annotation = setup_chemical_annotation(
-            chemical_annotation, metabolite_id_column
-        )
-        chemical_annotation.index = chemical_annotation.index.map(str)
-        sample_metadata.index = sample_metadata.index.map(str)
-        data.columns = data.columns.map(str)
-        data.index = data.index.map(str)
-        metabolites = [i for i in data.columns if i in list(chemical_annotation.index)]
+        #Initial checks for duplicate/missing sample and metabolite IDs
+        if check_duplicate_ids(sample_metadata, sample_id_column):
+            raise ValueError("Sample IDs must be unique")
+        if check_duplicate_ids(chemical_annotation, metabolite_id_column):
+            raise ValueError("Metabolite IDs must be unique")
+        if sample_id_column not in data.columns:
+            raise ValueError(f"No sample ID column '{sample_id_column}' found in data")
+        if sample_id_column not in sample_metadata.columns:
+            raise ValueError(f"No sample ID column '{sample_id_column}' found in data")
+        if metabolite_id_column not in chemical_annotation.columns:
+            raise ValueError(f"No metabolite ID column '{metabolite_id_column}' found in data")
+        chemical_annotation=chemical_annotation.with_columns(pl.col(metabolite_id_column).cast(pl.String))
+        metabolites = chemical_annotation[metabolite_id_column].to_list()
+        sample_metadata=sample_metadata.with_columns(pl.col(sample_id_column).cast(pl.String))
+        samples=data[sample_id_column].to_list()
+        if not check_all_ids_present(metabolites, list(data.columns)):
+            raise ValueError(f"Missing chemical annotation for {set(metabolites).difference(set(data.columns))}")
+        if not check_all_ids_present(samples, sample_metadata[sample_id_column].to_list()):
+            raise ValueError(f"Missing sample metadata for {set(samples).difference(set(sample_metadata[sample_id_column].to_list()))}")
+        '''
+        metabolites = [
+            i
+            for i in data.columns
+            if i in chemical_annotation[metabolite_id_column].to_list()
+        ]
+        samples=[
+            i
+            for i in data.index
+            if i in sample_metadata[sample_id_column].to_list()
+        ]
+        '''
+        data = data.with_row_index()
+        sample_id_column="PARENT_SAMPLE_NAME"
+        metabolite_id_column="CHEM_ID"
+        data=pl.read_csv("tests/test_data/data.csv")
+        sample_metadata=pl.read_csv("tests/test_data/sample_metadata.csv")
+        chemical_annotation=pl.read_csv("tests/test_data/chemical_annotation.csv")
+        
+        metabolite_order = pl.Enum(metabolites)
+        sample_order=
+        # chemical_annotation = chemical_annotation.with_row_index()
         data = data[metabolites]
         sample_metadata = sample_metadata.loc[data.index]
         sample_metadata.index.name = sample_id_column
@@ -98,12 +124,12 @@ class MetabolomicDataset:
         return self.__data
 
     @data.setter
-    def data(self, new_data: pd.DataFrame):
+    def data(self, new_data: pl.DataFrame):
         """
         Set the data
 
         Args:
-            new_data: pd.DataFrame
+            new_data: pl.DataFrame
         """
         validate_new_data(self.data, new_data)
         self.__data = new_data
@@ -113,11 +139,11 @@ class MetabolomicDataset:
         return self.__sample_metadata
 
     @sample_metadata.setter
-    def sample_metadata(self, new_sample_metadata: pd.DataFrame):
+    def sample_metadata(self, new_sample_metadata: pl.DataFrame):
         """
         Set the sample metadata
         Args:
-            new_sample_metadata: pd.DataFrame
+            new_sample_metadata: pl.DataFrame
         """
         validate_new_metadata(self.sample_metadata, new_sample_metadata)
         self.__sample_metadata = new_sample_metadata
@@ -127,11 +153,11 @@ class MetabolomicDataset:
         return self.__chemical_annotation
 
     @chemical_annotation.setter
-    def chemical_annotation(self, new_chemical_annotation: pd.DataFrame):
+    def chemical_annotation(self, new_chemical_annotation: pl.DataFrame):
         """
         Set the chemical annotation.
         Args:
-            new_chemical_annotation: pd.DataFrame
+            new_chemical_annotation: pl.DataFrame
         """
         validate_new_metadata(self.chemical_annotation, new_chemical_annotation)
         self.__chemical_annotation = new_chemical_annotation
